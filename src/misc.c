@@ -22,24 +22,21 @@ unsigned int SQRT16(unsigned int value) {
 void _putchar(char c) { UART_Send((uint8_t *)&c, 1); }
 void vAssertCalled(__attribute__((unused)) unsigned long ulLine,
                    __attribute__((unused)) const char *const pcFileName) {
-#ifdef DEBUG
+
   taskENTER_CRITICAL();
   { Log("[ASSERT ERROR] %s %s: line=%lu\r\n", __func__, pcFileName, ulLine); }
   taskEXIT_CRITICAL();
-#endif /* ifdef DEBUG */
 }
 
 void vApplicationStackOverflowHook(__attribute__((unused)) TaskHandle_t pxTask,
                                    __attribute__((unused)) char *pcTaskName) {
 
-#ifdef DEBUG
   taskENTER_CRITICAL();
   {
     unsigned int stackWm = uxTaskGetStackHighWaterMark(pxTask);
     Log("[STACK ERROR] %s task=%s : %i\r\n", __func__, pcTaskName, stackWm);
   }
   taskEXIT_CRITICAL();
-#endif /* ifdef DEBUG */
 }
 
 void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer,

@@ -24,7 +24,6 @@ typedef enum {
   M_SQL_CLOSE_T,
   M_SQL_TO_OPEN,
   M_SQL_TO_CLOSE,
-  M_DW,
   M_BRIGHTNESS,
   M_BRIGHTNESS_L,
   M_CONTRAST,
@@ -66,7 +65,6 @@ static const MenuItem menu[] = {
     {"SCAN listen t/o", M_SQL_TO_OPEN, ARRAY_SIZE(SCAN_TIMEOUT_NAMES)},
     {"SCAN stay t", M_SQL_TO_CLOSE, ARRAY_SIZE(SCAN_TIMEOUT_NAMES)},
     {"SCAN skip X_X", M_SKIP_GARBAGE_FREQS, 2},
-    {"DW", M_DW, 3},
     {"Contrast", M_CONTRAST, 16},
     {"BL high", M_BRIGHTNESS, 16},
     {"BL low", M_BRIGHTNESS_L, 16},
@@ -145,9 +143,6 @@ static void getSubmenuItemText(uint16_t index, char *name) {
   case M_SKIP_GARBAGE_FREQS:
   case M_SI4732_POWER_OFF:
     strncpy(name, yesNo[index], 31);
-    return;
-  case M_DW:
-    strncpy(name, dwNames[index], 31);
     return;
   case M_CH_DISP_MODE:
     strncpy(name, CH_DISPLAY_MODE_NAMES[index], 31);
@@ -241,10 +236,6 @@ static void accept(void) {
     gSettings.si4732PowerOff = subMenuIndex;
     SETTINGS_Save();
     break;
-  case M_DW:
-    gSettings.dw = subMenuIndex;
-    SETTINGS_Save();
-    break;
   case M_ROGER:
     gSettings.roger = subMenuIndex;
     SETTINGS_Save();
@@ -330,8 +321,6 @@ static const char *getValue(Menu type) {
     return yesNo[gSettings.skipGarbageFrequencies];
   case M_SI4732_POWER_OFF:
     return yesNo[gSettings.si4732PowerOff];
-  case M_DW:
-    return dwNames[gSettings.dw];
   case M_TONE_LOCAL:
     return yesNo[gSettings.toneLocal];
   case M_PTT_LOCK:
@@ -425,9 +414,6 @@ static void setInitialSubmenuIndex(void) {
     break;
   case M_SI4732_POWER_OFF:
     subMenuIndex = gSettings.si4732PowerOff;
-    break;
-  case M_DW:
-    subMenuIndex = gSettings.dw;
     break;
   case M_ROGER:
     subMenuIndex = gSettings.roger;

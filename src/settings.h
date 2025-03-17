@@ -21,12 +21,6 @@ typedef enum {
 } CHDisplayMode;
 
 typedef enum {
-  DW_OFF,
-  DW_STAY,
-  DW_SWITCH,
-} DWType;
-
-typedef enum {
   BAT_1600,
   BAT_2200,
   BAT_3500,
@@ -156,7 +150,6 @@ extern const char *BL_TIME_NAMES[7];
 extern const char *BL_SQL_MODE_NAMES[3];
 extern const char *CH_DISPLAY_MODE_NAMES[3];
 extern const char *rogerNames[5];
-extern const char *dwNames[3];
 extern const char *FC_TIME_NAMES[4];
 
 void SETTINGS_Save();

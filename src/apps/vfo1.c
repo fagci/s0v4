@@ -113,16 +113,6 @@ static void tuneTo(uint32_t f) {
   RADIO_SaveCurrentVFO();
 }
 
-static char message[16] = {'\0'};
-static void sendDtmf() {
-  RADIO_ToggleTX(true);
-  if (gTxState == TX_ON) {
-    BK4819_EnterDTMF_TX(true);
-    BK4819_PlayDTMFString(message, true, 100, 100, 100, 100);
-    RADIO_ToggleTX(false);
-  }
-}
-
 void VFO1_init(void) {
   if (!gVfo1ProMode) {
     gVfo1ProMode = gSettings.iAmPro;
@@ -223,8 +213,7 @@ bool VFOPRO_key(KEY_Code_t key, Key_State_t state) {
 }
 
 bool VFO1_keyEx(KEY_Code_t key, Key_State_t state, bool isProMode) {
-  if ((!gVfo1ProMode || gCurrentApp == APP_VFO2) && state == KEY_RELEASED &&
-      RADIO_IsChMode()) {
+  if ((!gVfo1ProMode) && state == KEY_RELEASED && RADIO_IsChMode()) {
     if (!gIsNumNavInput && key <= KEY_9) {
       NUMNAV_Init(radio->channel, 0, CHANNELS_GetCountMax() - 1);
       gNumNavCallback = setChannel;
@@ -305,12 +294,6 @@ bool VFO1_keyEx(KEY_Code_t key, Key_State_t state, bool isProMode) {
       return true;
     case KEY_8:
       radio->offsetDir = IncDecU(radio->offsetDir, 0, OFFSET_MINUS, true);
-      return true;
-    case KEY_9: // call
-      gTextInputSize = 15;
-      gTextinputText = message;
-      gTextInputCallback = sendDtmf;
-      APPS_run(APP_TEXTINPUT);
       return true;
     case KEY_0:
       RADIO_ToggleModulation();

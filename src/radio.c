@@ -340,13 +340,7 @@ static void sendEOT() {
   BK4819_ExitSubAu();
   switch (gSettings.roger) {
   case 1:
-    BK4819_PlayRoger();
-    break;
-  case 2:
     BK4819_PlayRogerTiny();
-    break;
-  case 3:
-    BK4819_PlayRogerStalk1();
     break;
   default:
     break;
@@ -989,6 +983,7 @@ void RADIO_CheckAndListen() {
   if (!gMonitorMode) {
     LOOT_Update(&m);
   }
+  Log("RADIO_CheckAndListen f=%u, r=%u, o=%u", m.f, m.rssi, m.open);
   RADIO_ToggleRX(m.open);
   SP_ShiftGraph(-1);
   SP_AddGraphPoint(&m);

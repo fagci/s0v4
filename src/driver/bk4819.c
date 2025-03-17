@@ -67,7 +67,7 @@ void BK4819_Init(void) {
   BK4819_WriteRegister(BK4819_REG_33, 0x9000);
   BK4819_WriteRegister(BK4819_REG_3F, 0);
 
-    // ---
+  // ---
   BK4819_ToggleGpioOut(BK4819_GPIO1_PIN29_PA_ENABLE, false);
   BK4819_SetupPowerAmplifier(0, 0); // 0 is default, but...
 
@@ -884,10 +884,13 @@ void BK4819_DisableFrequencyScan(void) {
 
 void BK4819_EnableFrequencyScan(void) {
   BK4819_WriteRegister(BK4819_REG_32, 0x0245);
+  // BK4819_WriteRegister(BK4819_REG_32, 0x0B01);
 }
 
 void BK4819_EnableFrequencyScanEx(FreqScanTime t) {
+  // BK4819_WriteRegister(BK4819_REG_32, 0x0B01 | (t << 14));
   BK4819_WriteRegister(BK4819_REG_32, 0x0245 | (t << 14));
+  // BK4819_WriteRegister(BK4819_REG_32, 0x3fff | (t << 14));
 }
 
 void BK4819_StopScan(void) {
@@ -907,19 +910,9 @@ uint8_t BK4819_GetCTCType(void) {
   return (BK4819_ReadRegister(BK4819_REG_0C) >> 10) & 3;
 }
 
-void BK4819_PlayRoger(void) {
-  const uint16_t M[] = {1540, 80, 0, 80, 1310, 80, 0, 0};
-  BK4819_PlaySequence(M);
-}
-
 void BK4819_PlayRogerTiny(void) {
   const uint16_t M[] = {1250, 30, 0, 50, 1500, 30, 750, 30, 0, 0};
   BK4819_PlaySequence(M);
-}
-
-void BK4819_PlayRogerStalk1(void) {
-  BK4819_PlaySequence((uint16_t[]){1975, 80, 0, 10, 2100, 100, 0, 10, 3140, 80,
-                                   0, 10, 2800, 100, 0, 10, 0, 0});
 }
 
 void BK4819_PlaySequence(const uint16_t *M) {

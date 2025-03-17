@@ -9,15 +9,12 @@
 #include "chscan.h"
 #include "fc.h"
 #include "finput.h"
-#include "generator.h"
 #include "lootlist.h"
-#include "memview.h"
 #include "reset.h"
 #include "scaner.h"
 #include "settings.h"
 #include "textinput.h"
 #include "vfo1.h"
-#include "vfo2.h"
 
 #define APPS_STACK_SIZE 8
 
@@ -54,20 +51,16 @@ AppType_t APPS_Peek(void) {
 
 const AppType_t appsAvailableToRun[RUN_APPS_COUNT] = {
     APP_VFO1,      //
-    APP_VFO2,      //
     APP_CH_LIST,   //
     APP_SCANER,    //
     APP_CH_SCAN,   //
     APP_FC,        //
     APP_LOOT_LIST, //
-    APP_MEMVIEW,   //
-    APP_GENERATOR, //
     APP_ABOUT,     //
 };
 
 const App apps[APPS_COUNT] = {
     {"None", NULL, NULL, NULL, NULL, NULL},
-    {"EEPROM view", MEMVIEW_Init, NULL, MEMVIEW_Render, MEMVIEW_key, NULL},
     {"Spectrum", SCANER_init, SCANER_update, SCANER_render, SCANER_key,
      SCANER_deinit},
     {"CH Scan", CHSCAN_init, CHSCAN_update, CHSCAN_render, CHSCAN_key,
@@ -85,9 +78,6 @@ const App apps[APPS_COUNT] = {
     {"CH cfg", CHCFG_init, NULL, CHCFG_render, CHCFG_key, CHCFG_deinit},
     {"Settings", NULL, NULL, SETTINGS_render, SETTINGS_key, SETTINGS_deinit},
     {"1 VFO", VFO1_init, VFO1_update, VFO1_render, VFO1_key, NULL},
-    {"2 VFO", VFO2_init, VFO2_update, VFO2_render, VFO2_key, NULL},
-    {"Generator", GENERATOR_init, GENERATOR_update, GENERATOR_render,
-     GENERATOR_key, NULL},
     {"ABOUT", NULL, NULL, ABOUT_Render, ABOUT_key, NULL},
 };
 

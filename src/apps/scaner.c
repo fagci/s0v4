@@ -222,7 +222,19 @@ void SCANER_update(void) {
 
 bool SCANER_key(KEY_Code_t key, Key_State_t state) {
   if (state == KEY_LONG_PRESSED) {
+    Band _b;
     switch (key) {
+    case KEY_6:
+      if (gLastActiveLoot) {
+        _b = *b;
+        _b.rxF = gLastActiveLoot->f - StepFrequencyTable[radio->step] * 64;
+        _b.txF = _b.rxF + StepFrequencyTable[radio->step] * 128;
+        BANDS_RangePush(_b);
+        b = BANDS_RangePeek();
+        CUR_Reset();
+        onNewBand();
+      }
+      return true;
     case KEY_5:
       selStart = !selStart;
       return true;

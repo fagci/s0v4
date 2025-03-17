@@ -111,10 +111,6 @@ void STATUSLINE_render(void) {
     icons[idx++] = SYM_BEACON;
   } */
 
-  if (gSettings.dw != DW_OFF) {
-    icons[idx++] = SYM_DW;
-  }
-
   /* if (SVC_Running(SVC_FC)) {
     icons[idx++] = SYM_FC;
   }
@@ -144,7 +140,7 @@ void STATUSLINE_render(void) {
   }
 
   if ((gCurrentApp == APP_CH_LIST || gCurrentApp == APP_VFO1 ||
-       gCurrentApp == APP_VFO2 || gCurrentApp == APP_LOOT_LIST)) {
+       gCurrentApp == APP_LOOT_LIST)) {
     UI_Scanlists(LCD_XCENTER - 13, 0, gSettings.currentScanlist);
   }
 

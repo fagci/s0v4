@@ -181,7 +181,7 @@ class QuanshengUVK5Radio(chirp_common.CloneModeRadio):
     SQUELCH_TYPES = ["RNG", "RG", "RN", "R"]
     MODULATION_LIST = ["FM", "AM", "LSB", "USB",
                        "DV", "RAW", "WFM"]
-    ROGER_NAMES = ["None", "Moto", "Tiny", "Stalk1", "Stalk2"]
+    ROGER_NAMES = ["None", "Tiny"]
     BL_TIME_VALUES = [0, 5, 10, 20, 60, 120, 255]
     BL_TIME_NAMES = ["Off", "5s", "10s", "20s", "1min", "2min", "On"]
     BL_TIME_MAP = list(zip(BL_TIME_NAMES, BL_TIME_VALUES))
