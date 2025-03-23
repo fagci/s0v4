@@ -87,7 +87,10 @@ typedef struct {
 typedef enum BK4819_CssScanResult_t BK4819_CssScanResult_t;
 extern const Gain gainTable[32];
 
-extern const uint8_t AUTO_GAIN_INDEX;
+#define AUTO_GAIN_INDEX 20
+#define PLUS2_GAIN_INDEX 21
+#define PLUS10_GAIN_INDEX 23
+#define PLUS33_GAIN_INDEX 31
 
 // extern const uint8_t SQ[2][6][11];
 

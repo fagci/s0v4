@@ -10,7 +10,6 @@
 #include "audio.h"
 #include "bk4819-regs.h"
 
-const uint8_t AUTO_GAIN_INDEX = 20;
 
 static uint16_t gBK4819_GpioOutState;
 static Filter selectedFilter = FILTER_OFF;

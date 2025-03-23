@@ -51,7 +51,7 @@ const uint16_t StepFrequencyTable[15] = {
 
 const char *modulationTypeOptions[8] = {"FM",  "AM",  "LSB", "USB",
                                         "BYP", "RAW", "WFM"};
-const char *powerNames[4] = {"ULOW, LOW", "MID", "HIGH"};
+const char *powerNames[4] = {"ULOW", "LOW", "MID", "HIGH"};
 const char *bwNames[10] = {
     "U6K",  //
     "U7K",  //
@@ -249,6 +249,7 @@ void RADIO_Init(void) {
   }
   Log("RADIO hasSi=%u, hasPatch=%u", hasSi, hasSsbPatch);
   BK4819_Init();
+  BK4819_SetAFC(7);
 }
 
 static void setSI4732Modulation(ModulationType mod) {
@@ -614,7 +615,6 @@ void RADIO_SwitchRadioPure() {
 
 void RADIO_SwitchRadio() {
   radio->modulation = getNextModulation(true, false);
-  // radio->radio = RADIO_Selector(radio->rxF, radio->modulation);
   RADIO_SwitchRadioPure();
 }
 
