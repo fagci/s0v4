@@ -214,6 +214,33 @@ const char *RADIO_GetBWName(const VFO *vfo) {
   }
 }
 
+uint8_t RADIO_GetBWCount(const VFO *vfo) {
+  switch (vfo->radio) {
+  case RADIO_SI4732:
+    if (RADIO_IsSSB()) {
+      return ARRAY_SIZE(bwNamesSiSSB);
+    }
+    return ARRAY_SIZE(bwNamesSiAMFM);
+  default:
+    return ARRAY_SIZE(bwNames);
+  }
+}
+
+void RADIO_GetGainString(char *buf, Radio radio, uint8_t i) {
+  if (i == AUTO_GAIN_INDEX) {
+    snprintf(buf, 16, "AGC");
+    return;
+  }
+  switch (radio) {
+  case RADIO_BK4819:
+    snprintf(buf, 16, "%+ddB", -gainTable[i].gainDb + 33);
+    break;
+  default:
+    snprintf(buf, 16, "%d", -i);
+    break;
+  }
+}
+
 void RADIO_Init(void) {
   Log("RADIO_Init");
   hasSi = RADIO_HasSi();
@@ -587,7 +614,7 @@ void RADIO_SwitchRadioPure() {
 
 void RADIO_SwitchRadio() {
   radio->modulation = getNextModulation(true, false);
-  radio->radio = RADIO_Selector(radio->rxF, radio->modulation);
+  // radio->radio = RADIO_Selector(radio->rxF, radio->modulation);
   RADIO_SwitchRadioPure();
 }
 
@@ -960,14 +987,6 @@ void RADIO_SendDTMF(const char *pattern, ...) {
     BK4819_EnterDTMF_TX(true);
     BK4819_PlayDTMFString(str, true, 100, 100, 100, 100);
     RADIO_ToggleTX(false);
-  }
-}
-
-void RADIO_GetGainString(char *String, uint8_t i) {
-  if (i == AUTO_GAIN_INDEX) {
-    sprintf(String, "AGC");
-  } else {
-    sprintf(String, "%+ddB", -gainTable[i].gainDb + 33);
   }
 }
 

@@ -99,8 +99,9 @@ bool RADIO_HasSi();
 void RADIO_SendDTMF(const char *pattern, ...);
 bool RADIO_IsChMode();
 
-void RADIO_GetGainString(char *String, uint8_t i);
-
 void RADIO_CheckAndListen();
+void RADIO_GetGainString(char *buf, Radio radio, uint8_t i);
+
+uint8_t RADIO_GetBWCount(const VFO *vfo);
 
 #endif /* end of include guard: RADIO_H */

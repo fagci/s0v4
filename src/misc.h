@@ -22,6 +22,7 @@
 char IsPrintable(char ch);
 unsigned int SQRT16(unsigned int value);
 
+#define KHZ 100
 #define MHZ 100000
 
 #include "external/FreeRTOS/include/FreeRTOS.h"

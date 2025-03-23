@@ -4,6 +4,7 @@
 #include "../helper/bands.h"
 #include "../helper/lootlist.h"
 #include "../helper/measurements.h"
+#include "../helper/regs-menu.h"
 #include "../radio.h"
 #include "../scheduler.h"
 #include "../ui/components.h"
@@ -33,18 +34,6 @@ static uint32_t cursorRangeTimeout = 0;
 
 static bool isAnalyserMode = false;
 
-typedef enum {
-  SET_AGC,
-  SET_BW,
-  SET_AFC,
-  SET_SQL_T,
-  SET_SQL_V,
-  SET_MOD,
-  SET_COUNT,
-} Setting;
-
-static Setting setting;
-
 static uint16_t measure(uint32_t f) {
   RADIO_TuneToPure(f, true);
   vTaskDelay(delay / 100);
@@ -69,35 +58,6 @@ static void setEndF(uint32_t f) {
   onNewBand();
 }
 
-static void changeSetting(bool up) {
-  switch (setting) {
-  case SET_AFC:
-    afc = IncDecU(afc, 0, 8 + 1, up);
-    BK4819_SetAFC(afc);
-    break;
-  case SET_BW:
-    radio->bw =
-        IncDecU(radio->bw, BK4819_FILTER_BW_6k, BK4819_FILTER_BW_26k + 1, up);
-    break;
-  case SET_AGC:
-    radio->gainIndex = IncDecU(radio->gainIndex, 0, ARRAY_SIZE(gainTable), up);
-    break;
-  case SET_SQL_T:
-    radio->squelch.type =
-        IncDecU(radio->squelch.type, 0, ARRAY_SIZE(sqTypeNames), up);
-    break;
-  case SET_SQL_V:
-    radio->squelch.value = IncDecU(radio->squelch.value, 0, 11, up);
-    break;
-  case SET_MOD:
-    RADIO_ToggleModulationEx(up);
-    break;
-  default:
-    break;
-  }
-  RADIO_Setup();
-}
-
 void SCANER_init(void) {
   SPECTRUM_Y = 8;
   SPECTRUM_H = 44;
@@ -108,6 +68,7 @@ void SCANER_init(void) {
     BANDS_SelectByFrequency(radio->rxF, true);
   }
 
+  afc = BK4819_GetAFC();
   m = &gLoot[gSettings.activeVFO];
   m->snr = 0;
 
@@ -221,6 +182,10 @@ void SCANER_update(void) {
 }
 
 bool SCANER_key(KEY_Code_t key, Key_State_t state) {
+  if (state == KEY_RELEASED && REGSMENU_Key(key, state)) {
+    return true;
+  }
+
   if (state == KEY_LONG_PRESSED) {
     Band _b;
     switch (key) {
@@ -237,9 +202,6 @@ bool SCANER_key(KEY_Code_t key, Key_State_t state) {
       return true;
     case KEY_5:
       selStart = !selStart;
-      return true;
-    case KEY_4:
-      setting = IncDecU(setting, 0, SET_COUNT, false);
       return true;
     case KEY_0:
       gChListFilter = TYPE_FILTER_BAND;
@@ -265,15 +227,10 @@ bool SCANER_key(KEY_Code_t key, Key_State_t state) {
     case KEY_STAR:
       APPS_run(APP_LOOT_LIST);
       return true;
-    case KEY_UP:
-    case KEY_DOWN:
-      CUR_Move(key == KEY_UP);
-      cursorRangeTimeout = Now() + 2000;
-      return true;
-
     case KEY_2:
     case KEY_8:
-      changeSetting(key == KEY_2);
+      CUR_Move(key == KEY_2);
+      cursorRangeTimeout = Now() + 2000;
       return true;
     default:
       break;
@@ -282,9 +239,6 @@ bool SCANER_key(KEY_Code_t key, Key_State_t state) {
 
   if (state == KEY_RELEASED) {
     switch (key) {
-    case KEY_4:
-      setting = IncDecU(setting, 0, SET_COUNT, true);
-      return true;
     case KEY_5:
       gFInputCallback = selStart ? setStartF : setEndF;
       APPS_run(APP_FINPUT);
@@ -340,18 +294,7 @@ void SCANER_render(void) {
     PrintSmallEx(LCD_XCENTER, 4, POS_C, C_FILL, "...");
   }
 
-  const int8_t vGain = -gainTable[radio->gainIndex].gainDb + 33;
-
-  STATUSLINE_SetText(                                                     //
-      "%c%+d%c%s%cAFC%u%c%s%c%u%c%s",                                     //
-      setting == SET_AGC ? '>' : ' ', vGain,                              //
-      setting == SET_BW ? '>' : ' ', RADIO_GetBWName(radio),              //
-      setting == SET_AFC ? '>' : ' ', afc,                                //
-      setting == SET_SQL_T ? '>' : ' ', sqTypeNames[radio->squelch.type], //
-      setting == SET_SQL_V ? '>' : ' ', radio->squelch.value,             //
-      setting == SET_MOD ? '>' : ' ',
-      modulationTypeOptions[RADIO_GetModulation()] //
-  );
+  STATUSLINE_RenderRadioSettings();
 
   SP_Render(b);
   SP_RenderArrow(b, radio->rxF);
@@ -389,6 +332,8 @@ void SCANER_render(void) {
   if (gIsListening) {
     UI_RSSIBar(16);
   }
+
+  REGSMENU_Draw();
 }
 
 void SCANER_deinit(void) {}

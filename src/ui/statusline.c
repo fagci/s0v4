@@ -139,7 +139,8 @@ void STATUSLINE_render(void) {
     icons[idx++] = SYM_LOCK;
   }
 
-  if ((gCurrentApp == APP_CH_LIST || gCurrentApp == APP_VFO1 ||
+  if ((gCurrentApp == APP_CH_LIST ||
+       (gCurrentApp == APP_VFO1 && RADIO_IsChMode()) ||
        gCurrentApp == APP_LOOT_LIST)) {
     UI_Scanlists(LCD_XCENTER - 13, 0, gSettings.currentScanlist);
   }
@@ -170,4 +171,18 @@ void STATUSLINE_renderCurrentBand() {
       }
     }
   }
+}
+
+void STATUSLINE_RenderRadioSettings() {
+  const int8_t vGain = -gainTable[radio->gainIndex].gainDb + 33;
+
+  STATUSLINE_SetText(                              //
+      "%+d %s AFC%u %s %u %s",                     //
+      vGain,                                       //
+      RADIO_GetBWName(radio),                      //
+      BK4819_GetAFC(),                             //
+      sqTypeNames[radio->squelch.type],            //
+      radio->squelch.value,                        //
+      modulationTypeOptions[RADIO_GetModulation()] //
+  );
 }
