@@ -1,8 +1,8 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #define getsize(V) char (*__ #V)(void)[sizeof(V)] = 1;
 
@@ -74,7 +74,7 @@ typedef struct {
   uint8_t contrast : 4;
 
   uint8_t backlight : 4;
-  uint8_t reserved4 : 4;
+  uint8_t mic : 4;
 
   uint8_t reserved3 : 4;
   uint8_t batsave : 4;

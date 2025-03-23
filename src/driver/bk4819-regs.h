@@ -36,6 +36,7 @@ static const RegisterSpec RS_BW_MODE = {"BW Mode", 0x43, 4, 0b11, 1};
 static const RegisterSpec RS_IF_F = {"IF", 0x3D, 0, 0xFFFF, 1};
 static const RegisterSpec RS_SQ_TYPE = {"SQ type", 0x77, 8, 0xFF, 1};
 static const RegisterSpec RS_DEV = {"DEV", 0x40, 0, 0xFFF, 10};
+static const RegisterSpec RS_PEAK_RSSI = {"Peak RSSI", 0x62, 0, 0xFF, 1};
 static const RegisterSpec RS_MIC = {"MIC", 0x7D, 0, 0xF, 1};
 /* {"Gain", BK4819_REG_13, 0, 0xFFFF, 1},
 

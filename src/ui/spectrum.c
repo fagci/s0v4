@@ -165,12 +165,12 @@ void SP_RenderLine(uint16_t rssi) {
 uint16_t SP_GetNoiseFloor() { return Std(rssiHistory, filledPoints); }
 uint16_t SP_GetRssiMax() { return Max(rssiHistory, filledPoints); }
 
-void SP_RenderGraph() {
+void SP_RenderGraph(uint16_t min, uint16_t max) {
   const VMinMax v = {
       /* .vMin = 78,
       .vMax = 274, */
-      .vMin = RSSI_MIN,
-      .vMax = RSSI_MAX,
+      .vMin = min,
+      .vMax = max,
   };
   S_BOTTOM = SPECTRUM_Y + SPECTRUM_H; // TODO: mv to separate function
 

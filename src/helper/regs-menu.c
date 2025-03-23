@@ -82,7 +82,7 @@ static void updateValue(bool inc) {
   case REG_MIC:
     v = IncDecU(BK4819_GetRegValue(RS_MIC), 0, 16, inc);
     BK4819_SetRegValue(RS_MIC, v);
-    gSettings.deviation = v / 10;
+    gSettings.mic = v;
     SETTINGS_DelayedSave();
     break;
   case REG_TX_POWER:

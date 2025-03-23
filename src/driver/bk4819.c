@@ -10,7 +10,6 @@
 #include "audio.h"
 #include "bk4819-regs.h"
 
-
 static uint16_t gBK4819_GpioOutState;
 static Filter selectedFilter = FILTER_OFF;
 
@@ -76,6 +75,7 @@ void BK4819_Init(void) {
   }
   BK4819_WriteRegister(BK4819_REG_3F, 0);
   BK4819_WriteRegister(BK4819_REG_7D, 0xE94F | 10); // mic
+  BK4819_SetRegValue(RS_MIC, gSettings.mic);
   // TX
   // BK4819_WriteRegister(0x44, 38888);  // 300 resp TX
   BK4819_WriteRegister(0x74, 0xAF1F); // 3k resp TX

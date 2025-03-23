@@ -17,7 +17,7 @@ void SP_RenderArrow(const Band *p, uint32_t f);
 uint16_t SP_GetNoiseFloor();
 uint16_t SP_GetRssiMax();
 
-void SP_RenderGraph();
+void SP_RenderGraph(uint16_t min, uint16_t max);
 void SP_AddGraphPoint(const Measurement *msm);
 void SP_Shift(int16_t n);
 void SP_ShiftGraph(int16_t n);
