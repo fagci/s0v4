@@ -212,6 +212,18 @@ bool SCANER_key(KEY_Code_t key, Key_State_t state) {
     }
   }
 
+  if (state == KEY_LONG_PRESSED_CONT) {
+    switch (key) {
+    case KEY_2:
+    case KEY_8:
+      CUR_Move(key == KEY_2);
+      cursorRangeTimeout = Now() + 2000;
+      return true;
+    default:
+      break;
+    }
+  }
+
   if (state == KEY_RELEASED || state == KEY_LONG_PRESSED_CONT) {
     switch (key) {
     case KEY_1:
@@ -226,11 +238,6 @@ bool SCANER_key(KEY_Code_t key, Key_State_t state) {
       return true;
     case KEY_STAR:
       APPS_run(APP_LOOT_LIST);
-      return true;
-    case KEY_2:
-    case KEY_8:
-      CUR_Move(key == KEY_2);
-      cursorRangeTimeout = Now() + 2000;
       return true;
     default:
       break;
@@ -253,14 +260,14 @@ bool SCANER_key(KEY_Code_t key, Key_State_t state) {
       APPS_run(APP_LOOT_LIST);
       return true;
 
-    case KEY_0:
+    case KEY_2:
       BANDS_RangePush(
           CUR_GetRange(BANDS_RangePeek(), StepFrequencyTable[radio->step]));
       b = BANDS_RangePeek();
       CUR_Reset();
       onNewBand();
       return true;
-    case KEY_F:
+    case KEY_8:
       BANDS_RangePop();
       b = BANDS_RangePeek();
       CUR_Reset();

@@ -7,7 +7,7 @@ void LEVEL_init() {
   SPECTRUM_Y = 6;
   SPECTRUM_H = LCD_HEIGHT - SPECTRUM_Y;
   BK4819_WriteRegister(0x13, (3 << 8) | (7 << 5) | (0 << 3) | (0 << 0));
-  BK4819_TuneTo(1340 * MHZ, true);
+  BK4819_TuneTo(1301 * MHZ, true);
 }
 
 void LEVEL_deinit() {}
