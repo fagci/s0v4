@@ -172,6 +172,7 @@ BK4819_CssScanResult_t BK4819_GetCxCSSScanResult(uint32_t *pCdcssFreq,
 void BK4819_DisableFrequencyScan(void);
 void BK4819_EnableFrequencyScan(void);
 void BK4819_EnableFrequencyScanEx(FreqScanTime t);
+void BK4819_EnableFrequencyScanEx2(FreqScanTime t, uint16_t hz);
 
 void BK4819_StopScan(void);
 

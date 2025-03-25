@@ -285,7 +285,6 @@ static void renderChannelName(uint8_t y, const char *name, bool isChMode,
 }
 
 static void renderProModeInfo(uint8_t y, const VFO *radio) {
-
   if (radio->radio == RADIO_BK4819) {
     PrintSmall(0, LCD_HEIGHT - 1, "R %+3u N %+3u G %+3u SNR %+2u",
                RADIO_GetRSSI(), BK4819_GetNoise(), BK4819_GetGlitch(),
@@ -308,10 +307,6 @@ void VFO1_render(void) {
   uint32_t f = gTxState == TX_ON ? RADIO_GetTXF() : GetScreenF(radio->rxF);
   const char *mod = modulationTypeOptions[radio->modulation];
 
-  if (gIsListening || gVfo1ProMode) {
-    UI_RSSIBar(BASE + 8);
-  }
-
   if (RADIO_IsChMode() && !gVfo1ProMode) {
     PrintMediumEx(LCD_XCENTER, BASE - 16, POS_C, C_FILL, radio->name);
   }
@@ -326,8 +321,17 @@ void VFO1_render(void) {
   PrintSmallEx(LCD_WIDTH, BASE + 6, POS_R, C_FILL, "%d.%02d", step / KHZ,
                step % KHZ);
 
-  if (gVfo1ProMode) {
-    renderProModeInfo(BASE, radio);
+  if (gMonitorMode) {
+    SPECTRUM_Y = BASE + 8;
+    SPECTRUM_H = LCD_HEIGHT - SPECTRUM_Y;
+    SP_RenderGraph(RSSI_MIN, RSSI_MAX);
+  } else {
+    if (gIsListening || gVfo1ProMode) {
+      UI_RSSIBar(BASE + 8);
+    }
+    if (gVfo1ProMode) {
+      renderProModeInfo(BASE, radio);
+    }
   }
 
   REGSMENU_Draw();

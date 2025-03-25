@@ -32,9 +32,11 @@ static uint32_t lastDetectedFrequency = 0;
 static uint8_t frequencyHits = 0;
 static uint8_t filterSwitchCounter = 0;
 
+static uint16_t hz = 0x244;
+
 static void enableScan() {
   Log("FC enable");
-  BK4819_EnableFrequencyScanEx(gSettings.fcTime);
+  BK4819_EnableFrequencyScanEx2(gSettings.fcTime, hz);
   isScanning = true;
 }
 
@@ -117,7 +119,7 @@ void FC_update(void) {
       Log("FC switch filter");
       switchFilter();
     }
-    vTaskDelay(pdMS_TO_TICKS(200));
+    vTaskDelay(pdMS_TO_TICKS(200 << gSettings.fcTime));
   } else {
     if (!gIsListening) {
       vTaskDelay(pdMS_TO_TICKS(60));
@@ -129,13 +131,16 @@ void FC_update(void) {
     } else {
       enableScan();
     }
-    vTaskDelay(pdMS_TO_TICKS(1));
   }
+  vTaskDelay(pdMS_TO_TICKS(1));
 }
 
 bool FC_key(KEY_Code_t key, Key_State_t state) {
   if (state == KEY_RELEASED || state == KEY_LONG_PRESSED_CONT) {
     switch (key) {
+    case KEY_5:
+      hz = hz == 0x244 ? 0x580 : 0x244;
+      break;
     default:
       break;
     }
@@ -186,8 +191,9 @@ bool FC_key(KEY_Code_t key, Key_State_t state) {
 }
 
 void FC_render() {
-  PrintMediumEx(0, 16, POS_L, C_FILL, "%s %ums SQ %u %s", FILTER_NAMES[filter],
-                200 << gSettings.fcTime, radio->squelch.value, bandAutoSwitch ? "[A]" : "");
+  PrintMediumEx(0, 16, POS_L, C_FILL, "%s %ums HZ %u SQ %u %s",
+                FILTER_NAMES[filter], 200 << gSettings.fcTime, hz,
+                radio->squelch.value, bandAutoSwitch ? "[A]" : "");
   UI_BigFrequency(40, currentFrequency);
 
   if (gLastActiveLoot) {

@@ -216,7 +216,7 @@ bool SCANER_key(KEY_Code_t key, Key_State_t state) {
     switch (key) {
     case KEY_2:
     case KEY_8:
-      CUR_Move(key == KEY_2);
+      CUR_Size(key == KEY_2);
       cursorRangeTimeout = Now() + 2000;
       return true;
     default:
@@ -238,6 +238,11 @@ bool SCANER_key(KEY_Code_t key, Key_State_t state) {
       return true;
     case KEY_STAR:
       APPS_run(APP_LOOT_LIST);
+      return true;
+    case KEY_UP:
+    case KEY_DOWN:
+      CUR_Move(key == KEY_UP);
+      cursorRangeTimeout = Now() + 2000;
       return true;
     default:
       break;

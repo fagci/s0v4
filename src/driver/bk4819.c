@@ -884,12 +884,22 @@ void BK4819_DisableFrequencyScan(void) {
 void BK4819_EnableFrequencyScan(void) {
   BK4819_WriteRegister(BK4819_REG_32, 0x0245);
   // BK4819_WriteRegister(BK4819_REG_32, 0x0B01);
+  // BK4819_WriteRegister(BK4819_REG_32, (F_SC_T_0_4s << 14) | (2047 << 1) |
+  // true);
 }
 
 void BK4819_EnableFrequencyScanEx(FreqScanTime t) {
   // BK4819_WriteRegister(BK4819_REG_32, 0x0B01 | (t << 14));
   BK4819_WriteRegister(BK4819_REG_32, 0x0245 | (t << 14));
   // BK4819_WriteRegister(BK4819_REG_32, 0x3fff | (t << 14));
+  // BK4819_WriteRegister(BK4819_REG_32, (t << 14) | (2047 << 1) | true);
+}
+
+void BK4819_EnableFrequencyScanEx2(FreqScanTime t, uint16_t hz) {
+  // BK4819_WriteRegister(BK4819_REG_32, 0x0B01 | (t << 14));
+  // BK4819_WriteRegister(BK4819_REG_32, 0x0245 | (t << 14));
+  // BK4819_WriteRegister(BK4819_REG_32, 0x3fff | (t << 14));
+  BK4819_WriteRegister(BK4819_REG_32, (t << 14) | (hz << 1) | true);
 }
 
 void BK4819_StopScan(void) {

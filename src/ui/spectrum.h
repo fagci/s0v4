@@ -29,6 +29,7 @@ bool CUR_Move(bool up);
 Band CUR_GetRange(Band *p, uint32_t step);
 uint32_t CUR_GetCenterF(Band *p, uint32_t step);
 void CUR_Reset();
+bool CUR_Size(bool up);
 
 extern uint8_t SPECTRUM_Y;
 extern uint8_t SPECTRUM_H;
