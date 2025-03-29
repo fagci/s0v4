@@ -57,7 +57,7 @@ static void selectEeprom(EEPROMType t) {
   total.mr = CHANNELS_GetCountMax();
 
   total.settings = 1;
-  total.vfos = ARRAY_SIZE(gVFO);
+  total.vfos = 1;
   total.bands = 0; // default bands
   total.channels = total.mr - total.vfos - total.bands;
 }
@@ -107,16 +107,12 @@ static bool resetFull() {
   }
 
   if (stats.vfos < total.vfos) {
-    memset(&gVFO[0], 0, sizeof(CH));
-    memset(&gVFO[1], 0, sizeof(CH));
-    VFO *vfo = &gVFO[stats.vfos];
+    memset(&radio, 0, sizeof(CH));
+    VFO *vfo = &radio;
 
     if (stats.vfos == 0) {
       sprintf(vfo->name, "%s", "VFO-A");
       vfo->rxF = 14550000;
-    } else {
-      sprintf(vfo->name, "%s", "VFO-B");
-      vfo->rxF = 43307500;
     }
 
     vfo->channel = -1;

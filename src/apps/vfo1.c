@@ -33,28 +33,11 @@ static char String[16];
 static TimerHandle_t eepromWriteTimer = NULL;
 static StaticTimer_t vfoSaveTimerBuffer;
 
-static void startABScan() {
-  uint32_t F1 = gVFO[0].rxF;
-  uint32_t F2 = gVFO[1].rxF;
-
-  if (F1 > F2) {
-    SWAP(F1, F2);
-  }
-
-  gCurrentBand = defaultBand;
-  gCurrentBand.meta.type = TYPE_BAND_DETACHED;
-  gCurrentBand.rxF = F1;
-  gCurrentBand.txF = F2;
-  gCurrentBand.step = radio->step;
-
-  APPS_run(APP_SCANER);
-}
-
 static void setChannel(uint16_t v) { RADIO_TuneToCH(v); }
 
 static void tuneTo(uint32_t f) {
   RADIO_TuneToSave(GetTuneF(f));
-  radio->fixedBoundsMode = false;
+  radio.fixedBoundsMode = false;
   RADIO_SaveCurrentVFO();
 }
 
@@ -98,7 +81,7 @@ bool VFOPRO_key(KEY_Code_t key, Key_State_t state) {
     case KEY_SIDE1:
     case KEY_SIDE2:
       if (RADIO_GetRadio() == RADIO_SI4732 && isSsb) {
-        RADIO_TuneToSave(radio->rxF + (key == KEY_SIDE1 ? 1 : -1));
+        RADIO_TuneToSave(radio.rxF + (key == KEY_SIDE1 ? 1 : -1));
         return true;
       }
       break;
@@ -129,7 +112,7 @@ bool VFOPRO_key(KEY_Code_t key, Key_State_t state) {
 bool VFO1_key(KEY_Code_t key, Key_State_t state) {
   if ((!gVfo1ProMode) && state == KEY_RELEASED && RADIO_IsChMode()) {
     if (!gIsNumNavInput && key <= KEY_9) {
-      NUMNAV_Init(radio->channel, 0, CHANNELS_GetCountMax() - 1);
+      NUMNAV_Init(radio.channel, 0, CHANNELS_GetCountMax() - 1);
       gNumNavCallback = setChannel;
     }
     if (gIsNumNavInput) {
@@ -167,7 +150,7 @@ bool VFO1_key(KEY_Code_t key, Key_State_t state) {
     case KEY_SIDE1:
     case KEY_SIDE2:
       if (RADIO_GetRadio() == RADIO_SI4732 && isSsb) {
-        RADIO_TuneToSave(radio->rxF + (key == KEY_SIDE1 ? 5 : -5));
+        RADIO_TuneToSave(radio.rxF + (key == KEY_SIDE1 ? 5 : -5));
         return true;
       }
       break;
@@ -178,9 +161,6 @@ bool VFO1_key(KEY_Code_t key, Key_State_t state) {
 
   if (state == KEY_LONG_PRESSED) {
     switch (key) {
-    case KEY_EXIT:
-      startABScan();
-      return true;
     case KEY_1:
       gChListFilter = TYPE_FILTER_BAND;
       APPS_run(APP_CH_LIST);
@@ -206,7 +186,7 @@ bool VFO1_key(KEY_Code_t key, Key_State_t state) {
       RADIO_UpdateStep(true);
       return true;
     case KEY_8:
-      radio->offsetDir = IncDecU(radio->offsetDir, 0, OFFSET_MINUS, true);
+      radio.offsetDir = IncDecU(radio.offsetDir, 0, OFFSET_MINUS, true);
       return true;
     case KEY_0:
       RADIO_ToggleModulation();
@@ -240,7 +220,7 @@ bool VFO1_key(KEY_Code_t key, Key_State_t state) {
       APPS_key(key, state);
       return true;
     case KEY_F:
-      gChEd = *radio;
+      gChEd = radio;
       if (RADIO_IsChMode()) {
         gChEd.meta.type = TYPE_CH;
       }
@@ -254,12 +234,6 @@ bool VFO1_key(KEY_Code_t key, Key_State_t state) {
       return true;
     case KEY_SIDE2:
       break;
-    case KEY_EXIT:
-      if (!APPS_exit()) {
-        LOOT_Standby();
-        RADIO_NextVFO();
-      }
-      return true;
     default:
       break;
     }
@@ -284,8 +258,8 @@ static void renderChannelName(uint8_t y, const char *name, bool isChMode,
   }
 }
 
-static void renderProModeInfo(uint8_t y, const VFO *radio) {
-  if (radio->radio == RADIO_BK4819) {
+static void renderProModeInfo(uint8_t y) {
+  if (radio.radio == RADIO_BK4819) {
     PrintSmall(0, LCD_HEIGHT - 1, "R %+3u N %+3u G %+3u SNR %+2u",
                RADIO_GetRSSI(), BK4819_GetNoise(), BK4819_GetGlitch(),
                RADIO_GetSNR());
@@ -304,11 +278,11 @@ void VFO1_render(void) {
     STATUSLINE_renderCurrentBand();
   }
 
-  uint32_t f = gTxState == TX_ON ? RADIO_GetTXF() : GetScreenF(radio->rxF);
-  const char *mod = modulationTypeOptions[radio->modulation];
+  uint32_t f = gTxState == TX_ON ? RADIO_GetTXF() : GetScreenF(radio.rxF);
+  const char *mod = modulationTypeOptions[radio.modulation];
 
   if (RADIO_IsChMode() && !gVfo1ProMode) {
-    PrintMediumEx(LCD_XCENTER, BASE - 16, POS_C, C_FILL, radio->name);
+    PrintMediumEx(LCD_XCENTER, BASE - 16, POS_C, C_FILL, radio.name);
   }
 
   // Шаг, полоса, уровень SQL, мощность, субтоны, названия каналов.
@@ -316,8 +290,8 @@ void VFO1_render(void) {
   renderTxRxState(BASE, gTxState == TX_ON);
   UI_BigFrequency(BASE, f);
   PrintMediumEx(LCD_WIDTH - 1, BASE - 12, POS_R, C_FILL, mod);
-  renderChannelName(21, radio->name, RADIO_IsChMode(), radio->channel);
-  const uint32_t step = StepFrequencyTable[radio->step];
+  renderChannelName(21, radio.name, RADIO_IsChMode(), radio.channel);
+  const uint32_t step = StepFrequencyTable[radio.step];
   PrintSmallEx(LCD_WIDTH, BASE + 6, POS_R, C_FILL, "%d.%02d", step / KHZ,
                step % KHZ);
 
@@ -330,7 +304,7 @@ void VFO1_render(void) {
       UI_RSSIBar(BASE + 8);
     }
     if (gVfo1ProMode) {
-      renderProModeInfo(BASE, radio);
+      renderProModeInfo(BASE);
     }
   }
 

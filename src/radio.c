@@ -137,11 +137,11 @@ static ModulationType MODS_WFM[] = {
 };
 
 static void loadVFO(uint8_t num) {
-  CHANNELS_Load(CHANNELS_GetCountMax() - 2 + num, &gVFO[num]);
+  CHANNELS_Load(CHANNELS_GetCountMax() - 2 + num, &radio);
 }
 
 static void saveVFO(uint8_t num) {
-  CHANNELS_Save(CHANNELS_GetCountMax() - 2 + num, &gVFO[num]);
+  CHANNELS_Save(CHANNELS_GetCountMax() - 2 + num, &radio);
 }
 
 static uint8_t indexOfMod(const ModulationType *arr, uint8_t n,
@@ -158,10 +158,10 @@ static ModulationType getNextModulation(bool next, bool apply) {
   uint8_t sz = ARRAY_SIZE(MODS_BK4819);
   ModulationType *items = MODS_BK4819;
 
-  if (radio->rxF >= 88 * MHZ && radio->rxF <= BK1080_F_MAX) {
+  if (radio.rxF >= 88 * MHZ && radio.rxF <= BK1080_F_MAX) {
     items = MODS_WFM;
     sz = ARRAY_SIZE(MODS_WFM);
-  } else if (radio->rxF <= SI47XX_F_MAX && radio->rxF >= BK4819_F_MIN) {
+  } else if (radio.rxF <= SI47XX_F_MAX && radio.rxF >= BK4819_F_MIN) {
     if (hasSsbPatch) {
       items = MODS_BOTH_PATCH;
       sz = ARRAY_SIZE(MODS_BOTH_PATCH);
@@ -169,7 +169,7 @@ static ModulationType getNextModulation(bool next, bool apply) {
       items = MODS_BOTH;
       sz = ARRAY_SIZE(MODS_BOTH);
     }
-  } else if (radio->rxF <= SI47XX_F_MAX) {
+  } else if (radio.rxF <= SI47XX_F_MAX) {
     if (hasSsbPatch) {
       items = MODS_SI4732_PATCH;
       sz = ARRAY_SIZE(MODS_SI4732_PATCH);
@@ -179,7 +179,7 @@ static ModulationType getNextModulation(bool next, bool apply) {
     }
   }
 
-  const uint8_t curIndex = indexOfMod(items, sz, radio->modulation);
+  const uint8_t curIndex = indexOfMod(items, sz, radio.modulation);
 
   return items[apply ? IncDecU(curIndex, 0, sz, next) : curIndex];
 }
@@ -197,24 +197,24 @@ Radio RADIO_Selector(uint32_t freq, ModulationType mod) {
   return RADIO_BK4819;
 }
 
-inline Radio RADIO_GetRadio() { return radio->radio; }
+inline Radio RADIO_GetRadio() { return radio.radio; }
 
-ModulationType RADIO_GetModulation() { return radio->modulation; }
+ModulationType RADIO_GetModulation() { return radio.modulation; }
 
-const char *RADIO_GetBWName(const VFO *vfo) {
-  switch (vfo->radio) {
+const char *RADIO_GetBWName() {
+  switch (radio.radio) {
   case RADIO_SI4732:
     if (RADIO_IsSSB()) {
-      return bwNamesSiSSB[vfo->bw];
+      return bwNamesSiSSB[radio.bw];
     }
-    return bwNamesSiAMFM[vfo->bw];
+    return bwNamesSiAMFM[radio.bw];
   default:
-    return bwNames[vfo->bw];
+    return bwNames[radio.bw];
   }
 }
 
-uint8_t RADIO_GetBWCount(const VFO *vfo) {
-  switch (vfo->radio) {
+uint8_t RADIO_GetBWCount() {
+  switch (radio.radio) {
   case RADIO_SI4732:
     if (RADIO_IsSSB()) {
       return ARRAY_SIZE(bwNamesSiSSB);
@@ -289,17 +289,17 @@ static void setupToneDetection() {
   } else {
     BK4819_DisableDTMF();
   }
-  switch (radio->code.rx.type) {
+  switch (radio.code.rx.type) {
   case CODE_TYPE_DIGITAL:
   case CODE_TYPE_REVERSE_DIGITAL:
     // Log("DCS on");
     BK4819_SetCDCSSCodeWord(
-        DCS_GetGolayCodeWord(radio->code.rx.type, radio->code.rx.value));
+        DCS_GetGolayCodeWord(radio.code.rx.type, radio.code.rx.value));
     InterruptMask |= BK4819_REG_3F_CDCSS_FOUND | BK4819_REG_3F_CDCSS_LOST;
     break;
   case CODE_TYPE_CONTINUOUS_TONE:
     // Log("CTCSS on");
-    BK4819_SetCTCSSFrequency(CTCSS_Options[radio->code.rx.value]);
+    BK4819_SetCTCSSFrequency(CTCSS_Options[radio.code.rx.value]);
     InterruptMask |= BK4819_REG_3F_CTCSS_FOUND | BK4819_REG_3F_CTCSS_LOST;
     break;
   default:
@@ -341,7 +341,7 @@ static uint8_t calculateOutputPower(uint32_t f) {
   uint8_t power_bias;
   PowerCalibration cal = BANDS_GetPowerCalib(f);
 
-  switch (radio->power) {
+  switch (radio.power) {
   case TX_POW_LOW:
     power_bias = cal.s;
     break;
@@ -409,7 +409,7 @@ static void rxTurnOn(Radio r) {
   case RADIO_BK1080:
     BK4819_Idle();
     BK1080_Mute(false);
-    BK1080_Init(radio->rxF, true);
+    BK1080_Init(radio.rxF, true);
     break;
   case RADIO_SI4732:
     BK4819_Idle();
@@ -466,14 +466,14 @@ void RADIO_ToggleRX(bool on) {
 }
 
 void RADIO_EnableCxCSS(void) {
-  switch (radio->code.tx.type) {
+  switch (radio.code.tx.type) {
   case CODE_TYPE_CONTINUOUS_TONE:
-    BK4819_SetCTCSSFrequency(CTCSS_Options[radio->code.tx.value]);
+    BK4819_SetCTCSSFrequency(CTCSS_Options[radio.code.tx.value]);
     break;
   case CODE_TYPE_DIGITAL:
   case CODE_TYPE_REVERSE_DIGITAL:
     BK4819_SetCDCSSCodeWord(
-        DCS_GetGolayCodeWord(radio->code.tx.type, radio->code.tx.value));
+        DCS_GetGolayCodeWord(radio.code.tx.type, radio.code.tx.value));
     break;
   default:
     BK4819_ExitSubAu();
@@ -481,20 +481,18 @@ void RADIO_EnableCxCSS(void) {
   }
 }
 
-uint32_t RADIO_GetTXFEx(const VFO *vfo) {
-  switch (vfo->offsetDir) {
+uint32_t RADIO_GetTXF() {
+  switch (radio.offsetDir) {
   case OFFSET_FREQ:
-    return vfo->txF;
+    return radio.txF;
   case OFFSET_PLUS:
-    return vfo->rxF + vfo->txF;
+    return radio.rxF + radio.txF;
   case OFFSET_MINUS:
-    return vfo->rxF - vfo->txF;
+    return radio.rxF - radio.txF;
   default:
-    return vfo->rxF;
+    return radio.rxF;
   }
 }
-
-uint32_t RADIO_GetTXF(void) { return RADIO_GetTXFEx(radio); }
 
 TXState RADIO_GetTXState(uint32_t txF) {
   if (gSettings.upconverter) {
@@ -507,7 +505,7 @@ TXState RADIO_GetTXState(uint32_t txF) {
 
   Band txBand = BANDS_ByFrequency(txF);
 
-  if (!txBand.allowTx && !(RADIO_IsChMode() && radio->allowTx)) {
+  if (!txBand.allowTx && !(RADIO_IsChMode() && radio.allowTx)) {
     return TX_DISABLED;
   }
 
@@ -530,7 +528,7 @@ void RADIO_ToggleTX(bool on) {
   RADIO_ToggleTXEX(on, txF, power, true);
 }
 
-bool RADIO_IsChMode() { return radio->channel >= 0; }
+bool RADIO_IsChMode() { return radio.channel >= 0; }
 
 void RADIO_ToggleTXEX(bool on, uint32_t txF, uint8_t power, bool paEnabled) {
   bool lastOn = gTxState == TX_ON;
@@ -573,7 +571,7 @@ void RADIO_ToggleTXEX(bool on, uint32_t txF, uint8_t power, bool paEnabled) {
     BK4819_ToggleGpioOut(BK4819_GPIO0_PIN28_RX_ENABLE, true);
 
     setupToneDetection();
-    BK4819_TuneTo(radio->rxF, true);
+    BK4819_TuneTo(radio.rxF, true);
   }
 }
 
@@ -585,7 +583,7 @@ void RADIO_TuneToPure(uint32_t f, bool precise) {
     s = 1000; // 10kHz
   }
   f += gCurrentBand.ppm * s;
-  LOOT_Replace(&gLoot[gSettings.activeVFO], f);
+  LOOT_Replace(&gLoot, f);
   Radio r = RADIO_GetRadio();
   // Log("Tune %s to %u", radioNames[r], f);
   switch (r) {
@@ -604,22 +602,22 @@ void RADIO_TuneToPure(uint32_t f, bool precise) {
 }
 
 void RADIO_SwitchRadioPure() {
-  if (oldRadio == radio->radio) {
+  if (oldRadio == radio.radio) {
     return;
   }
   rxTurnOff(oldRadio);
-  rxTurnOn(radio->radio);
-  oldRadio = radio->radio;
+  rxTurnOn(radio.radio);
+  oldRadio = radio.radio;
 }
 
 void RADIO_SwitchRadio() {
-  radio->modulation = getNextModulation(true, false);
+  radio.modulation = getNextModulation(true, false);
   RADIO_SwitchRadioPure();
 }
 
 static void checkVisibleBand() {
-  if (!BANDS_InRange(radio->rxF, gCurrentBand)) {
-    BANDS_SelectByFrequency(radio->rxF, radio->fixedBoundsMode);
+  if (!BANDS_InRange(radio.rxF, gCurrentBand)) {
+    BANDS_SelectByFrequency(radio.rxF, radio.fixedBoundsMode);
   }
 }
 
@@ -629,17 +627,17 @@ void RADIO_SetupByCurrentVFO(void) {
 
   RADIO_SwitchRadio();
   RADIO_Setup();
-  RADIO_TuneToPure(radio->rxF, !gMonitorMode);
+  RADIO_TuneToPure(radio.rxF, !gMonitorMode);
 }
 
 // USE CASE: set vfo temporary for current app
 void RADIO_TuneTo(uint32_t f) {
   if (RADIO_IsChMode()) {
-    radio->channel = -1;
-    snprintf(radio->name, 5, "VFO-%c", 'A' + gSettings.activeVFO);
+    radio.channel = -1;
+    snprintf(radio.name, 5, "VFO-%c", 'A' + gSettings.activeVFO);
   }
-  radio->txF = 0;
-  radio->rxF = f;
+  radio.txF = 0;
+  radio.rxF = f;
   RADIO_SetupByCurrentVFO();
 }
 
@@ -653,7 +651,7 @@ void RADIO_TuneToSave(uint32_t f) {
 
 void RADIO_SaveCurrentVFO(void) {
   int16_t vfoChNum = CHANNELS_GetCountMax() - 2 + gSettings.activeVFO;
-  int16_t chToSave = radio->channel;
+  int16_t chToSave = radio.channel;
   if (chToSave >= 0) {
     // save only active channel number
     // to load it instead of full VFO
@@ -664,21 +662,17 @@ void RADIO_SaveCurrentVFO(void) {
     CHANNELS_Save(vfoChNum, &oldVfo);
     return;
   }
-  CHANNELS_Save(vfoChNum, radio);
+  CHANNELS_Save(vfoChNum, &radio);
 }
 
 void RADIO_LoadCurrentVFO(void) {
   gMonitorMode = false;
-  for (uint8_t i = 0; i < 2; ++i) {
-    loadVFO(i);
-    // Log("gVFO(%u)= (f=%u, radio=%u)", i + 1, gVFO[i].rxF, gVFO[i].radio);
-    if (gVFO[i].channel >= 0) {
-      RADIO_VfoLoadCH(i);
-    }
-
-    LOOT_Replace(&gLoot[i], gVFO[i].rxF);
+  loadVFO(0);
+  if (radio.channel >= 0) {
+    RADIO_VfoLoadCH(0);
   }
-  radio = &gVFO[gSettings.activeVFO];
+
+  LOOT_Replace(&gLoot, radio.rxF);
 
   // needed to select gCurrentBand & set band index in SL
   CHANNELS_LoadScanlist(RADIO_IsChMode() ? TYPE_FILTER_CH : TYPE_FILTER_BAND,
@@ -688,23 +682,23 @@ void RADIO_LoadCurrentVFO(void) {
 }
 
 void RADIO_SetSquelch(uint8_t sq) {
-  radio->squelch.value = sq;
+  radio.squelch.value = sq;
   BK4819_Squelch(sq, gSettings.sqlOpenTime, gSettings.sqlCloseTime);
   RADIO_SaveCurrentVFODelayed();
 }
 
 void RADIO_SetSquelchType(SquelchType t) {
-  radio->squelch.type = t;
+  radio.squelch.type = t;
   RADIO_SaveCurrentVFODelayed();
 }
 
 void RADIO_SetGain(uint8_t gainIndex) {
-  radio->gainIndex = gainIndex;
+  radio.gainIndex = gainIndex;
   Log("GAIN: %+d", -gainTable[gainIndex].gainDb + 33);
   bool disableAGC;
   switch (RADIO_GetRadio()) {
   case RADIO_BK4819:
-    BK4819_SetAGC(radio->modulation != MOD_AM, gainIndex);
+    BK4819_SetAGC(radio.modulation != MOD_AM, gainIndex);
     break;
   case RADIO_SI4732:
     // 0 - max gain
@@ -745,17 +739,17 @@ void RADIO_SetFilterBandwidth(BK4819_FilterBandwidth_t bw) {
 void RADIO_Setup() {
   Log("---------- %s RADIO_Setup ----------", radioNames[RADIO_GetRadio()]);
   ModulationType mod = RADIO_GetModulation();
-  RADIO_SetGain(radio->gainIndex);
-  RADIO_SetFilterBandwidth(radio->bw);
+  RADIO_SetGain(radio.gainIndex);
+  RADIO_SetFilterBandwidth(radio.bw);
   switch (RADIO_GetRadio()) {
   case RADIO_BK4819:
-    Log("SQ %s,%u", sqTypeNames[radio->squelch.type], radio->squelch.value);
-    BK4819_SquelchType(radio->squelch.type);
-    BK4819_Squelch(radio->squelch.value, gSettings.sqlOpenTime,
+    Log("SQ %s,%u", sqTypeNames[radio.squelch.type], radio.squelch.value);
+    BK4819_SquelchType(radio.squelch.type);
+    BK4819_Squelch(radio.squelch.value, gSettings.sqlOpenTime,
                    gSettings.sqlCloseTime);
     Log("MOD: %s", modulationTypeOptions[mod]);
     BK4819_SetModulation(mod);
-    BK4819_SetScrambler(radio->scrambler);
+    BK4819_SetScrambler(radio.scrambler);
 
     setupToneDetection();
     break;
@@ -834,21 +828,21 @@ bool RADIO_IsSquelchOpen() {
     return BK4819_IsSquelchOpen();
   }
 
-  return gShowAllRSSI ? RADIO_GetSNR() > radio->squelch.value : true;
+  return gShowAllRSSI ? RADIO_GetSNR() > radio.squelch.value : true;
 }
 
 void RADIO_VfoLoadCH(uint8_t i) {
-  int16_t chNum = gVFO[i].channel;
-  CHANNELS_Load(gVFO[i].channel, &gVFO[i]);
-  gVFO[i].meta.type = TYPE_VFO;
-  gVFO[i].channel = chNum;
+  int16_t chNum = radio.channel;
+  CHANNELS_Load(radio.channel, &radio);
+  radio.meta.type = TYPE_VFO;
+  radio.channel = chNum;
 }
 
 void RADIO_TuneToBand(int16_t num) {
   if (CHANNELS_GetMeta(num).type == TYPE_BAND) {
     BANDS_Select(num, true);
-    // radio->allowTx = gCurrentBand.allowTx;
-    if (BANDS_InRange(radio->rxF, gCurrentBand)) {
+    // radio.allowTx = gCurrentBand.allowTx;
+    if (BANDS_InRange(radio.rxF, gCurrentBand)) {
       return;
     }
     if (BANDS_InRange(gCurrentBand.misc.lastUsedFreq, gCurrentBand)) {
@@ -861,7 +855,7 @@ void RADIO_TuneToBand(int16_t num) {
 
 void RADIO_TuneToCH(int16_t num) {
   if (CHANNELS_GetMeta(num).type == TYPE_CH) {
-    radio->channel = num;
+    radio.channel = num;
     RADIO_VfoLoadCH(gSettings.activeVFO);
     RADIO_SaveCurrentVFO();
     RADIO_SetupByCurrentVFO();
@@ -883,22 +877,15 @@ bool RADIO_TuneToMR(int16_t num) {
       break;
     }
   }
-  radio->channel = -1;
+  radio.channel = -1;
   return false;
-}
-
-void RADIO_NextVFO(void) {
-  gSettings.activeVFO = !gSettings.activeVFO;
-  radio = &gVFO[gSettings.activeVFO];
-  RADIO_SetupByCurrentVFO();
-  SETTINGS_Save();
 }
 
 void RADIO_ToggleVfoMR(void) {
   if (RADIO_IsChMode()) {
     loadVFO(gSettings.activeVFO);
-    radio->channel += 1; // 0 -> 1
-    radio->channel *= -1;
+    radio.channel += 1; // 0 -> 1
+    radio.channel *= -1;
     saveVFO(gSettings.activeVFO);
     RADIO_SetupByCurrentVFO();
   } else {
@@ -907,63 +894,63 @@ void RADIO_ToggleVfoMR(void) {
       // Log("SL SIZE=0, skip");
       return;
     }
-    radio->channel *= -1;
-    radio->channel -= 1; // 1 -> 0
-    // Log("radio->ch=%u", radio->channel);
-    if (CHANNELS_Existing(radio->channel)) {
-      RADIO_TuneToMR(radio->channel);
+    radio.channel *= -1;
+    radio.channel -= 1; // 1 -> 0
+    // Log("radio.ch=%u", radio.channel);
+    if (CHANNELS_Existing(radio.channel)) {
+      RADIO_TuneToMR(radio.channel);
     } else {
       CHANNELS_Next(true);
-      // Log("CH NEXT, radio->ch=%u", radio->channel);
+      // Log("CH NEXT, radio.ch=%u", radio.channel);
     }
   }
   RADIO_SaveCurrentVFO();
 }
 
 void RADIO_UpdateSquelchLevel(bool next) {
-  radio->squelch.value = IncDecU(radio->squelch.value, 0, 10, next);
-  RADIO_SetSquelch(radio->squelch.value);
+  radio.squelch.value = IncDecU(radio.squelch.value, 0, 10, next);
+  RADIO_SetSquelch(radio.squelch.value);
 }
 
 void RADIO_NextF(bool inc) {
-  uint32_t step = StepFrequencyTable[radio->step];
-  radio->rxF += inc ? step : -step;
-  RADIO_TuneToPure(radio->rxF, !gIsListening);
+  uint32_t step = StepFrequencyTable[radio.step];
+  radio.rxF += inc ? step : -step;
+  RADIO_TuneToPure(radio.rxF, !gIsListening);
 }
 
 void RADIO_UpdateStep(bool inc) {
-  radio->step = IncDecU(radio->step, 0, STEP_500_0kHz, inc);
-  radio->fixedBoundsMode = false;
+  radio.step = IncDecU(radio.step, 0, STEP_500_0kHz, inc);
+  radio.fixedBoundsMode = false;
   RADIO_SaveCurrentVFODelayed();
 }
 
 void RADIO_ToggleListeningBW(void) {
-  if (radio->bw == BK4819_FILTER_BW_26k) {
-    radio->bw = BK4819_FILTER_BW_6k;
+  if (radio.bw == BK4819_FILTER_BW_26k) {
+    radio.bw = BK4819_FILTER_BW_6k;
   } else {
-    ++radio->bw;
+    ++radio.bw;
   }
 
-  RADIO_SetFilterBandwidth(radio->bw);
+  RADIO_SetFilterBandwidth(radio.bw);
 
   RADIO_SaveCurrentVFODelayed();
 }
 
 void RADIO_ToggleTxPower(void) {
-  if (radio->power == TX_POW_HIGH) {
-    radio->power = TX_POW_ULOW;
+  if (radio.power == TX_POW_HIGH) {
+    radio.power = TX_POW_ULOW;
   } else {
-    ++radio->power;
+    ++radio.power;
   }
 
   RADIO_SaveCurrentVFODelayed();
 }
 
 void RADIO_ToggleModulationEx(bool next) {
-  if (radio->modulation == getNextModulation(next, true)) {
+  if (radio.modulation == getNextModulation(next, true)) {
     return;
   }
-  radio->modulation = getNextModulation(next, true);
+  radio.modulation = getNextModulation(next, true);
 
   // NOTE: for right BW after switching from WFM to another
   RADIO_Setup();
@@ -991,7 +978,7 @@ void RADIO_SendDTMF(const char *pattern, ...) {
 
 void RADIO_CheckAndListen() {
   Measurement m = {
-      .f = radio->rxF,
+      .f = radio.rxF,
       .rssi = RADIO_GetRSSI(),
       .snr = RADIO_GetSNR(),
       .noise = BK4819_GetNoise(),

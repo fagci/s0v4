@@ -165,24 +165,24 @@ void STATUSLINE_renderCurrentBand() {
         /* } else if (SVC_Running(SVC_SCAN)) {
           STATUSLINE_SetText("=%s", gCurrentBand.name); */
       } else {
-        STATUSLINE_SetText(radio->fixedBoundsMode ? "=%s:%u" : "%s:%u",
+        STATUSLINE_SetText(radio.fixedBoundsMode ? "=%s:%u" : "%s:%u",
                            gCurrentBand.name,
-                           CHANNELS_GetChannel(&gCurrentBand, radio->rxF) + 1);
+                           CHANNELS_GetChannel(&gCurrentBand, radio.rxF) + 1);
       }
     }
   }
 }
 
 void STATUSLINE_RenderRadioSettings() {
-  const int8_t vGain = -gainTable[radio->gainIndex].gainDb + 33;
+  const int8_t vGain = -gainTable[radio.gainIndex].gainDb + 33;
 
   STATUSLINE_SetText(                              //
       "%+d %s AFC%u %s %u %s",                     //
       vGain,                                       //
       RADIO_GetBWName(radio),                      //
       BK4819_GetAFC(),                             //
-      sqTypeNames[radio->squelch.type],            //
-      radio->squelch.value,                        //
+      sqTypeNames[radio.squelch.type],            //
+      radio.squelch.value,                        //
       modulationTypeOptions[RADIO_GetModulation()] //
   );
 }

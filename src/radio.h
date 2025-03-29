@@ -41,7 +41,7 @@ extern const char *sqTypeNames[4];
 extern const char *TX_STATE_NAMES[7];
 extern const char *bwNames[10];
 
-const char *RADIO_GetBWName(const VFO *vfo);
+const char *RADIO_GetBWName();
 Radio RADIO_GetRadio();
 ModulationType RADIO_GetModulation();
 void RADIO_Init();
@@ -68,7 +68,6 @@ void RADIO_SwitchRadioPure();
 
 void RADIO_VfoLoadCH(uint8_t i);
 void RADIO_SetupByCurrentVFO();
-void RADIO_NextVFO(void);
 void RADIO_NextF(bool inc);
 void RADIO_ToggleVfoMR();
 
@@ -90,7 +89,6 @@ uint16_t RADIO_GetRSSI(void);
 uint8_t RADIO_GetSNR(void);
 uint16_t RADIO_GetS();
 uint32_t RADIO_GetTXF(void);
-uint32_t RADIO_GetTXFEx(const VFO *vfo);
 uint32_t RADIO_GetTxPower(uint32_t txF);
 void RADIO_ToggleBK1080(bool on);
 
@@ -101,6 +99,6 @@ bool RADIO_IsChMode();
 void RADIO_CheckAndListen();
 void RADIO_GetGainString(char *buf, Radio radio, uint8_t i);
 
-uint8_t RADIO_GetBWCount(const VFO *vfo);
+uint8_t RADIO_GetBWCount();
 
 #endif /* end of include guard: RADIO_H */

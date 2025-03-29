@@ -103,7 +103,7 @@ void UI_DrawLoot(const Loot *loot, uint8_t x, uint8_t y, TextPos pos) {
 
   PrintMediumEx(x, y, pos, C_INVERT, "%c%u.%05u %c", c, loot->f / MHZ,
                 loot->f % MHZ,
-                gIsListening && loot->f == radio->rxF ? '!' : ' ');
+                gIsListening && loot->f == radio.rxF ? '!' : ' ');
 }
 
 void UI_BigFrequency(uint8_t y, uint32_t f) {

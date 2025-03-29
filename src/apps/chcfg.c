@@ -76,7 +76,7 @@ static uint8_t menuSize = 0;
 static void apply() {
   switch (gChEd.meta.type) {
   case TYPE_VFO:
-    gVFO[gSettings.activeVFO] = gChEd;
+    radio = gChEd;
     RADIO_SetupByCurrentVFO();
     RADIO_SaveCurrentVFO();
     break;
@@ -396,13 +396,13 @@ static void getSubmenuItemText(uint16_t index, char *name) {
     strncpy(name, TX_CODE_TYPES[index], 15);
     return;
   case M_RX_CODE:
-    PrintRTXCode(name, radio->code.rx.type, index);
+    PrintRTXCode(name, radio.code.rx.type, index);
     return;
   case M_TX_CODE_TYPE:
     strncpy(name, TX_CODE_TYPES[index], 15);
     return;
   case M_TX_CODE:
-    PrintRTXCode(name, radio->code.tx.type, index);
+    PrintRTXCode(name, radio.code.tx.type, index);
     return;
   case M_F_TXP:
     strncpy(name, TX_POWER_NAMES[index], 15);
@@ -463,7 +463,7 @@ void CHCFG_init(void) {
 
 void CHCFG_deinit(void) {
   if (gChEd.meta.type == TYPE_VFO) {
-    gVFO[gSettings.activeVFO] = gChEd;
+    radio = gChEd;
     RADIO_SaveCurrentVFO();
   }
   gChNum = -1;

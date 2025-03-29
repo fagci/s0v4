@@ -20,7 +20,7 @@ void CHSCAN_update(void) {
   }
   vTaskDelay(pdMS_TO_TICKS(60));
   Measurement m = {
-      .f = radio->rxF,
+      .f = radio.rxF,
       .rssi = RADIO_GetRSSI(),
       .snr = RADIO_GetSNR(),
       .noise = BK4819_GetNoise(),
@@ -49,13 +49,13 @@ bool CHSCAN_key(KEY_Code_t Key, Key_State_t state) {
 
 void CHSCAN_render(void) {
   if (gIsListening) {
-    PrintMediumEx(LCD_XCENTER, 18, POS_C, C_FILL, "MR %u", radio->channel + 1);
-    PrintSmallEx(LCD_XCENTER, 24, POS_C, C_FILL, "%u.%05u", radio->rxF / MHZ,
-                 radio->rxF % MHZ);
+    PrintMediumEx(LCD_XCENTER, 18, POS_C, C_FILL, "MR %u", radio.channel + 1);
+    PrintSmallEx(LCD_XCENTER, 24, POS_C, C_FILL, "%u.%05u", radio.rxF / MHZ,
+                 radio.rxF % MHZ);
     UI_RSSIBar(26);
   } else {
     PrintMediumEx(LCD_XCENTER, 18, POS_C, C_FILL, "Scanning...");
-    PrintSmallEx(LCD_XCENTER, 24, POS_C, C_FILL, "%u.%05u", radio->rxF / MHZ,
-                 radio->rxF % MHZ);
+    PrintSmallEx(LCD_XCENTER, 24, POS_C, C_FILL, "%u.%05u", radio.rxF / MHZ,
+                 radio.rxF % MHZ);
   }
 }

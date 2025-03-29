@@ -350,7 +350,7 @@ static void onSubChange(void) {
     break;
   case M_FLT_BOUND:
     gSettings.bound_240_280 = subMenuIndex;
-    BK4819_SelectFilter(radio->rxF);
+    BK4819_SelectFilter(radio.rxF);
     break;
   default:
     break;
@@ -456,7 +456,7 @@ static void setMenuIndexAndRun(uint16_t v) {
 }
 
 static void setUpconverterFreq(uint32_t f) {
-  uint32_t _f = GetScreenF(radio->rxF);
+  uint32_t _f = GetScreenF(radio.rxF);
   gSettings.upconverter = f;
   RADIO_TuneToSave(GetTuneF(_f));
   SETTINGS_Save();

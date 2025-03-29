@@ -42,7 +42,7 @@ static uint16_t measure(uint32_t f) {
 
 static void onNewBand() {
   gCurrentBand = *b;
-  radio->rxF = b->rxF;
+  radio.rxF = b->rxF;
   RADIO_Setup();
   SP_Init(b);
   isAnalyserMode = BANDS_RangeIndex() == RANGES_STACK_SIZE - 1;
@@ -65,11 +65,11 @@ void SCANER_init(void) {
   gMonitorMode = false;
   if (!gCurrentBand.rxF) {
     RADIO_LoadCurrentVFO();
-    BANDS_SelectByFrequency(radio->rxF, true);
+    BANDS_SelectByFrequency(radio.rxF, true);
   }
 
   afc = BK4819_GetAFC();
-  m = &gLoot[gSettings.activeVFO];
+  m = &gLoot;
   m->snr = 0;
 
   gCurrentBand.meta.type = TYPE_BAND_DETACHED;
@@ -87,10 +87,10 @@ void SCANER_init(void) {
 }
 
 static void next() {
-  radio->rxF += StepFrequencyTable[radio->step];
+  radio.rxF += StepFrequencyTable[radio.step];
 
-  if (radio->rxF > b->txF) {
-    radio->rxF = b->rxF;
+  if (radio.rxF > b->txF) {
+    radio.rxF = b->rxF;
     gRedrawScreen = true;
   }
 }
@@ -109,7 +109,7 @@ static void nextWithTimeout() {
   }
 
   if (CheckTimeout(&timeout)) {
-    lastSettedF = radio->rxF;
+    lastSettedF = radio.rxF;
     SetTimeout(&timeout, 0);
     next();
     return;
@@ -120,8 +120,8 @@ void SCANER_update(void) {
   if (m->open) {
     m->open = RADIO_IsSquelchOpen();
   } else {
-    m->f = radio->rxF;
-    m->rssi = measure(radio->rxF);
+    m->f = radio.rxF;
+    m->rssi = measure(radio.rxF);
 
     if (!sqLevel && m->rssi) {
       sqLevel = m->rssi - 1;
@@ -139,7 +139,7 @@ void SCANER_update(void) {
     }
   }
 
-  if (gSettings.skipGarbageFrequencies && (radio->rxF % 1300000 == 0)) {
+  if (gSettings.skipGarbageFrequencies && (radio.rxF % 1300000 == 0)) {
     m->open = false;
   }
 
@@ -192,8 +192,8 @@ bool SCANER_key(KEY_Code_t key, Key_State_t state) {
     case KEY_6:
       if (gLastActiveLoot) {
         _b = *b;
-        _b.rxF = gLastActiveLoot->f - StepFrequencyTable[radio->step] * 64;
-        _b.txF = _b.rxF + StepFrequencyTable[radio->step] * 128;
+        _b.rxF = gLastActiveLoot->f - StepFrequencyTable[radio.step] * 64;
+        _b.txF = _b.rxF + StepFrequencyTable[radio.step] * 128;
         BANDS_RangePush(_b);
         b = BANDS_RangePeek();
         CUR_Reset();
@@ -232,7 +232,7 @@ bool SCANER_key(KEY_Code_t key, Key_State_t state) {
       return true;
     case KEY_3:
     case KEY_9:
-      radio->step = b->step =
+      radio.step = b->step =
           IncDecU(b->step, STEP_0_02kHz, STEP_500_0kHz + 1, key == KEY_3);
       onNewBand();
       return true;
@@ -267,7 +267,7 @@ bool SCANER_key(KEY_Code_t key, Key_State_t state) {
 
     case KEY_2:
       BANDS_RangePush(
-          CUR_GetRange(BANDS_RangePeek(), StepFrequencyTable[radio->step]));
+          CUR_GetRange(BANDS_RangePeek(), StepFrequencyTable[radio.step]));
       b = BANDS_RangePeek();
       CUR_Reset();
       onNewBand();
@@ -300,7 +300,7 @@ static void renderAnalyzerUI() {
 }
 
 void SCANER_render(void) {
-  const uint32_t step = StepFrequencyTable[radio->step];
+  const uint32_t step = StepFrequencyTable[radio.step];
 
   if (thinking) {
     PrintSmallEx(LCD_XCENTER, 4, POS_C, C_FILL, "...");
@@ -309,7 +309,7 @@ void SCANER_render(void) {
   STATUSLINE_RenderRadioSettings();
 
   SP_Render(b);
-  SP_RenderArrow(b, radio->rxF);
+  SP_RenderArrow(b, radio.rxF);
 
   // top
   if (gLastActiveLoot) {
@@ -334,7 +334,7 @@ void SCANER_render(void) {
   bool showCurRange = Now() < cursorRangeTimeout;
   FSmall(1, LCD_HEIGHT - 2, POS_L, showCurRange ? r.rxF : b->rxF);
   FSmall(LCD_XCENTER, LCD_HEIGHT - 2, POS_C,
-         showCurRange ? CUR_GetCenterF(b, step) : radio->rxF);
+         showCurRange ? CUR_GetCenterF(b, step) : radio.rxF);
   FSmall(LCD_WIDTH - 1, LCD_HEIGHT - 2, POS_R, showCurRange ? r.txF : b->txF);
 
   FillRect(selStart ? 0 : LCD_WIDTH - 42, LCD_HEIGHT - 7, 42, 7, C_INVERT);

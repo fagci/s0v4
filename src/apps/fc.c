@@ -156,7 +156,7 @@ bool FC_key(KEY_Code_t key, Key_State_t state) {
       break;
     case KEY_3:
     case KEY_9:
-      radio->squelch.value = IncDecU(radio->squelch.value, 0, 11, key == KEY_3);
+      radio.squelch.value = IncDecU(radio.squelch.value, 0, 11, key == KEY_3);
       RADIO_SaveCurrentVFODelayed();
       RADIO_Setup();
       break;
@@ -193,7 +193,7 @@ bool FC_key(KEY_Code_t key, Key_State_t state) {
 void FC_render() {
   PrintMediumEx(0, 16, POS_L, C_FILL, "%s %ums HZ %u SQ %u %s",
                 FILTER_NAMES[filter], 200 << gSettings.fcTime, hz,
-                radio->squelch.value, bandAutoSwitch ? "[A]" : "");
+                radio.squelch.value, bandAutoSwitch ? "[A]" : "");
   UI_BigFrequency(40, currentFrequency);
 
   if (gLastActiveLoot) {

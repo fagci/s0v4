@@ -158,12 +158,12 @@ bool BANDS_InRange(const uint32_t f, const Band p) {
 }
 
 void BANDS_SetRadioParamsFromCurrentBand() {
-  radio->fixedBoundsMode = true;
-  radio->step = gCurrentBand.step;
-  radio->bw = gCurrentBand.bw;
-  radio->gainIndex = gCurrentBand.gainIndex;
-  radio->modulation = gCurrentBand.modulation;
-  radio->squelch = gCurrentBand.squelch;
+  radio.fixedBoundsMode = true;
+  radio.step = gCurrentBand.step;
+  radio.bw = gCurrentBand.bw;
+  radio.gainIndex = gCurrentBand.gainIndex;
+  radio.modulation = gCurrentBand.modulation;
+  radio.squelch = gCurrentBand.squelch;
 }
 
 // Set gCurrentBand, sets internal cursor in SL
@@ -178,7 +178,7 @@ void BANDS_Select(int16_t num, bool copyToVfo) {
       break;
     }
   }
-  radio->allowTx = gCurrentBand.allowTx;
+  radio.allowTx = gCurrentBand.allowTx;
   if (copyToVfo) {
     BANDS_SetRadioParamsFromCurrentBand();
   }

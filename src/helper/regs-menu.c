@@ -43,7 +43,7 @@ static void updateValue(bool inc) {
   uint16_t v;
   switch (currentIndex) {
   case REG_GAIN:
-    RADIO_SetGain(IncDecU(radio->gainIndex, 0, ARRAY_SIZE(gainTable), inc));
+    RADIO_SetGain(IncDecU(radio.gainIndex, 0, ARRAY_SIZE(gainTable), inc));
     RADIO_SaveCurrentVFODelayed();
     break;
   case REG_STEP:
@@ -56,18 +56,18 @@ static void updateValue(bool inc) {
     RADIO_ToggleModulationEx(inc);
     break;
   case REG_RADIO:
-    if (radio->radio == RADIO_BK4819) {
-      radio->radio = RADIO_HasSi() ? RADIO_SI4732 : RADIO_BK1080;
+    if (radio.radio == RADIO_BK4819) {
+      radio.radio = RADIO_HasSi() ? RADIO_SI4732 : RADIO_BK1080;
     } else {
-      radio->radio = RADIO_BK4819;
+      radio.radio = RADIO_BK4819;
     }
     RADIO_SwitchRadioPure();
     RADIO_Setup();
     RADIO_SaveCurrentVFODelayed();
     break;
   case REG_BW:
-    RADIO_SetFilterBandwidth(
-        radio->bw = IncDecU(radio->bw, 0, RADIO_GetBWCount(radio), inc));
+    RADIO_SetFilterBandwidth(radio.bw =
+                                 IncDecU(radio.bw, 0, RADIO_GetBWCount(), inc));
     RADIO_SaveCurrentVFODelayed();
     break;
   case REG_AFC:
@@ -86,7 +86,7 @@ static void updateValue(bool inc) {
     SETTINGS_DelayedSave();
     break;
   case REG_TX_POWER:
-    radio->power = IncDecU(radio->power, 0, TX_POW_HIGH + 1, inc);
+    radio.power = IncDecU(radio.power, 0, TX_POW_HIGH + 1, inc);
     RADIO_SaveCurrentVFODelayed();
     break;
   case REG_COUNT:
@@ -99,40 +99,39 @@ static void updateValueAlt(bool inc) {
   switch (currentIndex) {
   case REG_GAIN:
     // TODO: доделать
-    switch (radio->gainIndex) {
+    switch (radio.gainIndex) {
     case AUTO_GAIN_INDEX:
-      radio->gainIndex = PLUS2_GAIN_INDEX;
+      radio.gainIndex = PLUS2_GAIN_INDEX;
       break;
     case PLUS2_GAIN_INDEX:
-      radio->gainIndex = PLUS10_GAIN_INDEX;
+      radio.gainIndex = PLUS10_GAIN_INDEX;
       break;
     case PLUS10_GAIN_INDEX:
-      radio->gainIndex = PLUS33_GAIN_INDEX;
+      radio.gainIndex = PLUS33_GAIN_INDEX;
       break;
     default:
-      radio->gainIndex = AUTO_GAIN_INDEX;
+      radio.gainIndex = AUTO_GAIN_INDEX;
     }
-    RADIO_SetGain(radio->gainIndex);
+    RADIO_SetGain(radio.gainIndex);
     RADIO_SaveCurrentVFODelayed();
     break;
   case REG_SQL:
-    radio->squelch.type =
-        IncDecU(radio->squelch.type, 0, SQUELCH_RSSI + 1, inc);
+    radio.squelch.type = IncDecU(radio.squelch.type, 0, SQUELCH_RSSI + 1, inc);
     RADIO_SaveCurrentVFODelayed();
     break;
   case REG_BW:
-    switch (radio->bw) {
+    switch (radio.bw) {
     case BK4819_FILTER_BW_6k:
-      radio->bw = BK4819_FILTER_BW_12k;
+      radio.bw = BK4819_FILTER_BW_12k;
       break;
     case BK4819_FILTER_BW_12k:
-      radio->bw = BK4819_FILTER_BW_26k;
+      radio.bw = BK4819_FILTER_BW_26k;
       break;
     default:
-      radio->bw = BK4819_FILTER_BW_6k;
+      radio.bw = BK4819_FILTER_BW_6k;
       break;
     }
-    RADIO_SetFilterBandwidth(radio->bw);
+    RADIO_SetFilterBandwidth(radio.bw);
     RADIO_SaveCurrentVFODelayed();
     break;
   case REG_DEV:
@@ -149,23 +148,23 @@ static void updateValueAlt(bool inc) {
 static void getValue(MenuReg reg) {
   switch (reg) {
   case REG_GAIN:
-    RADIO_GetGainString(buf, radio->radio, radio->gainIndex);
+    RADIO_GetGainString(buf, radio.radio, radio.gainIndex);
     break;
   case REG_BW:
-    snprintf(buf, 16, "%s", RADIO_GetBWName(radio));
+    snprintf(buf, 16, "%s", RADIO_GetBWName());
     break;
   case REG_RADIO:
-    snprintf(buf, 16, "%s", radioNames[radio->radio]);
+    snprintf(buf, 16, "%s", radioNames[radio.radio]);
     break;
   case REG_TX_POWER:
-    snprintf(buf, 16, "%s", powerNames[radio->power]);
+    snprintf(buf, 16, "%s", powerNames[radio.power]);
     break;
   case REG_MOD:
-    snprintf(buf, 16, "%s", modulationTypeOptions[radio->modulation]);
+    snprintf(buf, 16, "%s", modulationTypeOptions[radio.modulation]);
     break;
   case REG_STEP:
-    snprintf(buf, 16, "%u.%02ukHz", StepFrequencyTable[radio->step] / KHZ,
-             StepFrequencyTable[radio->step] % KHZ);
+    snprintf(buf, 16, "%u.%02ukHz", StepFrequencyTable[radio.step] / KHZ,
+             StepFrequencyTable[radio.step] % KHZ);
     break;
   case REG_AFC:
     snprintf(buf, 16, "%u", BK4819_GetAFC());
@@ -177,8 +176,8 @@ static void getValue(MenuReg reg) {
     snprintf(buf, 16, "%u", BK4819_GetRegValue(RS_MIC));
     break;
   case REG_SQL:
-    snprintf(buf, 16, "%s %u", sqTypeNames[radio->squelch.type],
-             radio->squelch.value);
+    snprintf(buf, 16, "%s %u", sqTypeNames[radio.squelch.type],
+             radio.squelch.value);
     break;
   case REG_COUNT:
     break;
