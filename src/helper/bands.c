@@ -6,7 +6,6 @@
 #include "measurements.h"
 #include <stdint.h>
 
-
 // NOTE
 // for SCAN use cached band by index
 // for DISPLAY use bands in memory to select it by frequency faster
@@ -235,6 +234,7 @@ bool BANDS_SelectBandRelativeByScanlist(bool next) {
 }
 
 void BANDS_SaveCurrent(void) {
+  Log("BAND save i=%u, mr=%u", allBandIndex, allBands[allBandIndex].mr);
   if (allBandIndex >= 0 && gCurrentBand.meta.type == TYPE_BAND) {
     CHANNELS_Save(allBands[allBandIndex].mr, &gCurrentBand);
   }

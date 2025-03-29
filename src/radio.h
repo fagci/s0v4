@@ -17,10 +17,9 @@ typedef enum {
   TX_POW_OVERDRIVE,
 } TXState;
 
-extern CH *radio;
-extern CH gVFO[2];
+extern CH radio;
 
-extern Measurement gLoot[2];
+extern Measurement gLoot;
 
 extern bool gIsListening;
 extern bool gMonitorMode;

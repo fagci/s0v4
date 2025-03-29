@@ -27,10 +27,9 @@
 #include "ui/statusline.h"
 #include <stdint.h>
 
-CH *radio;
-VFO gVFO[2];
+CH radio;
 
-Measurement gLoot[2] = {0};
+Measurement gLoot = {0};
 
 bool gIsListening = false;
 bool gMonitorMode = false;
@@ -1002,7 +1001,6 @@ void RADIO_CheckAndListen() {
   if (!gMonitorMode) {
     LOOT_Update(&m);
   }
-  Log("RADIO_CheckAndListen f=%u, r=%u, o=%u", m.f, m.rssi, m.open);
   RADIO_ToggleRX(m.open);
   SP_ShiftGraph(-1);
   SP_AddGraphPoint(&m);
