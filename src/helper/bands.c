@@ -16,7 +16,7 @@ Band gCurrentBand;
 Band defaultBand = {
     .meta.readonly = true,
     .meta.type = TYPE_BAND_DETACHED,
-    .name = "Def",
+    .name = "Unknown",
     .step = STEP_25_0kHz,
     .bw = BK4819_FILTER_BW_12k,
     .squelch =

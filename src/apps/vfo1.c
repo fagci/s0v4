@@ -248,13 +248,12 @@ static void renderTxRxState(uint8_t y, bool isTx) {
   }
 }
 
-static void renderChannelName(uint8_t y, const char *name, bool isChMode,
-                              uint16_t channel) {
+static void renderChannelName(uint8_t y, uint16_t channel) {
   FillRect(0, y - 14, 28, 7, C_FILL);
-  if (isChMode) {
+  if (RADIO_IsChMode()) {
     PrintSmallEx(14, y - 9, POS_C, C_INVERT, "MR %03u", channel);
   } else {
-    PrintSmallEx(14, y - 9, POS_C, C_INVERT, name);
+    PrintSmallEx(14, y - 9, POS_C, C_INVERT, "VFO");
   }
 }
 
@@ -290,7 +289,7 @@ void VFO1_render(void) {
   renderTxRxState(BASE, gTxState == TX_ON);
   UI_BigFrequency(BASE, f);
   PrintMediumEx(LCD_WIDTH - 1, BASE - 12, POS_R, C_FILL, mod);
-  renderChannelName(21, radio.name, RADIO_IsChMode(), radio.channel);
+  renderChannelName(21, radio.channel);
   const uint32_t step = StepFrequencyTable[radio.step];
   PrintSmallEx(LCD_WIDTH, BASE + 6, POS_R, C_FILL, "%d.%02d", step / KHZ,
                step % KHZ);

@@ -23,6 +23,7 @@
 #include "misc.h"
 #include "scheduler.h"
 #include "settings.h"
+#include "system.h"
 #include "ui/spectrum.h"
 #include "ui/statusline.h"
 #include <stdint.h>
@@ -136,13 +137,9 @@ static ModulationType MODS_WFM[] = {
     MOD_WFM,
 };
 
-static void loadVFO(uint8_t num) {
-  CHANNELS_Load(CHANNELS_GetCountMax() - 2 + num, &radio);
-}
+static void loadVFO() { CHANNELS_Load(CHANNELS_GetCountMax() - 2, &radio); }
 
-static void saveVFO(uint8_t num) {
-  CHANNELS_Save(CHANNELS_GetCountMax() - 2 + num, &radio);
-}
+static void saveVFO() { CHANNELS_Save(CHANNELS_GetCountMax() - 2, &radio); }
 
 static uint8_t indexOfMod(const ModulationType *arr, uint8_t n,
                           ModulationType t) {
@@ -634,7 +631,6 @@ void RADIO_SetupByCurrentVFO(void) {
 void RADIO_TuneTo(uint32_t f) {
   if (RADIO_IsChMode()) {
     radio.channel = -1;
-    snprintf(radio.name, 5, "VFO-%c", 'A' + gSettings.activeVFO);
   }
   radio.txF = 0;
   radio.rxF = f;
@@ -667,9 +663,9 @@ void RADIO_SaveCurrentVFO(void) {
 
 void RADIO_LoadCurrentVFO(void) {
   gMonitorMode = false;
-  loadVFO(0);
-  if (radio.channel >= 0) {
-    RADIO_VfoLoadCH(0);
+  loadVFO();
+  if (RADIO_IsChMode()) {
+    RADIO_VfoLoadCH();
   }
 
   LOOT_Replace(&gLoot, radio.rxF);
@@ -831,7 +827,7 @@ bool RADIO_IsSquelchOpen() {
   return gShowAllRSSI ? RADIO_GetSNR() > radio.squelch.value : true;
 }
 
-void RADIO_VfoLoadCH(uint8_t i) {
+void RADIO_VfoLoadCH() {
   int16_t chNum = radio.channel;
   CHANNELS_Load(radio.channel, &radio);
   radio.meta.type = TYPE_VFO;
@@ -856,7 +852,7 @@ void RADIO_TuneToBand(int16_t num) {
 void RADIO_TuneToCH(int16_t num) {
   if (CHANNELS_GetMeta(num).type == TYPE_CH) {
     radio.channel = num;
-    RADIO_VfoLoadCH(gSettings.activeVFO);
+    RADIO_VfoLoadCH();
     RADIO_SaveCurrentVFO();
     RADIO_SetupByCurrentVFO();
   }
@@ -883,25 +879,29 @@ bool RADIO_TuneToMR(int16_t num) {
 
 void RADIO_ToggleVfoMR(void) {
   if (RADIO_IsChMode()) {
-    loadVFO(gSettings.activeVFO);
+    // loadVFO();
     radio.channel += 1; // 0 -> 1
     radio.channel *= -1;
-    saveVFO(gSettings.activeVFO);
+    saveVFO();
     RADIO_SetupByCurrentVFO();
   } else {
     CHANNELS_LoadScanlist(TYPE_FILTER_CH, gSettings.currentScanlist);
     if (gScanlistSize == 0) {
-      // Log("SL SIZE=0, skip");
+      SYS_MsgNotify("No channels", 1000);
       return;
     }
+    // loadVFO();
+    Log("radio.ch=%u", radio.channel);
     radio.channel *= -1;
     radio.channel -= 1; // 1 -> 0
-    // Log("radio.ch=%u", radio.channel);
-    if (CHANNELS_Existing(radio.channel)) {
+    Log("radio.ch=%u", radio.channel);
+    if (CHANNELS_GetMeta(radio.channel).type == TYPE_CH) {
       RADIO_TuneToMR(radio.channel);
+      Log("CH TUNE, radio.ch=%u", radio.channel);
     } else {
       CHANNELS_Next(true);
-      // Log("CH NEXT, radio.ch=%u", radio.channel);
+      Log("CH NEXT, radio.ch=%u", radio.channel);
+      saveVFO();
     }
   }
   RADIO_SaveCurrentVFO();
