@@ -179,10 +179,10 @@ void STATUSLINE_RenderRadioSettings() {
   STATUSLINE_SetText(                              //
       "%+d %s AFC%u %s %u %s",                     //
       vGain,                                       //
-      RADIO_GetBWName(),                      //
+      RADIO_GetBWName(),                           //
       BK4819_GetAFC(),                             //
-      sqTypeNames[radio.squelch.type],            //
-      radio.squelch.value,                        //
+      sqTypeNames[radio.squelch.type],             //
+      radio.squelch.value,                         //
       modulationTypeOptions[RADIO_GetModulation()] //
   );
 }

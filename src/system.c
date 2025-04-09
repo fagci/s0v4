@@ -115,6 +115,27 @@ static void loadSettingsOrReset() {
   }
 }
 
+static bool checkKeylock(Key_State_t state, KEY_Code_t key) {
+  if (state == KEY_LONG_PRESSED && key == KEY_F) {
+    gSettings.keylock = !gSettings.keylock;
+    SETTINGS_Save();
+    gRedrawScreen = true;
+    return true;
+  }
+
+  /* if (gSettings.keylock && state == KEY_LONG_PRESSED && key == KEY_8) {
+    captureScreen();
+    return true;
+  } */
+
+  if (gSettings.keylock && (gSettings.pttLock ? true : key != KEY_PTT) &&
+      !(state == KEY_LONG_PRESSED && key == KEY_F)) {
+    return true;
+  }
+
+  return false;
+}
+
 void SYS_Main(void *params) {
   BOARD_Init();
   BATTERY_UpdateBatteryInfo();
@@ -161,28 +182,12 @@ void SYS_Main(void *params) {
   for (;;) {
     if (xQueueReceive(systemMessageQueue, &n, pdMS_TO_TICKS(5))) {
       // Process system notifications
-      // Log("MSG: m:%u, k:%u, st:%u", n.message, n.key, n.state);
       if (n.message == MSG_KEYPRESSED && Now() - lastUartDataTime >= 1000) {
         BACKLIGHT_On();
 
-        /* if (n.state == KEY_LONG_PRESSED && n.key == KEY_F) {
-          gSettings.keylock = !gSettings.keylock;
-          SETTINGS_Save();
-          gRedrawScreen = true;
-          return;
-        } */
-
-        /* if (gSettings.keylock && n.state == KEY_LONG_PRESSED &&
-            n.key == KEY_8) {
-          captureScreen();
-          return;
-        } */
-
-        /* if (gSettings.keylock &&
-            (gSettings.pttLock ? true : n.key != KEY_PTT) &&
-            !(n.state == KEY_LONG_PRESSED && n.key == KEY_F)) {
-          return;
-        } */
+        if (checkKeylock(n.state, n.key)) {
+          continue;
+        }
 
         if (APPS_key(n.key, n.state)) {
           gRedrawScreen = true;
