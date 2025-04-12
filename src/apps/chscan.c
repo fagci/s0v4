@@ -7,12 +7,33 @@
 #include "../helper/channels.h"
 #include "../helper/lootlist.h"
 #include "../radio.h"
+#include "../scheduler.h"
 #include "../ui/components.h"
 #include "../ui/graphics.h"
+#include "apps.h"
 
 CH activeCh;
 
 static bool lastListenState;
+static uint32_t lastSettedF = 0;
+static bool lastScanForward = true;
+static uint32_t timeout = 0;
+
+static void nextWithTimeout() {
+  if (lastListenState != gIsListening) {
+    lastListenState = gIsListening;
+    SetTimeout(&timeout, gIsListening
+                             ? SCAN_TIMEOUTS[gSettings.sqOpenedTimeout]
+                             : SCAN_TIMEOUTS[gSettings.sqClosedTimeout]);
+  }
+
+  if (CheckTimeout(&timeout)) {
+    lastSettedF = radio.rxF;
+    SetTimeout(&timeout, 0);
+    CHANNELS_Next(true);
+    return;
+  }
+}
 
 void CHSCAN_init(void) {
   CHANNELS_LoadScanlist(TYPE_FILTER_CH, gSettings.currentScanlist);
@@ -22,7 +43,7 @@ void CHSCAN_deinit(void) {}
 
 void CHSCAN_update(void) {
   if (!gIsListening) {
-    CHANNELS_Next(true);
+    nextWithTimeout();
   }
   vTaskDelay(pdMS_TO_TICKS(60));
   Measurement m = {
@@ -62,6 +83,18 @@ bool CHSCAN_key(KEY_Code_t key, Key_State_t state) {
     switch (key) {
     case KEY_UP:
     case KEY_DOWN:
+      nextWithTimeout();
+      return true;
+    case KEY_SIDE1:
+      LOOT_BlacklistLast();
+      nextWithTimeout();
+      return true;
+    case KEY_SIDE2:
+      LOOT_WhitelistLast();
+      nextWithTimeout();
+      return true;
+    case KEY_STAR:
+      APPS_run(APP_LOOT_LIST);
       return true;
     default:
       break;
