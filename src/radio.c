@@ -137,9 +137,11 @@ static ModulationType MODS_WFM[] = {
     MOD_WFM,
 };
 
-static void loadVFO() { CHANNELS_Load(CHANNELS_GetCountMax() - 2, &radio); }
+static uint16_t getVfoChannel() { return CHANNELS_GetCountMax() - 1; }
 
-static void saveVFO() { CHANNELS_Save(CHANNELS_GetCountMax() - 2, &radio); }
+static void loadVFO() { CHANNELS_Load(getVfoChannel(), &radio); }
+
+static void saveVFO() { CHANNELS_Save(getVfoChannel(), &radio); }
 
 static uint8_t indexOfMod(const ModulationType *arr, uint8_t n,
                           ModulationType t) {
@@ -646,7 +648,7 @@ void RADIO_TuneToSave(uint32_t f) {
 }
 
 void RADIO_SaveCurrentVFO(void) {
-  int16_t vfoChNum = CHANNELS_GetCountMax() - 2 + gSettings.activeVFO;
+  int16_t vfoChNum = getVfoChannel();
   int16_t chToSave = radio.channel;
   if (chToSave >= 0) {
     // save only active channel number
