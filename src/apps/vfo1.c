@@ -1,19 +1,12 @@
 #include "vfo1.h"
-#include "../apps/textinput.h"
 #include "../driver/bk4819.h"
-#include "../driver/uart.h"
 #include "../external/FreeRTOS/include/FreeRTOS.h"
-#include "../external/FreeRTOS/include/portable.h"
 #include "../external/FreeRTOS/include/timers.h"
-#include "../external/FreeRTOS/portable/GCC/ARM_CM0/portmacro.h"
-#include "../helper/bands.h"
 #include "../helper/channels.h"
-#include "../helper/lootlist.h"
 #include "../helper/measurements.h"
 #include "../helper/numnav.h"
 #include "../helper/regs-menu.h"
 #include "../radio.h"
-#include "../scheduler.h"
 #include "../ui/components.h"
 #include "../ui/graphics.h"
 #include "../ui/spectrum.h"
@@ -291,6 +284,10 @@ void VFO1_render(void) {
   PrintMediumEx(LCD_WIDTH - 1, BASE - 12, POS_R, C_FILL, mod);
   renderChannelName(21, radio.channel);
   const uint32_t step = StepFrequencyTable[radio.step];
+  if (RADIO_GetTXState(RADIO_GetTXF()) == TX_ON) {
+    PrintSmallEx(LCD_XCENTER, BASE + 6, POS_C, C_FILL, "%s",
+                 TX_POWER_NAMES[radio.power]);
+  }
   PrintSmallEx(LCD_WIDTH, BASE + 6, POS_R, C_FILL, "%d.%02d", step / KHZ,
                step % KHZ);
 
@@ -301,6 +298,9 @@ void VFO1_render(void) {
   } else {
     if (gIsListening || gVfo1ProMode) {
       UI_RSSIBar(BASE + 8);
+    }
+    if (gTxState == TX_ON) {
+      UI_TxBar(BASE + 8);
     }
     if (gVfo1ProMode) {
       renderProModeInfo(BASE);

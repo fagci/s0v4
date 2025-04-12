@@ -372,10 +372,10 @@ static void sendEOT() {
     break;
   }
   if (gSettings.ste) {
-    SYS_DelayMs(50);
+    SYS_DelayMs(10);
     BK4819_GenTail(4);
     BK4819_WriteRegister(BK4819_REG_51, 0x9033);
-    SYS_DelayMs(200);
+    SYS_DelayMs(100);
   }
   BK4819_ExitSubAu();
 }
@@ -561,12 +561,12 @@ void RADIO_ToggleTXEX(bool on, uint32_t txF, uint8_t power, bool paEnabled) {
 
     sendEOT();
     toggleBK1080SI4732(false);
-    BOARD_ToggleRed(false);
     BK4819_TurnsOffTones_TurnsOnRX();
 
     gCurrentTxPower = 0;
     BK4819_SetupPowerAmplifier(0, 0);
     BK4819_ToggleGpioOut(BK4819_GPIO1_PIN29_PA_ENABLE, false);
+    BOARD_ToggleRed(false);
     BK4819_ToggleGpioOut(BK4819_GPIO0_PIN28_RX_ENABLE, true);
 
     setupToneDetection();
@@ -577,7 +577,7 @@ void RADIO_ToggleTXEX(bool on, uint32_t txF, uint8_t power, bool paEnabled) {
 void RADIO_TuneToPure(uint32_t f, bool precise) {
   uint32_t s = 100; // 1kHz
   if (f < SI47XX_F_MAX) {
-    s = 50; // 500Hz
+    s = 25; // 250Hz
   } else if (f >= BK1080_F_MIN && f <= BK1080_F_MAX) {
     s = 1000; // 10kHz
   }
