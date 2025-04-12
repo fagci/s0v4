@@ -4,14 +4,8 @@
 #include "components.h"
 #include "graphics.h"
 #include <stdint.h>
-#include <stdlib.h>
 
 #define MAX_POINTS 128
-
-typedef struct {
-  uint16_t vMin;
-  uint16_t vMax;
-} VMinMax;
 
 uint8_t SPECTRUM_Y = 8;
 uint8_t SPECTRUM_H = 44;
@@ -105,7 +99,7 @@ void SP_AddPoint(const Measurement *msm) {
   }
 }
 
-static VMinMax getV() {
+VMinMax SP_GetMinMax() {
   const uint16_t rssiMin = minRssi(rssiHistory, filledPoints);
   const uint16_t rssiMax = Max(rssiHistory, filledPoints);
   const uint16_t rssiDiff = rssiMax - rssiMin;
@@ -117,9 +111,7 @@ static VMinMax getV() {
 
 uint16_t peaks[MAX_POINTS];
 
-void SP_Render(const Band *p) {
-  const VMinMax v = getV();
-
+void SP_Render(const Band *p, VMinMax v) {
   if (p) {
     UI_DrawTicks(S_BOTTOM, p);
   }
@@ -146,18 +138,14 @@ void SP_RenderArrow(const Band *p, uint32_t f) {
   FillRect(cx - 2, SPECTRUM_Y + SPECTRUM_H + 3, 5, 1, C_FILL);
 }
 
-void SP_RenderRssi(uint16_t rssi, char *text, bool top) {
-  const VMinMax v = getV();
-
+void SP_RenderRssi(uint16_t rssi, char *text, bool top, VMinMax v) {
   uint8_t yVal = ConvertDomain(rssi, v.vMin, v.vMax, 0, SPECTRUM_H);
   DrawHLine(0, S_BOTTOM - yVal, filledPoints, C_FILL);
   PrintSmallEx(0, S_BOTTOM - yVal + (top ? -2 : 6), POS_L, C_FILL, "%s %d",
                text, Rssi2DBm(rssi));
 }
 
-void SP_RenderLine(uint16_t rssi) {
-  const VMinMax v = getV();
-
+void SP_RenderLine(uint16_t rssi, VMinMax v) {
   uint8_t yVal = ConvertDomain(rssi, v.vMin, v.vMax, 0, SPECTRUM_H);
   DrawHLine(0, S_BOTTOM - yVal, filledPoints, C_FILL);
 }

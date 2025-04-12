@@ -6,16 +6,22 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+typedef struct {
+  uint16_t vMin;
+  uint16_t vMax;
+} VMinMax;
+
 void SP_AddPoint(const Measurement *msm);
 void SP_ResetHistory();
 void SP_Init(Band *b);
 void SP_Begin();
-void SP_Render(const Band *p);
-void SP_RenderRssi(uint16_t rssi, char *text, bool top);
-void SP_RenderLine(uint16_t rssi);
+void SP_Render(const Band *p, VMinMax v);
+void SP_RenderRssi(uint16_t rssi, char *text, bool top, VMinMax v);
+void SP_RenderLine(uint16_t rssi, VMinMax v);
 void SP_RenderArrow(const Band *p, uint32_t f);
 uint16_t SP_GetNoiseFloor();
 uint16_t SP_GetRssiMax();
+VMinMax SP_GetMinMax();
 
 void SP_RenderGraph(uint16_t min, uint16_t max);
 void SP_AddGraphPoint(const Measurement *msm);

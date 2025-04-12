@@ -18,9 +18,11 @@
 static Band *b;
 static Measurement *m;
 
+static VMinMax minMaxRssi;
+
 static bool selStart = true;
 
-static uint32_t delay = 1000;
+static uint32_t delay = 1500;
 static uint8_t afc = 0;
 
 static uint16_t sqLevel = 0;
@@ -128,6 +130,9 @@ void SCANER_update(void) {
     }
 
     m->open = m->rssi >= sqLevel;
+    if (isAnalyserMode) {
+      m->open = false;
+    }
 
     SP_AddPoint(m);
 
@@ -144,7 +149,7 @@ void SCANER_update(void) {
   }
 
   // really good level?
-  if (m->open && !gIsListening) {
+  if (m->open && !gIsListening && !isAnalyserMode) {
     thinking = true;
     wasThinkingEarlier = true;
     gRedrawScreen = true;
@@ -251,6 +256,10 @@ bool SCANER_key(KEY_Code_t key, Key_State_t state) {
 
   if (state == KEY_RELEASED) {
     switch (key) {
+    case KEY_4:
+      isAnalyserMode = !isAnalyserMode;
+      minMaxRssi = SP_GetMinMax();
+      return true;
     case KEY_5:
       gFInputCallback = selStart ? setStartF : setEndF;
       APPS_run(APP_FINPUT);
@@ -295,8 +304,11 @@ bool SCANER_key(KEY_Code_t key, Key_State_t state) {
 }
 
 static void renderAnalyzerUI() {
-  PrintSmallEx(0, 18, POS_L, C_FILL, "%u", msmHigh);
-  PrintSmallEx(0, 24, POS_L, C_FILL, "%u", msmLow);
+  VMinMax mm = SP_GetMinMax();
+  PrintSmallEx(LCD_WIDTH, 18, POS_R, C_FILL, "%3u %+3d", mm.vMax,
+               Rssi2DBm(mm.vMax));
+  PrintSmallEx(LCD_WIDTH, 24, POS_R, C_FILL, "%3u %+3d", mm.vMin,
+               Rssi2DBm(mm.vMin));
 }
 
 void SCANER_render(void) {
@@ -308,7 +320,11 @@ void SCANER_render(void) {
 
   STATUSLINE_RenderRadioSettings();
 
-  SP_Render(b);
+  if (!isAnalyserMode) {
+    minMaxRssi = SP_GetMinMax();
+  }
+
+  SP_Render(b, minMaxRssi);
   SP_RenderArrow(b, radio.rxF);
 
   // top

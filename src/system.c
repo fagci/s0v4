@@ -58,7 +58,7 @@ static StaticQueue_t systemTasksQueue;   // Static queue storage area
 static uint8_t systemQueueStorageArea[queueLen * itemSize];
 
 StaticTask_t appUpdateTaskBuffer;
-StackType_t appUpdateTaskStack[configMINIMAL_STACK_SIZE + 100];
+StackType_t appUpdateTaskStack[configMINIMAL_STACK_SIZE + 200];
 
 StaticTask_t appRenderTaskBuffer;
 StackType_t appRenderTaskStack[configMINIMAL_STACK_SIZE + 100];

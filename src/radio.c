@@ -277,9 +277,9 @@ void RADIO_SaveCurrentVFODelayed(void) {
 }
 
 static void setupToneDetection() {
-  Log("setupToneDetection");
+  // Log("setupToneDetection");
   // HACK? to enable STE RX
-  Log("DC flt BW = 0");
+  // Log("DC flt BW = 0");
   BK4819_WriteRegister(BK4819_REG_7E, 0x302E); // DC flt BW 0=BYP
   uint16_t InterruptMask = BK4819_REG_3F_CxCSS_TAIL;
   if (gSettings.dtmfdecode) {
@@ -621,7 +621,7 @@ static void checkVisibleBand() {
 }
 
 void RADIO_SetupByCurrentVFO(void) {
-  Log("RADIO setup by VFO");
+  // Log("RADIO setup by VFO");
   checkVisibleBand();
 
   RADIO_SwitchRadio();
@@ -692,7 +692,7 @@ void RADIO_SetSquelchType(SquelchType t) {
 
 void RADIO_SetGain(uint8_t gainIndex) {
   radio.gainIndex = gainIndex;
-  Log("GAIN: %+d", -gainTable[gainIndex].gainDb + 33);
+  // Log("GAIN: %+d", -gainTable[gainIndex].gainDb + 33);
   bool disableAGC;
   switch (RADIO_GetRadio()) {
   case RADIO_BK4819:
@@ -714,7 +714,7 @@ void RADIO_SetGain(uint8_t gainIndex) {
 }
 
 void RADIO_SetFilterBandwidth(BK4819_FilterBandwidth_t bw) {
-  Log("BW: %s", bwNames[bw]);
+  // Log("BW: %s", bwNames[bw]);
   ModulationType mod = RADIO_GetModulation();
   switch (RADIO_GetRadio()) {
   case RADIO_BK4819:
@@ -735,17 +735,17 @@ void RADIO_SetFilterBandwidth(BK4819_FilterBandwidth_t bw) {
 }
 
 void RADIO_Setup() {
-  Log("---------- %s RADIO_Setup ----------", radioNames[RADIO_GetRadio()]);
+  // Log("---------- %s RADIO_Setup ----------", radioNames[RADIO_GetRadio()]);
   ModulationType mod = RADIO_GetModulation();
   RADIO_SetGain(radio.gainIndex);
   RADIO_SetFilterBandwidth(radio.bw);
   switch (RADIO_GetRadio()) {
   case RADIO_BK4819:
-    Log("SQ %s,%u", sqTypeNames[radio.squelch.type], radio.squelch.value);
+    // Log("SQ %s,%u", sqTypeNames[radio.squelch.type], radio.squelch.value);
     BK4819_SquelchType(radio.squelch.type);
     BK4819_Squelch(radio.squelch.value, gSettings.sqlOpenTime,
                    gSettings.sqlCloseTime);
-    Log("MOD: %s", modulationTypeOptions[mod]);
+    // Log("MOD: %s", modulationTypeOptions[mod]);
     BK4819_SetModulation(mod);
     BK4819_SetScrambler(radio.scrambler);
 

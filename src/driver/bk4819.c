@@ -391,7 +391,7 @@ void BK4819_SetupPowerAmplifier(uint8_t Bias, uint32_t Frequency) {
 }
 
 void BK4819_SetFrequency(uint32_t f) {
-  Log("BK f=%u", f);
+  // Log("BK f=%u", f);
   BK4819_WriteRegister(BK4819_REG_38, f & 0xFFFF);
   BK4819_WriteRegister(BK4819_REG_39, (f >> 16) & 0xFFFF);
 }
@@ -496,7 +496,7 @@ void BK4819_RX_TurnOn(void) {
 }
 
 void BK4819_SelectFilterEx(Filter filter) {
-  Log("BK ---- SEL flt %u", filter);
+  // Log("BK ---- SEL flt %u", filter);
 
   // for single write to 0x33
   const uint16_t PIN_BIT_VHF = 0x40U >> BK4819_GPIO4_PIN32_VHF_LNA;
@@ -518,7 +518,7 @@ void BK4819_SelectFilterEx(Filter filter) {
 }
 
 void BK4819_SelectFilter(uint32_t f) {
-  Log("BK -- SEL flt for %u", f);
+  // Log("BK -- SEL flt for %u", f);
   Filter filter = f < SETTINGS_GetFilterBound() ? FILTER_VHF : FILTER_UHF;
 
   if (selectedFilter != filter) {

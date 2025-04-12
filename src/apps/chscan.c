@@ -10,7 +10,13 @@
 #include "../ui/components.h"
 #include "../ui/graphics.h"
 
-void CHSCAN_init(void) {}
+CH activeCh;
+
+static bool lastListenState;
+
+void CHSCAN_init(void) {
+  CHANNELS_LoadScanlist(TYPE_FILTER_CH, gSettings.currentScanlist);
+}
 
 void CHSCAN_deinit(void) {}
 
@@ -31,12 +37,29 @@ void CHSCAN_update(void) {
     LOOT_Update(&m);
   }
   RADIO_ToggleRX(m.open);
+
+  if (lastListenState != gIsListening) {
+    lastListenState = gIsListening;
+    if (gIsListening) {
+      CHANNELS_Load(radio.channel, &activeCh);
+    }
+  }
+
   gRedrawScreen = true;
 }
 
-bool CHSCAN_key(KEY_Code_t Key, Key_State_t state) {
+bool CHSCAN_key(KEY_Code_t key, Key_State_t state) {
+  bool longHeld = state == KEY_LONG_PRESSED;
+  bool simpleKeypress = state == KEY_RELEASED;
+  if ((longHeld || simpleKeypress) && (key > KEY_0 && key < KEY_9)) {
+    gSettings.currentScanlist = CHANNELS_ScanlistByKey(
+        gSettings.currentScanlist, key, longHeld && !simpleKeypress);
+    CHANNELS_LoadScanlist(TYPE_FILTER_CH, gSettings.currentScanlist);
+    SETTINGS_DelayedSave();
+    return true;
+  }
   if (state == KEY_RELEASED) {
-    switch (Key) {
+    switch (key) {
     case KEY_UP:
     case KEY_DOWN:
       return true;
@@ -49,13 +72,38 @@ bool CHSCAN_key(KEY_Code_t Key, Key_State_t state) {
 
 void CHSCAN_render(void) {
   if (gIsListening) {
-    PrintMediumEx(LCD_XCENTER, 18, POS_C, C_FILL, "MR %u", radio.channel + 1);
-    PrintSmallEx(LCD_XCENTER, 24, POS_C, C_FILL, "%u.%05u", radio.rxF / MHZ,
-                 radio.rxF % MHZ);
-    UI_RSSIBar(26);
+    PrintMediumBoldEx(LCD_XCENTER, 18, POS_C, C_FILL, "%s", activeCh.name);
+    PrintMediumEx(LCD_XCENTER, 26, POS_C, C_FILL, "%u.%05u", radio.rxF / MHZ,
+                  radio.rxF % MHZ);
+    UI_RSSIBar(28);
   } else {
-    PrintMediumEx(LCD_XCENTER, 18, POS_C, C_FILL, "Scanning...");
-    PrintSmallEx(LCD_XCENTER, 24, POS_C, C_FILL, "%u.%05u", radio.rxF / MHZ,
-                 radio.rxF % MHZ);
+    if (gScanlistSize) {
+      PrintMediumEx(LCD_XCENTER, 18, POS_C, C_FILL, "Scanning...");
+      PrintMediumEx(LCD_XCENTER, 26, POS_C, C_FILL, "%u.%05u", radio.rxF / MHZ,
+                    radio.rxF % MHZ);
+    } else {
+      PrintMediumEx(LCD_XCENTER, 18, POS_C, C_FILL, "Scanlist empty");
+    }
   }
+  uint16_t sl = gSettings.currentScanlist;
+  PrintMediumEx(LCD_XCENTER, 44, POS_C, C_FILL, "%s %s %s %s %s %s %s %s",
+                (sl >> 0) & 1 ? "01" : "__", //
+                (sl >> 1) & 1 ? "02" : "__", //
+                (sl >> 2) & 1 ? "03" : "__", //
+                (sl >> 3) & 1 ? "04" : "__", //
+                (sl >> 4) & 1 ? "05" : "__", //
+                (sl >> 5) & 1 ? "06" : "__", //
+                (sl >> 6) & 1 ? "07" : "__", //
+                (sl >> 7) & 1 ? "08" : "__"  //
+  );
+  PrintMediumEx(LCD_XCENTER, 52, POS_C, C_FILL, "%s %s %s %s %s %s %s %s",
+                (sl >> 8) & 1 ? "09" : "__",  //
+                (sl >> 9) & 1 ? "10" : "__",  //
+                (sl >> 10) & 1 ? "11" : "__", //
+                (sl >> 11) & 1 ? "12" : "__", //
+                (sl >> 12) & 1 ? "13" : "__", //
+                (sl >> 13) & 1 ? "14" : "__", //
+                (sl >> 14) & 1 ? "15" : "__", //
+                (sl >> 15) & 1 ? "16" : "__"  //
+  );
 }
