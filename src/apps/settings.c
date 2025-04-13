@@ -1,5 +1,6 @@
 #include "settings.h"
 #include "../driver/backlight.h"
+#include "../driver/eeprom.h"
 #include "../driver/st7565.h"
 #include "../helper/battery.h"
 #include "../helper/measurements.h"
@@ -11,6 +12,7 @@
 #include "../ui/menu.h"
 #include "../ui/statusline.h"
 #include "apps.h"
+#include "../external/CMSIS_5/Device/ARM/ARMCM0/Include/ARMCM0.h"
 #include "finput.h"
 #include "textinput.h"
 #include <string.h>
@@ -43,7 +45,10 @@ typedef enum {
   M_DTMF_DECODE,
   M_CH_DISP_MODE,
   M_FC_TIME,
+  M_RESET,
 } Menu;
+
+static uint8_t DEAD_BUF[] = {0xDE, 0xAD};
 
 static uint8_t menuIndex = 0;
 static uint8_t subMenuIndex = 0;
@@ -83,6 +88,7 @@ static const MenuItem menu[] = {
     {"Roger", M_ROGER, ARRAY_SIZE(rogerNames)},
     {"Tone local", M_TONE_LOCAL, 2},
     {"Lock PTT", M_PTT_LOCK, 2},
+    {"Reset", M_RESET, 2},
 };
 
 static const uint8_t MENU_SIZE = ARRAY_SIZE(menu);
@@ -142,6 +148,7 @@ static void getSubmenuItemText(uint16_t index, char *name) {
   case M_PTT_LOCK:
   case M_SKIP_GARBAGE_FREQS:
   case M_SI4732_POWER_OFF:
+  case M_RESET:
     strncpy(name, yesNo[index], 31);
     return;
   case M_CH_DISP_MODE:
@@ -259,6 +266,12 @@ static void accept(void) {
   case M_CH_DISP_MODE:
     gSettings.chDisplayMode = subMenuIndex;
     SETTINGS_Save();
+    break;
+  case M_RESET:
+    if (subMenuIndex > 0) {
+      EEPROM_WriteBuffer(0, DEAD_BUF, 2);
+      NVIC_SystemReset();
+    }
     break;
   default:
     break;

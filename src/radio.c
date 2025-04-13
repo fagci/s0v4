@@ -27,6 +27,7 @@
 #include "ui/spectrum.h"
 #include "ui/statusline.h"
 #include <stdint.h>
+#include <string.h>
 
 CH radio;
 
@@ -657,6 +658,7 @@ void RADIO_SaveCurrentVFO(void) {
     VFO oldVfo;
     CHANNELS_Load(vfoChNum, &oldVfo);
     oldVfo.channel = chToSave;
+    strncpy(oldVfo.name, "VFO-A", 6); // to fix save named channels
     CHANNELS_Save(vfoChNum, &oldVfo);
     return;
   }

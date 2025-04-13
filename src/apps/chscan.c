@@ -1,5 +1,6 @@
 #include "chscan.h"
 
+#include "../driver/uart.h"
 #include "../external/FreeRTOS/include/FreeRTOS.h"
 #include "../external/FreeRTOS/include/portable.h"
 #include "../external/FreeRTOS/include/timers.h"
@@ -15,36 +16,38 @@
 CH activeCh;
 
 static bool lastListenState;
-static uint32_t lastSettedF = 0;
-static bool lastScanForward = true;
 static uint32_t timeout = 0;
+static bool isWaiting;
 
 static void nextWithTimeout() {
   if (lastListenState != gIsListening) {
     lastListenState = gIsListening;
+    if (gIsListening) {
+      CHANNELS_Load(radio.channel, &activeCh);
+      isWaiting = true;
+    }
     SetTimeout(&timeout, gIsListening
                              ? SCAN_TIMEOUTS[gSettings.sqOpenedTimeout]
                              : SCAN_TIMEOUTS[gSettings.sqClosedTimeout]);
   }
 
   if (CheckTimeout(&timeout)) {
-    lastSettedF = radio.rxF;
-    SetTimeout(&timeout, 0);
     CHANNELS_Next(true);
+    isWaiting = false;
+    SetTimeout(&timeout, 0);
     return;
   }
 }
 
 void CHSCAN_init(void) {
   CHANNELS_LoadScanlist(TYPE_FILTER_CH, gSettings.currentScanlist);
+  CHANNELS_LoadCurrentScanlistCH();
 }
 
 void CHSCAN_deinit(void) {}
 
 void CHSCAN_update(void) {
-  if (!gIsListening) {
-    nextWithTimeout();
-  }
+  nextWithTimeout();
   vTaskDelay(pdMS_TO_TICKS(60));
   Measurement m = {
       .f = radio.rxF,
@@ -54,17 +57,8 @@ void CHSCAN_update(void) {
       .glitch = BK4819_GetGlitch(),
   };
   m.open = RADIO_IsSquelchOpen();
-  if (!gMonitorMode) {
-    LOOT_Update(&m);
-  }
+  LOOT_Update(&m);
   RADIO_ToggleRX(m.open);
-
-  if (lastListenState != gIsListening) {
-    lastListenState = gIsListening;
-    if (gIsListening) {
-      CHANNELS_Load(radio.channel, &activeCh);
-    }
-  }
 
   gRedrawScreen = true;
 }
@@ -76,7 +70,9 @@ bool CHSCAN_key(KEY_Code_t key, Key_State_t state) {
     gSettings.currentScanlist = CHANNELS_ScanlistByKey(
         gSettings.currentScanlist, key, longHeld && !simpleKeypress);
     CHANNELS_LoadScanlist(TYPE_FILTER_CH, gSettings.currentScanlist);
+    CHANNELS_LoadCurrentScanlistCH();
     SETTINGS_DelayedSave();
+    isWaiting = false;
     return true;
   }
   if (state == KEY_RELEASED) {
@@ -111,7 +107,8 @@ void CHSCAN_render(void) {
     UI_RSSIBar(28);
   } else {
     if (gScanlistSize) {
-      PrintMediumEx(LCD_XCENTER, 18, POS_C, C_FILL, "Scanning...");
+      PrintMediumEx(LCD_XCENTER, 18, POS_C, C_FILL,
+                    isWaiting ? "Waiting..." : "Scanning...");
       PrintMediumEx(LCD_XCENTER, 26, POS_C, C_FILL, "%u.%05u", radio.rxF / MHZ,
                     radio.rxF % MHZ);
     } else {

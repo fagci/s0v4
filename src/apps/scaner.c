@@ -97,8 +97,6 @@ static void next() {
   }
 }
 
-static uint32_t lastSettedF = 0;
-static bool lastScanForward = true;
 static uint32_t timeout = 0;
 static bool lastListenState = false;
 
@@ -111,7 +109,6 @@ static void nextWithTimeout() {
   }
 
   if (CheckTimeout(&timeout)) {
-    lastSettedF = radio.rxF;
     SetTimeout(&timeout, 0);
     next();
     return;
