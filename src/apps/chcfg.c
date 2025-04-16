@@ -234,12 +234,14 @@ static void acceptRadioConfig(const MenuItem *item, uint8_t subMenuIndex) {
     break;
   case M_RX_CODE_TYPE:
     gChEd.code.rx.type = subMenuIndex;
+    gChEd.code.rx.value = 0;
     break;
   case M_RX_CODE:
     gChEd.code.rx.value = subMenuIndex;
     break;
   case M_TX_CODE_TYPE:
     gChEd.code.tx.type = subMenuIndex;
+    gChEd.code.rx.value = 0;
     break;
   case M_TX_CODE:
     gChEd.code.tx.value = subMenuIndex;
@@ -369,15 +371,21 @@ static void updateTxCodeListSize() {
   for (uint8_t i = 0; i < menuSize; ++i) {
     MenuItem *item = &menu[i];
     uint8_t type = CODE_TYPE_OFF;
+    bool isCodeTypeMenu = false;
+
     if (item->type == M_TX_CODE) {
       type = gChEd.code.tx.type;
+      isCodeTypeMenu = true;
     } else if (item->type == M_RX_CODE) {
       type = gChEd.code.rx.type;
+      isCodeTypeMenu = true;
     }
     if (type == CODE_TYPE_CONTINUOUS_TONE) {
       item->size = ARRAY_SIZE(CTCSS_Options);
     } else if (type != CODE_TYPE_OFF) {
       item->size = ARRAY_SIZE(DCS_Options);
+    } else if (isCodeTypeMenu) {
+      item->size = 1;
     }
   }
 }
