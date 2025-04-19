@@ -92,4 +92,5 @@ void BANDSCAN_render(void) {
     }
   }
   UI_DisplayScanlists(44);
+  REGSMENU_Draw();
 }
