@@ -1,4 +1,5 @@
 #include "vfo1.h"
+#include "../dcs.h"
 #include "../driver/bk4819.h"
 #include "../external/FreeRTOS/include/FreeRTOS.h"
 #include "../external/FreeRTOS/include/timers.h"
@@ -9,6 +10,7 @@
 #include "../radio.h"
 #include "../ui/components.h"
 #include "../ui/graphics.h"
+#include "../ui/menu.h"
 #include "../ui/spectrum.h"
 #include "../ui/statusline.h"
 #include "apps.h"
@@ -290,6 +292,22 @@ void VFO1_render(void) {
   }
   PrintSmallEx(LCD_WIDTH, BASE + 6, POS_R, C_FILL, "%d.%02d", step / KHZ,
                step % KHZ);
+
+  if (radio.code.rx.type) {
+    PrintRTXCode(String, radio.code.rx.type, radio.code.rx.value);
+    PrintSmallEx(0, BASE, POS_L, C_FILL, "R%s", String);
+  }
+  if (radio.code.tx.type) {
+    PrintRTXCode(String, radio.code.tx.type, radio.code.tx.value);
+    PrintSmallEx(0, BASE - 6, POS_L, C_FILL, "T%s", String);
+  }
+  if (gLoot.ct != 255) {
+    PrintRTXCode(String, CODE_TYPE_CONTINUOUS_TONE, gLoot.ct);
+    PrintSmallEx(0, BASE - 6, POS_L, C_FILL, "%s", String);
+  } else if (gLoot.cd != 255) {
+    PrintRTXCode(String, CODE_TYPE_DIGITAL, gLoot.cd);
+    PrintSmallEx(0, BASE - 6, POS_L, C_FILL, "%s", String);
+  }
 
   if (gMonitorMode) {
     SPECTRUM_Y = BASE + 8;

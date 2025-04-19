@@ -980,15 +980,62 @@ void RADIO_SendDTMF(const char *pattern, ...) {
   }
 }
 
+static uint32_t lastCloseToneFound;
+
+// TODO: переделать на что-то более гибкое
+static void checkTone(Measurement *m) {
+  if (RADIO_GetRadio() != RADIO_BK4819) {
+    return;
+  }
+  while (BK4819_ReadRegister(BK4819_REG_0C) & 1) {
+    BK4819_WriteRegister(BK4819_REG_02, 0);
+
+    uint16_t intBits = BK4819_ReadRegister(BK4819_REG_02);
+
+    if ((intBits & BK4819_REG_02_CxCSS_TAIL) ||
+        (intBits & BK4819_REG_02_CTCSS_FOUND) ||
+        (intBits & BK4819_REG_02_CDCSS_FOUND)) {
+      Log("Tail tone or ctcss/dcs found");
+      lastCloseToneFound = Now();
+      m->open = false;
+    }
+    if ((intBits & BK4819_REG_02_CTCSS_LOST) ||
+        (intBits & BK4819_REG_02_CDCSS_LOST)) {
+      Log("ctcss/dcs lost");
+      lastCloseToneFound = 0;
+      m->open = true;
+    }
+
+    // to keep it closed while STE transmitting
+    if (Now() - lastCloseToneFound < 250) {
+      m->open = false;
+    }
+
+    /* if (intBits & BK4819_REG_02_DTMF_5TONE_FOUND) {
+      uint8_t code = BK4819_GetDTMF_5TONE_Code();
+      Log("DTMF: %u", code);
+    } */
+  }
+}
+
+static Measurement m;
+
 void RADIO_CheckAndListen() {
-  Measurement m = {
-      .f = radio.rxF,
-      .rssi = RADIO_GetRSSI(),
-      .snr = RADIO_GetSNR(),
-      .noise = BK4819_GetNoise(),
-      .glitch = BK4819_GetGlitch(),
-  };
-  m.open = RADIO_IsSquelchOpen();
+  m.f = radio.rxF;
+  m.rssi = RADIO_GetRSSI();
+  m.snr = RADIO_GetSNR();
+  m.noise = BK4819_GetNoise();
+  m.glitch = BK4819_GetGlitch();
+
+  if (radio.code.rx.type == CODE_TYPE_OFF) {
+    m.open = RADIO_IsSquelchOpen();
+    if (m.open) {
+      checkTone(&m);
+    }
+  } else {
+    checkTone(&m);
+  }
+
   if (!gMonitorMode) {
     LOOT_Update(&m);
   }

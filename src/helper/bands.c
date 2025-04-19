@@ -164,6 +164,7 @@ void BANDS_SetRadioParamsFromCurrentBand() {
   radio.gainIndex = gCurrentBand.gainIndex;
   radio.modulation = gCurrentBand.modulation;
   radio.squelch = gCurrentBand.squelch;
+  radio.radio = gCurrentBand.radio;
 }
 
 // Set gCurrentBand, sets internal cursor in SL

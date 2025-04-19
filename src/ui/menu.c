@@ -77,7 +77,7 @@ void UI_ShowMenuEx(void (*showItem)(uint16_t i, uint16_t index, bool isCurrent),
 
 void PrintRTXCode(char *Output, uint8_t codeType, uint8_t code) {
   if (codeType == CODE_TYPE_CONTINUOUS_TONE) {
-    sprintf(Output, "CT:%u.%uHz", CTCSS_Options[code] / 10,
+    sprintf(Output, "CT:%u.%u", CTCSS_Options[code] / 10,
             CTCSS_Options[code] % 10);
   } else if (codeType == CODE_TYPE_DIGITAL) {
     sprintf(Output, "DCS:D%03oN", DCS_Options[code]);

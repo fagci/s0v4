@@ -29,6 +29,7 @@ static MenuItem menuChVfo[] = {
     {"Modulation", M_MODULATION, ARRAY_SIZE(modulationTypeOptions)},
     {"BW", M_BW, 10},
     {"Gain", M_GAIN, ARRAY_SIZE(gainTable)},
+    {"Radio", M_RADIO, 2},
     {"SQ type", M_SQ_TYPE, ARRAY_SIZE(sqTypeNames)},
     {"SQ level", M_SQ, 10},
     {"RX f", M_F_RX, 0},
@@ -52,6 +53,7 @@ static MenuItem menuBand[] = {
     {"Modulation", M_MODULATION, ARRAY_SIZE(modulationTypeOptions)},
     {"BW", M_BW, 10},
     {"Gain", M_GAIN, ARRAY_SIZE(gainTable)},
+    {"Radio", M_RADIO, 2},
     {"SQ type", M_SQ_TYPE, ARRAY_SIZE(sqTypeNames)},
     {"SQ level", M_SQ, 10},
     {"RX f", M_F_RX, 0},
@@ -192,6 +194,9 @@ static void getMenuItemValue(BandCfgMenu type, char *Output) {
   case M_TYPE:
     snprintf(Output, 15, CH_TYPE_NAMES[gChEd.meta.type]);
     break;
+  case M_RADIO:
+    snprintf(Output, 15, radioNames[gChEd.radio]);
+    break;
   default:
     break;
   }
@@ -267,6 +272,9 @@ static void acceptRadioConfig(const MenuItem *item, uint8_t subMenuIndex) {
   case M_P_CAL_H:
     gChEd.misc.powCalib.e = subMenuIndex;
     break;
+  case M_RADIO:
+    gChEd.radio = subMenuIndex;
+    break;
   default:
     break;
   }
@@ -339,6 +347,9 @@ static void setInitialSubmenuIndex(void) {
     break;
   case M_P_CAL_H:
     subMenuIndex = gChEd.misc.powCalib.e;
+    break;
+  case M_RADIO:
+    subMenuIndex = gChEd.radio;
     break;
   default:
     subMenuIndex = 0;
@@ -427,6 +438,9 @@ static void getSubmenuItemText(uint16_t index, char *name) {
     return;
   case M_SQ_TYPE:
     strncpy(name, sqTypeNames[index], 31);
+    return;
+  case M_RADIO:
+    strncpy(name, radioNames[index], 31);
     return;
   case M_SQ:
   case M_SCRAMBLER:
