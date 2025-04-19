@@ -149,7 +149,7 @@ extern uint8_t BL_TIME_VALUES[7];
 extern const char *BL_TIME_NAMES[7];
 extern const char *BL_SQL_MODE_NAMES[3];
 extern const char *CH_DISPLAY_MODE_NAMES[3];
-extern const char *rogerNames[5];
+extern const char *rogerNames[2];
 extern const char *FC_TIME_NAMES[4];
 
 void SETTINGS_Save();

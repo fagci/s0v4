@@ -4,6 +4,7 @@
 #include "../ui/statusline.h"
 #include "about.h"
 #include "appslist.h"
+#include "bandscan.h"
 #include "chcfg.h"
 #include "chlist.h"
 #include "chscan.h"
@@ -55,6 +56,7 @@ const AppType_t appsAvailableToRun[RUN_APPS_COUNT] = {
     APP_CH_LIST,   //
     APP_SCANER,    //
     APP_CH_SCAN,   //
+    APP_BAND_SCAN,   //
     APP_FC,        //
     APP_LOOT_LIST, //
     APP_LEVEL,     //
@@ -67,6 +69,8 @@ const App apps[APPS_COUNT] = {
      SCANER_deinit},
     {"CH Scan", CHSCAN_init, CHSCAN_update, CHSCAN_render, CHSCAN_key,
      CHSCAN_deinit},
+    {"Band Scan", BANDSCAN_init, BANDSCAN_update, BANDSCAN_render, BANDSCAN_key,
+     BANDSCAN_deinit},
     {"FC", FC_init, FC_update, FC_render, FC_key, FC_deinit},
     {"Channels", CHLIST_init, NULL, CHLIST_render, CHLIST_key, CHLIST_deinit},
     {"Freq input", FINPUT_init, FINPUT_update, FINPUT_render, FINPUT_key,

@@ -18,5 +18,6 @@ void UI_ShowWait();
 void UI_Scanlists(uint8_t baseX, uint8_t baseY, uint16_t sl);
 void UI_DrawLoot(const Loot *loot, uint8_t x, uint8_t y, TextPos pos);
 void UI_BigFrequency(uint8_t y, uint32_t f);
+void UI_DisplayScanlists(uint32_t y);
 
 #endif /* end of include guard: COMPONENTS_H */

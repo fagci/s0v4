@@ -183,7 +183,6 @@ void BANDS_Select(int16_t num, bool copyToVfo) {
   if (copyToVfo) {
     BANDS_SetRadioParamsFromCurrentBand();
   }
-  RADIO_SaveCurrentVFO();
 }
 
 // Used in vfo1 to select first band from scanlist

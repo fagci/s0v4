@@ -920,7 +920,7 @@ uint8_t BK4819_GetCTCType(void) {
 }
 
 void BK4819_PlayRogerTiny(void) {
-  const uint16_t M[] = {1250, 30, 0, 50, 1500, 30, 750, 30, 0, 0};
+  const uint16_t M[] = {1250, 20, 0, 10, 1500, 20, 0, 0};
   BK4819_PlaySequence(M);
 }
 

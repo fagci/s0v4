@@ -4,6 +4,7 @@
 #include "../helper/lootlist.h"
 #include "../helper/measurements.h"
 #include "../radio.h"
+#include "bands.h"
 #include <stddef.h>
 #include <string.h>
 

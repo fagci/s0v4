@@ -273,7 +273,11 @@ static void acceptRadioConfig(const MenuItem *item, uint8_t subMenuIndex) {
     gChEd.misc.powCalib.e = subMenuIndex;
     break;
   case M_RADIO:
-    gChEd.radio = subMenuIndex;
+    if (RADIO_HasSi() && subMenuIndex > 0) {
+      gChEd.radio = subMenuIndex + 1;
+    } else {
+      gChEd.radio = subMenuIndex + 1;
+    }
     break;
   default:
     break;
@@ -349,7 +353,11 @@ static void setInitialSubmenuIndex(void) {
     subMenuIndex = gChEd.misc.powCalib.e;
     break;
   case M_RADIO:
-    subMenuIndex = gChEd.radio;
+    if (RADIO_HasSi() && gChEd.radio > 0) {
+      subMenuIndex = 1;
+    } else {
+      subMenuIndex = gChEd.radio;
+    }
     break;
   default:
     subMenuIndex = 0;
@@ -440,7 +448,8 @@ static void getSubmenuItemText(uint16_t index, char *name) {
     strncpy(name, sqTypeNames[index], 31);
     return;
   case M_RADIO:
-    strncpy(name, radioNames[index], 31);
+    strncpy(name, radioNames[RADIO_HasSi() && index > 0 ? index + 1 : index],
+            31);
     return;
   case M_SQ:
   case M_SCRAMBLER:

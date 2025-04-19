@@ -12,7 +12,7 @@ const char *BL_TIME_NAMES[7] = {"Off",  "5s",   "10s", "20s",
 
 const char *BL_SQL_MODE_NAMES[3] = {"Off", "On", "Open"};
 const char *CH_DISPLAY_MODE_NAMES[3] = {"Name+F", "F", "Name"};
-const char *rogerNames[5] = {"None", "Moto", "Tiny", "Stalk1", "Stalk2"};
+const char *rogerNames[2] = {"None", "Tiny"};
 const char *FC_TIME_NAMES[4] = {"0.2s", "0.4s", "0.8s", "1.6s"};
 const char *EEPROM_TYPE_NAMES[6] = {
     "BL24C64 #", // 010

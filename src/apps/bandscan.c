@@ -5,72 +5,45 @@
 #include "../external/FreeRTOS/include/portable.h"
 #include "../external/FreeRTOS/include/timers.h"
 #include "../external/FreeRTOS/portable/GCC/ARM_CM0/portmacro.h"
+#include "../helper/bands.h"
 #include "../helper/channels.h"
 #include "../helper/lootlist.h"
+#include "../helper/regs-menu.h"
+#include "../helper/scan.h"
 #include "../radio.h"
 #include "../scheduler.h"
 #include "../ui/components.h"
 #include "../ui/graphics.h"
+#include "../ui/statusline.h"
 #include "apps.h"
-
-CH activeCh;
 
 static bool lastListenState;
 static uint32_t timeout = 0;
 static bool isWaiting;
 
-static void nextWithTimeout() {
-  if (lastListenState != gIsListening) {
-    lastListenState = gIsListening;
-    if (gIsListening) {
-      CHANNELS_Load(radio.channel, &activeCh);
-      isWaiting = true;
-    }
-    SetTimeout(&timeout, gIsListening
-                             ? SCAN_TIMEOUTS[gSettings.sqOpenedTimeout]
-                             : SCAN_TIMEOUTS[gSettings.sqClosedTimeout]);
-  }
+void BANDSCAN_init(void) {
+  CHANNELS_LoadScanlist(TYPE_FILTER_BAND, gSettings.currentScanlist);
+  SCAN_Init(true);
+}
 
-  if (CheckTimeout(&timeout)) {
-    CHANNELS_Next(true);
-    isWaiting = false;
-    SetTimeout(&timeout, 0);
-    return;
+void BANDSCAN_deinit(void) {}
+
+void BANDSCAN_update(void) {
+  if (gScanlistSize) {
+    SCAN_Check(false);
   }
 }
 
-void CHSCAN_init(void) {
-  CHANNELS_LoadScanlist(TYPE_FILTER_CH, gSettings.currentScanlist);
-  CHANNELS_LoadCurrentScanlistCH();
-}
-
-void CHSCAN_deinit(void) {}
-
-void CHSCAN_update(void) {
-  nextWithTimeout();
-  vTaskDelay(pdMS_TO_TICKS(60));
-  Measurement m = {
-      .f = radio.rxF,
-      .rssi = RADIO_GetRSSI(),
-      .snr = RADIO_GetSNR(),
-      .noise = BK4819_GetNoise(),
-      .glitch = BK4819_GetGlitch(),
-  };
-  m.open = RADIO_IsSquelchOpen();
-  LOOT_Update(&m);
-  RADIO_ToggleRX(m.open);
-
-  gRedrawScreen = true;
-}
-
-bool CHSCAN_key(KEY_Code_t key, Key_State_t state) {
+bool BANDSCAN_key(KEY_Code_t key, Key_State_t state) {
+  if (state == KEY_RELEASED && REGSMENU_Key(key, state)) {
+    return true;
+  }
   bool longHeld = state == KEY_LONG_PRESSED;
   bool simpleKeypress = state == KEY_RELEASED;
   if ((longHeld || simpleKeypress) && (key > KEY_0 && key < KEY_9)) {
     gSettings.currentScanlist = CHANNELS_ScanlistByKey(
         gSettings.currentScanlist, key, longHeld && !simpleKeypress);
-    CHANNELS_LoadScanlist(TYPE_FILTER_CH, gSettings.currentScanlist);
-    CHANNELS_LoadCurrentScanlistCH();
+    CHANNELS_LoadScanlist(TYPE_FILTER_BAND, gSettings.currentScanlist);
     SETTINGS_DelayedSave();
     isWaiting = false;
     return true;
@@ -79,15 +52,15 @@ bool CHSCAN_key(KEY_Code_t key, Key_State_t state) {
     switch (key) {
     case KEY_UP:
     case KEY_DOWN:
-      nextWithTimeout();
+      SCAN_Next(key == KEY_UP);
       return true;
     case KEY_SIDE1:
       LOOT_BlacklistLast();
-      nextWithTimeout();
+      SCAN_Next(true);
       return true;
     case KEY_SIDE2:
       LOOT_WhitelistLast();
-      nextWithTimeout();
+      SCAN_Next(true);
       return true;
     case KEY_STAR:
       APPS_run(APP_LOOT_LIST);
@@ -99,16 +72,19 @@ bool CHSCAN_key(KEY_Code_t key, Key_State_t state) {
   return false;
 }
 
-void CHSCAN_render(void) {
+void BANDSCAN_render(void) {
+  STATUSLINE_RenderRadioSettings();
+  if (gScanlistSize) {
+    PrintMediumEx(LCD_XCENTER, 18, POS_C, C_FILL, "%s", gCurrentBand.name);
+  }
   if (gIsListening) {
-    PrintMediumBoldEx(LCD_XCENTER, 18, POS_C, C_FILL, "%s", activeCh.name);
     PrintMediumEx(LCD_XCENTER, 26, POS_C, C_FILL, "%u.%05u", radio.rxF / MHZ,
                   radio.rxF % MHZ);
     UI_RSSIBar(28);
   } else {
     if (gScanlistSize) {
-      PrintMediumEx(LCD_XCENTER, 18, POS_C, C_FILL,
-                    isWaiting ? "Waiting..." : "Scanning...");
+      /* PrintMediumEx(LCD_XCENTER, 18, POS_C, C_FILL,
+                    isWaiting ? "Waiting..." : "Scanning..."); */
       PrintMediumEx(LCD_XCENTER, 26, POS_C, C_FILL, "%u.%05u", radio.rxF / MHZ,
                     radio.rxF % MHZ);
     } else {
