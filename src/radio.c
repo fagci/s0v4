@@ -859,6 +859,7 @@ void RADIO_TuneToCH(int16_t num) {
     RADIO_VfoLoadCH();
     RADIO_SaveCurrentVFO();
     RADIO_SetupByCurrentVFO();
+    CHANNELS_SetScanlistIndexFromRadio();
   }
 }
 

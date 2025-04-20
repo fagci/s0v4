@@ -42,7 +42,7 @@ struct {
   u8
     keylock : 1,
     beep : 1,
-    reserved2 : 1,
+    showLevelInVfo : 1,
     pttLock : 1,
     chDisplayMode : 2,
     scanmode : 2;
@@ -198,22 +198,24 @@ class QuanshengUVK5Radio(chirp_common.CloneModeRadio):
         "0", "100ms", "200ms", "300ms", "400ms", "500ms", "1s", "3s", "5s", "10s",
         "30s", "1min", "2min", "5min", "None"
     ]
+
     APP_LIST = [
-        "NONE",
-        "MEMVIEW",
-        "ANALYZER",
-        "CH LIST",
-        "FINPUT",
-        "APPS LIST",
-        "LOOT LIST",
-        "RESET",
-        "TEXTINPUT",
-        "CH CFG",
-        "SETTINGS",
-        "VFO1",
-        "VFO2",
-        "GENERATOR",
-        "ABOUT",
+      "NONE",
+      "SCANER",
+      "CH_SCAN",
+      "BAND_SCAN",
+      "FC",
+      "CH_LIST",
+      "FINPUT",
+      "APPS_LIST",
+      "LOOT_LIST",
+      "RESET",
+      "TEXTINPUT",
+      "CH_CFG",
+      "SETTINGS",
+      "VFO1",
+      "LEVEL",
+      "ABOUT",
     ]
 
     BL_SQL_MODE_NAMES = ["Off", "On", "Open"]
@@ -543,6 +545,8 @@ class QuanshengUVK5Radio(chirp_common.CloneModeRadio):
                     _mem.gainIndex = 21
             if sname == "bw":
                 _mem.bw = self.BW_NAMES.index(svalue)
+            if sname == "batteryCalibration":
+                _mem.batteryCalibration = svalue - 1900
             if sname == "sq_type":
                 _mem.squelch.type = self.SQUELCH_TYPES.index(svalue)
             if sname == "sq_value":
@@ -694,6 +698,10 @@ class QuanshengUVK5Radio(chirp_common.CloneModeRadio):
         rs = RadioSetting("keylock", "Keylock", RadioSettingValueBoolean(bool(tmpval)))
         basic.append(rs)
 
+        tmpval = _mem.Settings.showLevelInVfo
+        rs = RadioSetting("showLevelInVfo", "Show level in VFO", RadioSettingValueBoolean(bool(tmpval)))
+        basic.append(rs)
+
         tmpval = _mem.Settings.beep
         rs = RadioSetting("beep", "Beep", RadioSettingValueBoolean(bool(tmpval)))
         basic.append(rs)
@@ -729,7 +737,7 @@ class QuanshengUVK5Radio(chirp_common.CloneModeRadio):
                           RadioSettingValueList(self.BATTERY_TYPE_NAMES, self.BATTERY_TYPE_NAMES[tmpval]))
         display_battery.append(rs)
 
-        tmpval = _mem.Settings.batteryCalibration
+        tmpval = _mem.Settings.batteryCalibration + 1900
         rs = RadioSetting("batteryCalibration", "Battery Calibration",
                           RadioSettingValueInteger(0, (1 << 13) - 1, tmpval))
         display_battery.append(rs)

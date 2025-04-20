@@ -2,6 +2,7 @@
 #include "../driver/backlight.h"
 #include "../driver/eeprom.h"
 #include "../driver/st7565.h"
+#include "../external/CMSIS_5/Device/ARM/ARMCM0/Include/ARMCM0.h"
 #include "../helper/battery.h"
 #include "../helper/measurements.h"
 #include "../helper/numnav.h"
@@ -12,7 +13,6 @@
 #include "../ui/menu.h"
 #include "../ui/statusline.h"
 #include "apps.h"
-#include "../external/CMSIS_5/Device/ARM/ARMCM0/Include/ARMCM0.h"
 #include "finput.h"
 #include "textinput.h"
 #include <string.h>
@@ -46,6 +46,7 @@ typedef enum {
   M_CH_DISP_MODE,
   M_FC_TIME,
   M_RESET,
+  M_LEVEL_IN_VFO,
 } Menu;
 
 static uint8_t DEAD_BUF[] = {0xDE, 0xAD};
@@ -84,6 +85,7 @@ static const MenuItem menu[] = {
     {"BAT style", M_BAT_STYLE, ARRAY_SIZE(BATTERY_STYLE_NAMES)},
     {"CH Display", M_CH_DISP_MODE, ARRAY_SIZE(CH_DISPLAY_MODE_NAMES)},
     {"Beep", M_BEEP, 2},
+    {"Level in VFO", M_LEVEL_IN_VFO, 2},
     {"STE", M_STE, 2},
     {"Roger", M_ROGER, ARRAY_SIZE(rogerNames)},
     {"Tone local", M_TONE_LOCAL, 2},
@@ -149,6 +151,7 @@ static void getSubmenuItemText(uint16_t index, char *name) {
   case M_SKIP_GARBAGE_FREQS:
   case M_SI4732_POWER_OFF:
   case M_RESET:
+  case M_LEVEL_IN_VFO:
     strncpy(name, yesNo[index], 31);
     return;
   case M_CH_DISP_MODE:
@@ -263,6 +266,10 @@ static void accept(void) {
     gSettings.dtmfdecode = subMenuIndex;
     SETTINGS_Save();
     break;
+  case M_LEVEL_IN_VFO:
+    gSettings.showLevelInVFO = subMenuIndex;
+    SETTINGS_Save();
+    break;
   case M_CH_DISP_MODE:
     gSettings.chDisplayMode = subMenuIndex;
     SETTINGS_Save();
@@ -330,6 +337,8 @@ static const char *getValue(Menu type) {
     return onOff[gSettings.dtmfdecode];
   case M_STE:
     return onOff[gSettings.ste];
+  case M_LEVEL_IN_VFO:
+    return yesNo[gSettings.showLevelInVFO];
   case M_SKIP_GARBAGE_FREQS:
     return yesNo[gSettings.skipGarbageFrequencies];
   case M_SI4732_POWER_OFF:
@@ -442,6 +451,9 @@ static void setInitialSubmenuIndex(void) {
     break;
   case M_PTT_LOCK:
     subMenuIndex = gSettings.pttLock;
+    break;
+  case M_LEVEL_IN_VFO:
+    subMenuIndex = gSettings.showLevelInVFO;
     break;
   case M_CH_DISP_MODE:
     subMenuIndex = gSettings.chDisplayMode;

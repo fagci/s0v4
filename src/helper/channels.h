@@ -164,6 +164,8 @@ uint16_t CHANNELS_Scanlists(int16_t i);
 void CHANNELS_LoadScanlist(CHTypeFilter type, uint16_t n);
 void CHANNELS_LoadBlacklistToLoot();
 
+void CHANNELS_SetScanlistIndexFromRadio();
+
 uint16_t CHANNELS_GetStepSize(CH *p);
 uint32_t CHANNELS_GetSteps(Band *p);
 uint32_t CHANNELS_GetF(Band *p, uint32_t channel);

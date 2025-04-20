@@ -46,7 +46,7 @@ void VFO1_init(void) {
 void VFO1_update(void) {
   RADIO_CheckAndListen();
   gRedrawScreen = true;
-  vTaskDelay(pdMS_TO_TICKS(60));
+  vTaskDelay(pdMS_TO_TICKS(gSettings.scanTimeout));
 }
 
 bool VFOPRO_key(KEY_Code_t key, Key_State_t state) {
@@ -312,7 +312,11 @@ void VFO1_render(void) {
   if (gMonitorMode) {
     SPECTRUM_Y = BASE + 8;
     SPECTRUM_H = LCD_HEIGHT - SPECTRUM_Y;
-    SP_RenderGraph(RSSI_MIN, RSSI_MAX);
+    if (gSettings.showLevelInVFO) {
+      SP_RenderGraph(RSSI_MIN, RSSI_MAX);
+    } else {
+      UI_RSSIBar(BASE + 8);
+    }
   } else {
     if (gIsListening || gVfo1ProMode) {
       UI_RSSIBar(BASE + 8);

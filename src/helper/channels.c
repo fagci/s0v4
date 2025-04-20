@@ -87,6 +87,17 @@ void CHANNELS_Next(bool next) {
   }
 }
 
+void CHANNELS_SetScanlistIndexFromRadio() {
+  if (RADIO_IsChMode() && gScanlistSize > 0) {
+    for (uint8_t i = 0; i < gScanlistSize; ++i) {
+      if (gScanlist[i] == radio.channel) {
+        chScanlistIndex = i;
+        break;
+      }
+    }
+  }
+}
+
 void CHANNELS_LoadScanlist(CHTypeFilter typeFilter, uint16_t scanlistMask) {
   Log("Load SL w type_filter=%u", typeFilter);
   if (gSettings.currentScanlist != scanlistMask) {
@@ -115,7 +126,13 @@ void CHANNELS_LoadScanlist(CHTypeFilter typeFilter, uint16_t scanlistMask) {
       Log("Load CH %u in SL", i);
     }
   }
-  chScanlistIndex = 0;
+  if (typeFilter == TYPE_FILTER_CH || typeFilter == TYPE_FILTER_CH_SAVE) {
+    chScanlistIndex = 0;
+    CHANNELS_SetScanlistIndexFromRadio();
+  } else {
+    if (!gScanlistSize || gScanlistSize - 1 < chScanlistIndex) {
+    }
+  }
   Log("SL sz: %u", gScanlistSize);
 }
 

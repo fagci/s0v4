@@ -90,7 +90,7 @@ typedef struct {
   uint8_t scanmode : 2;
   CHDisplayMode chDisplayMode : 2;
   uint8_t pttLock : 1;
-  uint8_t reserved2 : 1;
+  bool showLevelInVFO : 1;
   uint8_t beep : 1;
   uint8_t keylock : 1;
 
