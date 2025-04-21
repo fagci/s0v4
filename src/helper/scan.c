@@ -109,7 +109,7 @@ void SCAN_Check(bool isAnalyserMode) {
     thinking = true;
     wasThinkingEarlier = true;
     gRedrawScreen = true;
-    vTaskDelay(pdMS_TO_TICKS(gSettings.scanTimeout));
+    vTaskDelay(pdMS_TO_TICKS(SQL_DELAY));
     m->open = RADIO_IsSquelchOpen();
     thinking = false;
     gRedrawScreen = true;

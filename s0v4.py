@@ -70,7 +70,7 @@ struct {
     batteryStyle : 2,
     batteryType : 2;
 
-  u8 scanTimeout;
+  u8 reserved6;
 
   u8
     sqlCloseTime : 2,
@@ -768,10 +768,6 @@ class QuanshengUVK5Radio(chirp_common.CloneModeRadio):
         tmpval = _mem.Settings.bound_240_280
         rs = RadioSetting("bound_240_280", "Bound 240 / 280",
                           RadioSettingValueList(self.BOUND_240_280_NAMES, self.BOUND_240_280_NAMES[tmpval]))
-        radio_settings.append(rs)
-
-        tmpval = _mem.Settings.scanTimeout
-        rs = RadioSetting("scanTimeout", "SCAN single freq Time", RadioSettingValueInteger(0, 255, tmpval))
         radio_settings.append(rs)
 
         tmpval = _mem.Settings.activeVFO

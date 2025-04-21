@@ -121,7 +121,7 @@ static void sort(Sort type) {
 void LOOTLIST_update() {
   RADIO_CheckAndListen();
   gRedrawScreen = true;
-  vTaskDelay(pdMS_TO_TICKS(gSettings.scanTimeout));
+  vTaskDelay(pdMS_TO_TICKS(SQL_DELAY));
 }
 
 void LOOTLIST_render(void) {

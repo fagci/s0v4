@@ -62,7 +62,6 @@ Settings gSettings = (Settings){
     .sqlOpenTime = 1,
     .sqlCloseTime = 1,
     .skipGarbageFrequencies = true,
-    .scanTimeout = 60,
     .activeVFO = 0,
     .backlightOnSquelch = BL_SQL_ON,
     .batteryCalibration = 2000,

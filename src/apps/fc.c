@@ -122,7 +122,7 @@ void FC_update(void) {
     vTaskDelay(pdMS_TO_TICKS(200 << gSettings.fcTime));
   } else {
     if (!gIsListening) {
-      vTaskDelay(pdMS_TO_TICKS(gSettings.scanTimeout));
+      vTaskDelay(pdMS_TO_TICKS(SQL_DELAY));
     }
     Log("FC checklisten");
     RADIO_CheckAndListen();

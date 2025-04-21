@@ -48,7 +48,7 @@ void CHSCAN_deinit(void) {}
 
 void CHSCAN_update(void) {
   nextWithTimeout();
-  vTaskDelay(pdMS_TO_TICKS(gSettings.scanTimeout));
+  vTaskDelay(pdMS_TO_TICKS(SQL_DELAY));
   Measurement m = {
       .f = radio.rxF,
       .rssi = RADIO_GetRSSI(),

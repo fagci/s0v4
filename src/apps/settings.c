@@ -21,7 +21,6 @@ typedef enum {
   M_NONE,
   M_UPCONVERTER,
   M_MAIN_APP,
-  M_SCAN_DELAY,
   M_SQL_OPEN_T,
   M_SQL_CLOSE_T,
   M_SQL_TO_OPEN,
@@ -66,7 +65,6 @@ static const MenuItem menu[] = {
     {"Main app", M_MAIN_APP, ARRAY_SIZE(appsAvailableToRun)},
     {"SQL open t", M_SQL_OPEN_T, 7},
     {"SQL close t", M_SQL_CLOSE_T, 3},
-    {"SCAN measure t", M_SCAN_DELAY, 255},
     {"FC t", M_FC_TIME, 4},
     {"SCAN listen t/o", M_SQL_TO_OPEN, ARRAY_SIZE(SCAN_TIMEOUT_NAMES)},
     {"SCAN stay t", M_SQL_TO_CLOSE, ARRAY_SIZE(SCAN_TIMEOUT_NAMES)},
@@ -101,9 +99,6 @@ static void getSubmenuItemText(uint16_t index, char *name) {
   switch (item->type) {
   case M_MAIN_APP:
     strncpy(name, apps[appsAvailableToRun[index]].name, 31);
-    return;
-  case M_SCAN_DELAY:
-    sprintf(name, "%ums", index);
     return;
   case M_SQL_OPEN_T:
   case M_SQL_CLOSE_T:
@@ -170,10 +165,6 @@ static void accept(void) {
   switch (item->type) {
   case M_MAIN_APP:
     gSettings.mainApp = appsAvailableToRun[subMenuIndex];
-    SETTINGS_Save();
-    break;
-  case M_SCAN_DELAY:
-    gSettings.scanTimeout = subMenuIndex;
     SETTINGS_Save();
     break;
   case M_SQL_OPEN_T:
@@ -299,9 +290,6 @@ static const char *getValue(Menu type) {
   case M_BAT_CAL:
     sprintf(Output, "%u", gSettings.batteryCalibration);
     return Output;
-  case M_SCAN_DELAY:
-    sprintf(Output, "%ums", gSettings.scanTimeout);
-    return Output;
   case M_SQL_OPEN_T:
     sprintf(Output, "%ums", gSettings.sqlOpenTime * 5);
     return Output;
@@ -394,9 +382,6 @@ static void setInitialSubmenuIndex(void) {
     break;
   case M_BL_TIME:
     subMenuIndex = gSettings.backlight;
-    break;
-  case M_SCAN_DELAY:
-    subMenuIndex = gSettings.scanTimeout;
     break;
   case M_SQL_OPEN_T:
     subMenuIndex = gSettings.sqlOpenTime;

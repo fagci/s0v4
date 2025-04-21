@@ -20,7 +20,7 @@ void LEVEL_update() {
   SP_AddGraphPoint(&msm);
   gRedrawScreen = true;
 
-  vTaskDelay(pdMS_TO_TICKS(gSettings.scanTimeout));
+  vTaskDelay(pdMS_TO_TICKS(SQL_DELAY));
 }
 
 bool LEVEL_key(KEY_Code_t key, Key_State_t state) {

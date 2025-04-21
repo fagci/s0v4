@@ -113,7 +113,7 @@ typedef struct {
   bool si4732PowerOff : 1;
   uint8_t dw : 2;
 
-  uint8_t scanTimeout;
+  uint8_t reserved6;
 
   BacklightOnSquelchMode backlightOnSquelch : 2;
   bool toneLocal : 1;

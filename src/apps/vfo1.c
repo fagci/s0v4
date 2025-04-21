@@ -46,7 +46,7 @@ void VFO1_init(void) {
 void VFO1_update(void) {
   RADIO_CheckAndListen();
   gRedrawScreen = true;
-  vTaskDelay(pdMS_TO_TICKS(gSettings.scanTimeout));
+  vTaskDelay(pdMS_TO_TICKS(SQL_DELAY));
 }
 
 bool VFOPRO_key(KEY_Code_t key, Key_State_t state) {
