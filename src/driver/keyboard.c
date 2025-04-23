@@ -129,7 +129,6 @@ static uint8_t ScanKeyboardMatrix() {
     taskENTER_CRITICAL();
     ResetKeyboardRow(i);
     uint16_t reg = ReadStableGpioData();
-    taskEXIT_CRITICAL();
 
     for (uint8_t j = 0; j < COLS; j++) {
       const uint16_t mask = 1u << keyboard[i].pins[j].pin;
@@ -137,6 +136,7 @@ static uint8_t ScanKeyboardMatrix() {
         return keyboard[i].pins[j].key;
       }
     }
+    taskEXIT_CRITICAL();
   }
   return KEY_INVALID;
 }
@@ -195,7 +195,7 @@ static void checkKeys(void *attr) {
   for (;;) {
     KEYBOARD_Poll();
     KEYBOARD_CheckKeys();
-    vTaskDelay(pdMS_TO_TICKS(10));
+    vTaskDelay(pdMS_TO_TICKS(16));
   }
 }
 
