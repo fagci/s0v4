@@ -86,11 +86,13 @@ static void DrawALine(int16_t x0, int16_t y0, int16_t x1, int16_t y1,
 }
 
 void DrawVLine(int16_t x, int16_t y, int16_t h, Color color) {
-  DrawALine(x, y, x, y + h - 1, color);
+  if (h)
+    DrawALine(x, y, x, y + h - 1, color);
 }
 
 void DrawHLine(int16_t x, int16_t y, int16_t w, Color color) {
-  DrawALine(x, y, x + w - 1, y, color);
+  if (w)
+    DrawALine(x, y, x + w - 1, y, color);
 }
 
 void DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, Color color) {

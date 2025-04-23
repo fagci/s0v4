@@ -10,7 +10,7 @@
 #include "task.h"
 
 static StaticTask_t mKeyTaskBuffer;
-static StackType_t mKeyTaskStack[configMINIMAL_STACK_SIZE + 100];
+static StackType_t mKeyTaskStack[configMINIMAL_STACK_SIZE + 120];
 
 static const uint32_t LONG_PRESS_TIME = 500;
 static const uint32_t LONG_PRESS_REPEAT_TIME = 100;
@@ -120,8 +120,10 @@ static uint16_t ReadStableGpioData() {
 }
 
 static void ResetKeyboardPins() {
-  GPIO_ClearBit(&GPIOA->DATA, GPIOA_PIN_KEYBOARD_6);
-  GPIO_SetBit(&GPIOA->DATA, GPIOA_PIN_KEYBOARD_7);
+  /* GPIO_ClearBit(&GPIOA->DATA, GPIOA_PIN_KEYBOARD_6);
+  GPIO_SetBit(&GPIOA->DATA, GPIOA_PIN_KEYBOARD_7); */
+  GPIOA->DATA = (GPIOA->DATA & ~(1u << GPIOA_PIN_KEYBOARD_6)) |
+                (1u << GPIOA_PIN_KEYBOARD_7);
 }
 
 static uint8_t ScanKeyboardMatrix() {
@@ -129,6 +131,7 @@ static uint8_t ScanKeyboardMatrix() {
     taskENTER_CRITICAL();
     ResetKeyboardRow(i);
     uint16_t reg = ReadStableGpioData();
+    taskEXIT_CRITICAL();
 
     for (uint8_t j = 0; j < COLS; j++) {
       const uint16_t mask = 1u << keyboard[i].pins[j].pin;
@@ -136,7 +139,6 @@ static uint8_t ScanKeyboardMatrix() {
         return keyboard[i].pins[j].key;
       }
     }
-    taskEXIT_CRITICAL();
   }
   return KEY_INVALID;
 }
@@ -195,7 +197,7 @@ static void checkKeys(void *attr) {
   for (;;) {
     KEYBOARD_Poll();
     KEYBOARD_CheckKeys();
-    vTaskDelay(pdMS_TO_TICKS(16));
+    vTaskDelay(pdMS_TO_TICKS(20));
   }
 }
 

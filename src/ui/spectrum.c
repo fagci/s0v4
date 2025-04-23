@@ -74,25 +74,22 @@ uint32_t SP_X2F(uint8_t x) {
 }
 
 void SP_AddPoint(const Measurement *msm) {
-  uint32_t xs = SP_F2X(msm->f);
-  uint32_t xe = SP_F2X(msm->f + step);
+  const uint32_t xs = SP_F2X(msm->f);
+  const uint32_t xe = SP_F2X(msm->f + step);
 
-  if (xe > MAX_POINTS) {
-    xe = MAX_POINTS;
-  }
-  uint16_t v = msm->rssi ? msm->rssi : msm->rssi;
   // TODO: debug this range
-  for (x = xs; x <= xe; ++x) {
+  for (x = xs; x < MAX_POINTS && x <= xe; ++x) {
     if (ox != x) {
       ox = x;
       rssiHistory[x] = 0;
     }
-    if (v > rssiHistory[x]) {
-      rssiHistory[x] = v;
+    if (msm->rssi > rssiHistory[x]) {
+      rssiHistory[x] = msm->rssi;
     }
   }
-  if (x + 1 > filledPoints) {
-    filledPoints = x + 1;
+  // not x+1 as we going to xe inclusive
+  if (x > filledPoints) {
+    filledPoints = x;
   }
   if (filledPoints > MAX_POINTS) {
     filledPoints = MAX_POINTS;
@@ -100,7 +97,7 @@ void SP_AddPoint(const Measurement *msm) {
 }
 
 VMinMax SP_GetMinMax() {
-  const uint16_t rssiMin = minRssi(rssiHistory, filledPoints);
+  const uint16_t rssiMin = Min(rssiHistory, filledPoints);
   const uint16_t rssiMax = Max(rssiHistory, filledPoints);
   const uint16_t rssiDiff = rssiMax - rssiMin;
   return (VMinMax){
@@ -109,25 +106,16 @@ VMinMax SP_GetMinMax() {
   };
 }
 
-uint16_t peaks[MAX_POINTS];
-
 void SP_Render(const Band *p, VMinMax v) {
   if (p) {
     UI_DrawTicks(S_BOTTOM, p);
   }
 
   DrawHLine(0, S_BOTTOM, MAX_POINTS, C_FILL);
-  // DrawHLine(0, SPECTRUM_Y, LCD_WIDTH, C_FILL);
 
   for (uint8_t i = 0; i < filledPoints; ++i) {
     uint8_t yVal = ConvertDomain(rssiHistory[i], v.vMin, v.vMax, 0, SPECTRUM_H);
     DrawVLine(i, S_BOTTOM - yVal, yVal, C_FILL);
-  }
-
-  for (uint8_t x = 0; x < MAX_POINTS; ++x) {
-    if (peaks[x]) {
-      DrawVLine(x, SPECTRUM_Y + 1, 4, C_FILL);
-    }
   }
 }
 

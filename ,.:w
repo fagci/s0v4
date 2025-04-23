@@ -1,6 +1,5 @@
 #include "scan.h"
 #include "../driver/st7565.h"
-#include "../driver/systick.h"
 #include "../radio.h"
 #include "../scheduler.h"
 #include "../ui/spectrum.h"
@@ -17,17 +16,10 @@ static uint32_t timeout = 0;
 static bool lastListenState = false;
 static bool isMultiband = false;
 
-/* static uint16_t measure(uint32_t f) {
-  return (RADIO_TuneToPure(f, true), vTaskDelay(delay / 100), RADIO_GetRSSI());
-} */
-
 static uint16_t measure(uint32_t f) {
-  taskENTER_CRITICAL();
-  RADIO_TuneToPure(f, true);
-  SYSTICK_DelayUs(delay);
-  uint16_t rssi = RADIO_GetRSSI();
-  taskEXIT_CRITICAL();
-  return rssi;
+  uint16_t r =
+      (RADIO_TuneToPure(f, true), vTaskDelay(delay / 100), RADIO_GetRSSI());
+  return r;
 }
 
 static void onNewBand() {
