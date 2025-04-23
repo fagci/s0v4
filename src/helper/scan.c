@@ -62,6 +62,8 @@ static void next() {
     radio.rxF = gCurrentBand.rxF;
     gRedrawScreen = true;
   }
+  RADIO_TuneToPure(radio.rxF, true);
+  SetTimeout(&timeout, 0);
 }
 
 static void nextWithTimeout() {
@@ -73,7 +75,6 @@ static void nextWithTimeout() {
   }
 
   if (CheckTimeout(&timeout)) {
-    SetTimeout(&timeout, 0);
     next();
     return;
   }
