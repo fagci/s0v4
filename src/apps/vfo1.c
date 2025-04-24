@@ -247,10 +247,10 @@ static void renderChannelName(uint8_t y, uint16_t channel) {
   FillRect(0, y - 14, 28, 7, C_FILL);
   if (RADIO_IsChMode()) {
     PrintSmallEx(14, y - 9, POS_C, C_INVERT, "MR %03u", channel);
+    UI_Scanlists(LCD_XCENTER - 13, y - 13, gSettings.currentScanlist);
   } else {
     PrintSmallEx(14, y - 9, POS_C, C_INVERT, "VFO");
   }
-  UI_Scanlists(LCD_XCENTER - 13, y - 13, gSettings.currentScanlist);
 }
 
 static void renderProModeInfo(uint8_t y) {
