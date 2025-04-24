@@ -58,10 +58,10 @@ static StaticQueue_t systemTasksQueue;   // Static queue storage area
 static uint8_t systemQueueStorageArea[queueLen * itemSize];
 
 StaticTask_t appUpdateTaskBuffer;
-StackType_t appUpdateTaskStack[configMINIMAL_STACK_SIZE + 150];
+StackType_t appUpdateTaskStack[configMINIMAL_STACK_SIZE + 120];
 
 StaticTask_t appRenderTaskBuffer;
-StackType_t appRenderTaskStack[configMINIMAL_STACK_SIZE + 150];
+StackType_t appRenderTaskStack[configMINIMAL_STACK_SIZE + 120];
 
 static uint32_t lastUartDataTime;
 
@@ -149,6 +149,10 @@ void SYS_Main(void *params) {
                     appUpdateTaskStack, &appUpdateTaskBuffer);
   xTaskCreateStatic(appRender, "appR", ARRAY_SIZE(appRenderTaskStack), NULL, 2,
                     appRenderTaskStack, &appRenderTaskBuffer);
+  systemMessageQueue = xQueueCreateStatic(
+      queueLen, itemSize, systemQueueStorageArea, &systemTasksQueue);
+
+  SystemMessages n;
 
   if (resetNeeded()) {
     gSettings.batteryCalibration = 2000;
@@ -173,11 +177,6 @@ void SYS_Main(void *params) {
     Log("RUN DEFAULT APP");
     APPS_run(gSettings.mainApp);
   }
-
-  systemMessageQueue = xQueueCreateStatic(
-      queueLen, itemSize, systemQueueStorageArea, &systemTasksQueue);
-
-  SystemMessages n;
 
   for (;;) {
     if (xQueueReceive(systemMessageQueue, &n, pdMS_TO_TICKS(5))) {

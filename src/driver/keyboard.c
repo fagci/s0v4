@@ -10,7 +10,7 @@
 #include "task.h"
 
 static StaticTask_t mKeyTaskBuffer;
-static StackType_t mKeyTaskStack[configMINIMAL_STACK_SIZE + 120];
+static StackType_t mKeyTaskStack[configMINIMAL_STACK_SIZE + 100];
 
 static const uint32_t LONG_PRESS_TIME = 500;
 static const uint32_t LONG_PRESS_REPEAT_TIME = 100;

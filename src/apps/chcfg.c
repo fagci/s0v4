@@ -448,10 +448,8 @@ static void getSubmenuItemText(uint16_t index, char *name) {
     strncpy(name, sqTypeNames[index], 31);
     return;
   case M_RADIO:
-    strncpy(
-        name,
-        radioNames[RADIO_HasSi() && index > 0 ? RADIO_SI4732 : RADIO_BK4819],
-        31);
+    strncpy(name, radioNames[RADIO_HasSi() && index > 0 ? RADIO_SI4732 : index],
+            31);
     return;
   case M_SQ:
   case M_SCRAMBLER:

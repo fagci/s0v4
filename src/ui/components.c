@@ -115,8 +115,9 @@ void UI_BigFrequency(uint8_t y, uint32_t f) {
   PrintBigDigitsEx(LCD_WIDTH - 1, y, POS_R, C_FILL, "%02u", fp3);
 }
 
-void UI_DisplayScanlists(uint32_t y) {
+/* void UI_DisplayScanlists(uint32_t y) {
   uint16_t sl = gSettings.currentScanlist;
+
   PrintMediumEx(LCD_XCENTER, y, POS_C, C_FILL, "%s %s %s %s %s %s %s %s",
                 (sl >> 0) & 1 ? "01" : "__", //
                 (sl >> 1) & 1 ? "02" : "__", //
@@ -137,4 +138,21 @@ void UI_DisplayScanlists(uint32_t y) {
                 (sl >> 14) & 1 ? "15" : "__", //
                 (sl >> 15) & 1 ? "16" : "__"  //
   );
+} */
+
+void UI_DisplayScanlists(uint32_t y) {
+  uint16_t sl = gSettings.currentScanlist;
+  char buf[17] = {0}; // 16 бит + нуль-терминатор
+
+  for (uint8_t i = 0; i < 16; i++) {
+    bool sel = sl & (1 << i);
+    if (i < 8) {
+      buf[i] = sel ? '1' + i : '_';
+    } else {
+      buf[i] = sel ? 'A' + (i - 8) : '_';
+    }
+  }
+
+  PrintMediumEx(LCD_XCENTER, y, POS_C, C_FILL, "%.4s %.4s %.4s %.4s", buf,
+                buf + 4, buf + 8, buf + 12);
 }

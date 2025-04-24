@@ -55,7 +55,7 @@ const AppType_t appsAvailableToRun[RUN_APPS_COUNT] = {
     APP_CH_LIST,   //
     APP_SCANER,    //
     APP_CH_SCAN,   //
-    APP_BAND_SCAN,   //
+    APP_BAND_SCAN, //
     APP_FC,        //
     APP_LOOT_LIST, //
     APP_ABOUT,     //
@@ -107,6 +107,7 @@ void APPS_update(void) {
   if (apps[gCurrentApp].update) {
     apps[gCurrentApp].update();
   } else {
+    gRedrawScreen = true;
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }

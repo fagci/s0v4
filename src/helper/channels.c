@@ -4,6 +4,7 @@
 #include "../helper/lootlist.h"
 #include "../helper/measurements.h"
 #include "../radio.h"
+#include "../system.h"
 #include "bands.h"
 #include <stddef.h>
 #include <string.h>
@@ -89,7 +90,7 @@ void CHANNELS_Next(bool next) {
 
 void CHANNELS_SetScanlistIndexFromRadio() {
   if (RADIO_IsChMode() && gScanlistSize > 0) {
-    for (uint8_t i = 0; i < gScanlistSize; ++i) {
+    for (uint16_t i = 0; i < gScanlistSize; ++i) {
       if (gScanlist[i] == radio.channel) {
         chScanlistIndex = i;
         break;
@@ -99,6 +100,7 @@ void CHANNELS_SetScanlistIndexFromRadio() {
 }
 
 void CHANNELS_LoadScanlist(CHTypeFilter typeFilter, uint16_t scanlistMask) {
+  SYS_MsgNotify("LOAD SL", 5000);
   Log("Load SL w type_filter=%u", typeFilter);
   if (gSettings.currentScanlist != scanlistMask) {
     gSettings.currentScanlist = scanlistMask;
@@ -129,11 +131,12 @@ void CHANNELS_LoadScanlist(CHTypeFilter typeFilter, uint16_t scanlistMask) {
   if (typeFilter == TYPE_FILTER_CH || typeFilter == TYPE_FILTER_CH_SAVE) {
     chScanlistIndex = 0;
     CHANNELS_SetScanlistIndexFromRadio();
-  } else {
-    if (!gScanlistSize || gScanlistSize - 1 < chScanlistIndex) {
-    }
+    /* } else {
+      if (!gScanlistSize || gScanlistSize - 1 < chScanlistIndex) {
+      } */
   }
   Log("SL sz: %u", gScanlistSize);
+  SYS_MsgNotify("", 0);
 }
 
 void CHANNELS_LoadBlacklistToLoot() {

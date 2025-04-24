@@ -24,7 +24,7 @@ static bool isMultiband = false;
 static uint16_t measure(uint32_t f) {
   taskENTER_CRITICAL();
   RADIO_TuneToPure(f, true);
-  SYSTICK_DelayUs(delay);
+  SYSTICK_DelayUs(delay / 100);
   uint16_t rssi = RADIO_GetRSSI();
   taskEXIT_CRITICAL();
   return rssi;

@@ -139,9 +139,7 @@ void STATUSLINE_render(void) {
     icons[idx++] = SYM_LOCK;
   }
 
-  if ((gCurrentApp == APP_CH_LIST ||
-       (gCurrentApp == APP_VFO1 && RADIO_IsChMode()) ||
-       gCurrentApp == APP_LOOT_LIST)) {
+  if (gCurrentApp == APP_CH_LIST || gCurrentApp == APP_LOOT_LIST) {
     UI_Scanlists(LCD_XCENTER - 13, 0, gSettings.currentScanlist);
   }
 

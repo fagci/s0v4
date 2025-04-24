@@ -250,6 +250,7 @@ static void renderChannelName(uint8_t y, uint16_t channel) {
   } else {
     PrintSmallEx(14, y - 9, POS_C, C_INVERT, "VFO");
   }
+  UI_Scanlists(LCD_XCENTER - 13, y - 13, gSettings.currentScanlist);
 }
 
 static void renderProModeInfo(uint8_t y) {
