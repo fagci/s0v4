@@ -28,6 +28,7 @@ void UI_TxBar(uint8_t y) {
 }
 
 void UI_RSSIBar(uint8_t y) {
+#if 1
   uint16_t rssi = RADIO_GetRSSI();
   if (rssi == 0) {
     return;
@@ -58,6 +59,7 @@ void UI_RSSIBar(uint8_t y) {
   }
 
   PrintMediumEx(LCD_WIDTH - 1, BAR_BASE, 2, true, "%d", Rssi2DBm(rssi));
+#endif
 }
 
 void drawTicks(uint8_t y, uint32_t fs, uint32_t fe, uint32_t div, uint8_t h) {
@@ -141,6 +143,7 @@ void UI_BigFrequency(uint8_t y, uint32_t f) {
 } */
 
 void UI_DisplayScanlists(uint32_t y) {
+#if 1
   uint16_t sl = gSettings.currentScanlist;
   char buf[17] = {0}; // 16 бит + нуль-терминатор
 
@@ -155,4 +158,5 @@ void UI_DisplayScanlists(uint32_t y) {
 
   PrintMediumEx(LCD_XCENTER, y, POS_C, C_FILL, "%.4s %.4s %.4s %.4s", buf,
                 buf + 4, buf + 8, buf + 12);
+#endif
 }

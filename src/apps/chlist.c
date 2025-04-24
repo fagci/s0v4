@@ -78,9 +78,9 @@ static void getChItem(uint16_t i, uint16_t index, bool isCurrent) {
   switch (viewMode) {
   case MODE_INFO:
     if (CHANNELS_IsFreqable(ch.meta.type)) {
-      PrintSmallEx(LCD_WIDTH - 5, y + 8, POS_R, C_INVERT, "%u.%03u %u.%03u",
+      PrintSmallEx(LCD_WIDTH - 5, y + 8, POS_R, C_INVERT, "%u.%03u %u.%03u #%u",
                    ch.rxF / MHZ, ch.rxF / 100 % 1000, ch.txF / MHZ,
-                   ch.txF / 100 % 1000);
+                   ch.txF / 100 % 1000, index);
     }
     break;
   case MODE_SCANLIST:

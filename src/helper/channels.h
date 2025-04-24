@@ -98,7 +98,10 @@ typedef struct {
   CHMeta meta;
   union {
     uint16_t scanlists;
-    int16_t channel;
+    struct {
+      uint16_t channel : 15;
+      bool isChMode : 1;
+    };
   };
   char name[10];
   union {
@@ -176,7 +179,7 @@ bool CHANNELS_IsScanlistable(CHType type);
 bool CHANNELS_IsFreqable(CHType type);
 uint16_t CHANNELS_ScanlistByKey(uint16_t sl, KEY_Code_t key, bool longPress);
 
-extern int16_t gScanlistSize;
+extern uint16_t gScanlistSize;
 extern uint16_t gScanlist[SCANLIST_MAX];
 extern const char *TX_POWER_NAMES[4];
 extern const char *TX_OFFSET_NAMES[3];

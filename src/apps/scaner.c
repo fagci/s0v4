@@ -25,6 +25,9 @@ static uint32_t cursorRangeTimeout = 0;
 static bool isAnalyserMode = false;
 
 void SCANER_init(void) {
+  gMonitorMode = false;
+  RADIO_ToggleRX(false);
+
   SPECTRUM_Y = 8;
   SPECTRUM_H = 44;
 

@@ -5,11 +5,10 @@
 #include "../helper/measurements.h"
 #include "../radio.h"
 #include "../system.h"
-#include "bands.h"
 #include <stddef.h>
 #include <string.h>
 
-int16_t gScanlistSize = 0;
+uint16_t gScanlistSize = 0;
 uint16_t gScanlist[SCANLIST_MAX] = {0};
 CHType gScanlistType = TYPE_CH;
 const char *CH_TYPE_NAMES[6] = {"EMPTY", "CH",     "BAND",
@@ -73,9 +72,10 @@ uint16_t CHANNELS_Scanlists(int16_t num) {
 static int16_t chScanlistIndex = 0;
 
 void CHANNELS_LoadCurrentScanlistCH() {
-  if (gScanlistSize > 0) {
-    int16_t chNum = gScanlist[chScanlistIndex];
+  if (gScanlistSize) {
+    uint16_t chNum = gScanlist[chScanlistIndex];
     radio.channel = chNum;
+    radio.isChMode = true;
     RADIO_VfoLoadCH();
     RADIO_SetupByCurrentVFO();
   }
@@ -89,7 +89,7 @@ void CHANNELS_Next(bool next) {
 }
 
 void CHANNELS_SetScanlistIndexFromRadio() {
-  if (RADIO_IsChMode() && gScanlistSize > 0) {
+  if (RADIO_IsChMode() && gScanlistSize) {
     for (uint16_t i = 0; i < gScanlistSize; ++i) {
       if (gScanlist[i] == radio.channel) {
         chScanlistIndex = i;
@@ -99,15 +99,22 @@ void CHANNELS_SetScanlistIndexFromRadio() {
   }
 }
 
+static CHTypeFilter _typeFilter = TYPE_FILTER_BAND_SAVE;
+static uint16_t _scanlistMask = UINT16_MAX;
 void CHANNELS_LoadScanlist(CHTypeFilter typeFilter, uint16_t scanlistMask) {
+  if (_typeFilter == typeFilter && _scanlistMask == scanlistMask) {
+    return;
+  }
+  _typeFilter = typeFilter;
+  _scanlistMask = scanlistMask;
+
   SYS_MsgNotify("LOAD SL", 5000);
-  Log("Load SL w type_filter=%u", typeFilter);
   if (gSettings.currentScanlist != scanlistMask) {
     gSettings.currentScanlist = scanlistMask;
     SETTINGS_Save();
   }
   gScanlistSize = 0;
-  for (int16_t i = 0; i < CHANNELS_GetCountMax(); ++i) {
+  for (uint16_t i = 0; i < CHANNELS_GetCountMax(); ++i) {
     CHMeta meta = CHANNELS_GetMeta(i);
     bool isSaveFilter = typeFilter == TYPE_FILTER_BAND_SAVE ||
                         typeFilter == TYPE_FILTER_CH_SAVE;
@@ -131,12 +138,8 @@ void CHANNELS_LoadScanlist(CHTypeFilter typeFilter, uint16_t scanlistMask) {
   if (typeFilter == TYPE_FILTER_CH || typeFilter == TYPE_FILTER_CH_SAVE) {
     chScanlistIndex = 0;
     CHANNELS_SetScanlistIndexFromRadio();
-    /* } else {
-      if (!gScanlistSize || gScanlistSize - 1 < chScanlistIndex) {
-      } */
   }
   Log("SL sz: %u", gScanlistSize);
-  SYS_MsgNotify("", 0);
 }
 
 void CHANNELS_LoadBlacklistToLoot() {

@@ -61,9 +61,9 @@ void RADIO_TuneToPure(uint32_t f, bool precise);
 void RADIO_TuneTo(uint32_t f);
 void RADIO_TuneToSave(uint32_t f);
 
-bool RADIO_TuneToMR(int16_t num);
-void RADIO_TuneToCH(int16_t num);
-void RADIO_TuneToBand(int16_t num);
+bool RADIO_TuneToMR(uint16_t num);
+void RADIO_TuneToCH(uint16_t num);
+void RADIO_TuneToBand(uint16_t num);
 
 void RADIO_Setup();
 void RADIO_SwitchRadioPure();

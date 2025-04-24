@@ -528,7 +528,7 @@ void RADIO_ToggleTX(bool on) {
   RADIO_ToggleTXEX(on, txF, power, true);
 }
 
-bool RADIO_IsChMode() { return radio.channel >= 0; }
+bool RADIO_IsChMode() { return radio.isChMode; }
 
 void RADIO_ToggleTXEX(bool on, uint32_t txF, uint8_t power, bool paEnabled) {
   bool lastOn = gTxState == TX_ON;
@@ -633,7 +633,7 @@ void RADIO_SetupByCurrentVFO(void) {
 // USE CASE: set vfo temporary for current app
 void RADIO_TuneTo(uint32_t f) {
   if (RADIO_IsChMode()) {
-    radio.channel = -1;
+    radio.isChMode = false;
   }
   radio.txF = 0;
   radio.rxF = f;
@@ -651,6 +651,7 @@ void RADIO_TuneToSave(uint32_t f) {
 void RADIO_SaveCurrentVFO(void) {
   int16_t vfoChNum = getVfoChannel();
   int16_t chToSave = radio.channel;
+  bool _isChMode = radio.isChMode;
   if (chToSave >= 0) {
     // save only active channel number
     // to load it instead of full VFO
@@ -658,6 +659,7 @@ void RADIO_SaveCurrentVFO(void) {
     VFO oldVfo;
     CHANNELS_Load(vfoChNum, &oldVfo);
     oldVfo.channel = chToSave;
+    oldVfo.isChMode = _isChMode;
     strncpy(oldVfo.name, "VFO-A", 6); // to fix save named channels
     CHANNELS_Save(vfoChNum, &oldVfo);
     return;
@@ -832,13 +834,16 @@ bool RADIO_IsSquelchOpen() {
 }
 
 void RADIO_VfoLoadCH() {
-  int16_t chNum = radio.channel;
+  uint16_t chNum = radio.channel;
   CHANNELS_Load(radio.channel, &radio);
+
+  // NOTE: coz it modified by CHANNELS_Load
   radio.meta.type = TYPE_VFO;
   radio.channel = chNum;
+  radio.isChMode = true;
 }
 
-void RADIO_TuneToBand(int16_t num) {
+void RADIO_TuneToBand(uint16_t num) {
   if (CHANNELS_GetMeta(num).type == TYPE_BAND) {
     BANDS_Select(num, true);
     // radio.allowTx = gCurrentBand.allowTx;
@@ -853,9 +858,10 @@ void RADIO_TuneToBand(int16_t num) {
   }
 }
 
-void RADIO_TuneToCH(int16_t num) {
+void RADIO_TuneToCH(uint16_t num) {
   if (CHANNELS_GetMeta(num).type == TYPE_CH) {
     radio.channel = num;
+    radio.isChMode = true;
     RADIO_VfoLoadCH();
     RADIO_SaveCurrentVFO();
     RADIO_SetupByCurrentVFO();
@@ -863,7 +869,7 @@ void RADIO_TuneToCH(int16_t num) {
   }
 }
 
-bool RADIO_TuneToMR(int16_t num) {
+bool RADIO_TuneToMR(uint16_t num) {
   // Log("Tune to MR %u", num);
   if (CHANNELS_Existing(num)) {
     // Log("MR existing, type=%u", CHANNELS_GetMeta(num).type);
@@ -878,15 +884,14 @@ bool RADIO_TuneToMR(int16_t num) {
       break;
     }
   }
-  radio.channel = -1;
+  radio.isChMode = false;
   return false;
 }
 
 void RADIO_ToggleVfoMR(void) {
   if (RADIO_IsChMode()) {
     // loadVFO();
-    radio.channel += 1; // 0 -> 1
-    radio.channel *= -1;
+    radio.isChMode = false;
     saveVFO();
     RADIO_SetupByCurrentVFO();
   } else {
@@ -896,9 +901,6 @@ void RADIO_ToggleVfoMR(void) {
       return;
     }
     // loadVFO();
-    Log("radio.ch=%u", radio.channel);
-    radio.channel *= -1;
-    radio.channel -= 1; // 1 -> 0
     Log("radio.ch=%u", radio.channel);
     if (CHANNELS_GetMeta(radio.channel).type == TYPE_CH) {
       RADIO_TuneToMR(radio.channel);
