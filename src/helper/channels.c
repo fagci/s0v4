@@ -108,7 +108,7 @@ void CHANNELS_LoadScanlist(CHTypeFilter typeFilter, uint16_t scanlistMask) {
   _typeFilter = typeFilter;
   _scanlistMask = scanlistMask;
 
-  SYS_MsgNotify("LOAD SL", 5000);
+  Log("Load SL w type_filter=%u", typeFilter);
   if (gSettings.currentScanlist != scanlistMask) {
     gSettings.currentScanlist = scanlistMask;
     SETTINGS_Save();

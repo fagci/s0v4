@@ -44,6 +44,7 @@ bool BANDSCAN_key(KEY_Code_t key, Key_State_t state) {
     gSettings.currentScanlist = CHANNELS_ScanlistByKey(
         gSettings.currentScanlist, key, longHeld && !simpleKeypress);
     CHANNELS_LoadScanlist(TYPE_FILTER_BAND, gSettings.currentScanlist);
+    BANDS_SelectScan(0);
     SETTINGS_DelayedSave();
     isWaiting = false;
     return true;
