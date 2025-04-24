@@ -10,7 +10,6 @@
 #include "chscan.h"
 #include "fc.h"
 #include "finput.h"
-#include "level.h"
 #include "lootlist.h"
 #include "reset.h"
 #include "scaner.h"
@@ -59,7 +58,6 @@ const AppType_t appsAvailableToRun[RUN_APPS_COUNT] = {
     APP_BAND_SCAN,   //
     APP_FC,        //
     APP_LOOT_LIST, //
-    APP_LEVEL,     //
     APP_ABOUT,     //
 };
 
@@ -84,7 +82,6 @@ const App apps[APPS_COUNT] = {
     {"CH cfg", CHCFG_init, NULL, CHCFG_render, CHCFG_key, CHCFG_deinit},
     {"Settings", NULL, NULL, SETTINGS_render, SETTINGS_key, SETTINGS_deinit},
     {"1 VFO", VFO1_init, VFO1_update, VFO1_render, VFO1_key, NULL},
-    {"Level", LEVEL_init, LEVEL_update, LEVEL_render, LEVEL_key, LEVEL_deinit},
     {"ABOUT", NULL, NULL, ABOUT_Render, ABOUT_key, NULL},
 };
 

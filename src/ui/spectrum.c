@@ -22,29 +22,6 @@ static uint8_t filledPoints;
 static Band *range;
 static uint32_t step;
 
-static uint16_t minRssi(const uint16_t *array, uint8_t n) {
-  uint16_t min = UINT16_MAX;
-  for (uint8_t i = 0; i < n; ++i) {
-    if (array[i] && array[i] < min) {
-      min = array[i];
-    }
-  }
-  return min;
-}
-
-static uint8_t maxNoise(const uint8_t *array, uint8_t n) {
-  uint16_t max = 0;
-  for (uint8_t i = 0; i < n; ++i) {
-    if (array[i] != UINT8_MAX && array[i] > max) {
-      max = array[i];
-    }
-    /* if (array[i] == UINT8_MAX) {
-      Log("!!! NOISE=255 at %u", i); // appears when switching bands
-    } */
-  }
-  return max;
-}
-
 void SP_ResetHistory(void) {
   filledPoints = 0;
   for (uint8_t i = 0; i < MAX_POINTS; ++i) {

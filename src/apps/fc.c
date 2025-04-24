@@ -1,13 +1,10 @@
 #include "fc.h"
 #include "../dcs.h"
-#include "../driver/system.h"
 #include "../driver/uart.h"
 #include "../radio.h"
-#include "../scheduler.h"
 #include "../settings.h"
 #include "../ui/components.h"
 #include "../ui/graphics.h"
-#include "../ui/statusline.h"
 #include "apps.h"
 #include "vfo1.h"
 #include <stdint.h>
