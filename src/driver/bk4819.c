@@ -194,7 +194,8 @@ void BK4819_SetAGC(bool useDefault, uint8_t gainIndex) {
   BK4819_WriteRegister(BK4819_REG_7E, (regVal & ~(1 << 15) & ~(0b111 << 12)) |
                                           (!enableAgc << 15) // 0  AGC fix mode
                                           | (3u << 12)       // 3  AGC fix index
-  );
+                                          // IJV
+                                          | (5u << 3) | (6u << 0));
 
   if (gainIndex == GAIN_AUTO) {
     BK4819_WriteRegister(BK4819_REG_13, 0x03BE);
@@ -202,9 +203,22 @@ void BK4819_SetAGC(bool useDefault, uint8_t gainIndex) {
   } else {
     BK4819_WriteRegister(BK4819_REG_13, gainTable[gainIndex].regValue);
   }
-  BK4819_WriteRegister(BK4819_REG_12, 0x037C);
+  /* BK4819_WriteRegister(BK4819_REG_12, 0x037C);
   BK4819_WriteRegister(BK4819_REG_11, 0x027B);
-  BK4819_WriteRegister(BK4819_REG_10, 0x007A);
+  BK4819_WriteRegister(BK4819_REG_10, 0x007A); */
+
+  BK4819_WriteRegister(
+      0x12, (3u << 8) | (3u << 5) | (3u << 3) |
+                (4u << 0)); // 000000 11 011 11 100  0x037C =  3 3 3 4
+  BK4819_WriteRegister(
+      0x11, (2u << 8) | (3u << 5) | (3u << 3) |
+                (3u << 0)); // 000000 10 011 11 011  0x027B =  2 3 3 3
+  BK4819_WriteRegister(
+      0x10, (0u << 8) | (3u << 5) | (3u << 3) |
+                (2u << 0)); // 000000 00 011 11 010  0x007A =  0 3 3 2
+  BK4819_WriteRegister(
+      0x14, (0u << 8) | (0u << 5) | (3u << 3) |
+                (1u << 0)); // 000000 00 000 11 000  0x0019 =  0 0 3 1
 
   uint8_t Lo = 0;    // 0-1 - auto, 2 - low, 3 high
   uint8_t low = 56;  // 1dB / LSB 56

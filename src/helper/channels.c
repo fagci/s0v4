@@ -45,8 +45,8 @@ void CHANNELS_Load(int16_t num, CH *p) {
 
 void CHANNELS_Save(int16_t num, CH *p) {
   if (num >= 0) {
-    /* Log(">> W CH%u OFS=%u '%s': f=%u, radio=%u", num, GetChannelOffset(num),
-        p->name, p->rxF, p->radio); */
+    Log(">> W CH%u OFS=%u '%s': f=%u, radio=%u", num, GetChannelOffset(num),
+        p->name, p->rxF, p->radio);
     EEPROM_WriteBuffer(GetChannelOffset(num), p, CH_SIZE);
   }
 }
@@ -132,7 +132,7 @@ void CHANNELS_LoadScanlist(CHTypeFilter typeFilter, uint16_t scanlistMask) {
     if (isOurScanlist) {
       gScanlist[gScanlistSize] = i;
       gScanlistSize++;
-      Log("Load CH %u in SL", i);
+      // Log("Load CH %u in SL", i);
     }
   }
   if (typeFilter == TYPE_FILTER_CH || typeFilter == TYPE_FILTER_CH_SAVE) {

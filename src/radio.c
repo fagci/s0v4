@@ -585,7 +585,7 @@ void RADIO_TuneToPure(uint32_t f, bool precise) {
   f += gCurrentBand.ppm * s;
   LOOT_Replace(&gLoot, f);
   Radio r = RADIO_GetRadio();
-  // Log("Tune %s to %u", radioNames[r], f);
+  Log("Tune %s to %u", radioNames[r], f);
   switch (r) {
   case RADIO_BK4819:
     BK4819_TuneTo(f, precise);
@@ -617,12 +617,13 @@ void RADIO_SwitchRadio() {
 
 static void checkVisibleBand() {
   if (!BANDS_InRange(radio.rxF, gCurrentBand)) {
+    Log("band %s not in r of %u", gCurrentBand.name, radio.rxF);
     BANDS_SelectByFrequency(radio.rxF, radio.fixedBoundsMode);
   }
 }
 
 void RADIO_SetupByCurrentVFO(void) {
-  // Log("RADIO setup by VFO");
+  Log("RADIO setup by VFO");
   checkVisibleBand();
 
   RADIO_SwitchRadio();
@@ -644,6 +645,7 @@ void RADIO_TuneTo(uint32_t f) {
 void RADIO_TuneToSave(uint32_t f) {
   RADIO_TuneTo(f);
   gCurrentBand.misc.lastUsedFreq = f;
+  radio.rxF = f; // TEST: save freq in vfo
   RADIO_SaveCurrentVFO();
   BANDS_SaveCurrent();
 }
