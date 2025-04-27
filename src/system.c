@@ -179,7 +179,7 @@ void SYS_Main(void *params) {
   }
 
   for (;;) {
-    if (xQueueReceive(systemMessageQueue, &n, pdMS_TO_TICKS(5))) {
+    if (xQueueReceive(systemMessageQueue, &n, pdMS_TO_TICKS(40))) {
       // Process system notifications
       if (n.message == MSG_KEYPRESSED && Now() - lastUartDataTime >= 1000) {
         BACKLIGHT_On();

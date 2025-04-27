@@ -170,7 +170,7 @@ void BANDS_SetRadioParamsFromCurrentBand() {
 // Set gCurrentBand, sets internal cursor in SL
 void BANDS_Select(int16_t num, bool copyToVfo) {
   CHANNELS_Load(num, &gCurrentBand);
-  Log("Load Band %s", gCurrentBand.name);
+  Log("Select Band %s", gCurrentBand.name);
   for (int16_t i = 0; i < gScanlistSize; ++i) {
     if (gScanlist[i] == num) {
       scanlistBandIndex = i;

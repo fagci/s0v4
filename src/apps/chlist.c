@@ -239,7 +239,9 @@ bool CHLIST_key(KEY_Code_t key, Key_State_t state) {
         }
         return true;
       }
+      Log("BAND Selected by user");
       RADIO_TuneToMR(chNum);
+      Log("Tuned to band, exit app");
       APPS_exit();
       return true;
     case KEY_PTT:

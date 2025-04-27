@@ -38,8 +38,8 @@ uint16_t CHANNELS_GetCountMax(void) {
 void CHANNELS_Load(int16_t num, CH *p) {
   if (num >= 0) {
     EEPROM_ReadBuffer(GetChannelOffset(num), p, CH_SIZE);
-    /* Log(">> R CH%u '%s': f=%u, radio=%u, type=%s", num, p->name, p->rxF,
-        p->radio, CH_TYPE_NAMES[p->meta.type]); */
+    Log(">> R CH%u '%s': f=%u, radio=%u, type=%s", num, p->name, p->rxF,
+        p->radio, CH_TYPE_NAMES[p->meta.type]);
   }
 }
 

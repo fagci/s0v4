@@ -109,7 +109,7 @@ static uint16_t ReadStableGpioData() {
 
   for (ii = 0, reg = 0; ii < 3; ii++) {
     // vTaskDelay(pdMS_TO_TICKS(1));
-    SYSTICK_DelayUs(1);
+    SYSTICK_DelayUs(0);
     reg2 = (uint16_t)GPIOA->DATA;
     if (reg != reg2) {
       reg = reg2;

@@ -13,27 +13,39 @@ static Measurement *m;
 static bool thinking = false;
 static bool wasThinkingEarlier = false;
 
-static uint32_t timeout = 0;
+static uint32_t stay_at_timeout;
+static uint32_t scan_listen_timeout;
+
 static bool lastListenState = false;
 static bool isMultiband = false;
 
-/* static uint16_t measure(uint32_t f) {
-  return (RADIO_TuneToPure(f, true), vTaskDelay(delay / 100), RADIO_GetRSSI());
-} */
+static uint32_t scanCycles = 0;
+static uint32_t lastCpsTime = 0;
 
 static uint16_t measure(uint32_t f) {
+  return (RADIO_TuneToPure(f, true), vTaskDelay(delay / 100), RADIO_GetRSSI());
+}
+
+/* static uint16_t measure(uint32_t f) {
   taskENTER_CRITICAL();
   RADIO_TuneToPure(f, true);
   SYSTICK_DelayUs(delay / 100);
   uint16_t rssi = RADIO_GetRSSI();
   taskEXIT_CRITICAL();
   return rssi;
-}
+} */
 
 static void onNewBand() {
   radio.rxF = gCurrentBand.rxF;
   RADIO_Setup();
   SP_Init(&gCurrentBand);
+}
+
+uint32_t SCAN_GetCps() {
+  uint32_t cps = scanCycles * 1000 / (Now() - lastCpsTime);
+  lastCpsTime = Now();
+  scanCycles = 0;
+  return cps;
 }
 
 void SCAN_setBand(Band b) {
@@ -51,7 +63,7 @@ void SCAN_setEndF(uint32_t f) {
   onNewBand();
 }
 
-static void next() {
+/* static void next() {
   radio.rxF += StepFrequencyTable[radio.step];
 
   if (radio.rxF > gCurrentBand.txF) {
@@ -64,6 +76,8 @@ static void next() {
   }
   RADIO_TuneToPure(radio.rxF, true);
   SetTimeout(&timeout, 0);
+
+  scanCycles++;
 }
 
 static void nextWithTimeout() {
@@ -78,14 +92,59 @@ static void nextWithTimeout() {
     next();
     return;
   }
+} */
+
+static void next() {
+  radio.rxF += StepFrequencyTable[radio.step];
+
+  if (radio.rxF > gCurrentBand.txF) {
+    if (isMultiband) {
+      BANDS_SelectBandRelativeByScanlist(true);
+      onNewBand();
+    }
+    radio.rxF = gCurrentBand.rxF;
+    gRedrawScreen = true;
+  }
+
+  RADIO_TuneToPure(radio.rxF, true);
+  SetTimeout(&scan_listen_timeout, 0);
+  SetTimeout(&stay_at_timeout, 0);
+  scanCycles++;
 }
 
-void SCAN_Next(bool up) { nextWithTimeout(); }
+static void nextWithTimeout() {
+  if (lastListenState != gIsListening) {
+    lastListenState = gIsListening;
+
+    if (gIsListening) {
+      SetTimeout(&scan_listen_timeout,
+                 SCAN_TIMEOUTS[gSettings.sqOpenedTimeout]);
+      SetTimeout(&stay_at_timeout, UINT32_MAX);
+    } else {
+      SetTimeout(&stay_at_timeout, SCAN_TIMEOUTS[gSettings.sqClosedTimeout]);
+    }
+  }
+
+  if (CheckTimeout(&scan_listen_timeout) && gIsListening) {
+    next();
+    return;
+  }
+
+  if (CheckTimeout(&stay_at_timeout)) {
+    next();
+    return;
+  }
+}
+
+void SCAN_Next(bool up) { next(); }
 
 void SCAN_Init(bool multiband) {
   isMultiband = multiband;
   m = &gLoot;
   m->snr = 0;
+
+  lastCpsTime = Now();
+  scanCycles = 0;
 
   onNewBand();
 }

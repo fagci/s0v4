@@ -643,18 +643,19 @@ void RADIO_TuneTo(uint32_t f) {
 
 // USE CASE: set vfo and use in another app
 void RADIO_TuneToSave(uint32_t f) {
-  RADIO_TuneTo(f);
+  Log("Tune to save");
   gCurrentBand.misc.lastUsedFreq = f;
   radio.rxF = f; // TEST: save freq in vfo
   RADIO_SaveCurrentVFO();
   BANDS_SaveCurrent();
+  RADIO_TuneTo(f);
 }
 
 void RADIO_SaveCurrentVFO(void) {
   int16_t vfoChNum = getVfoChannel();
   int16_t chToSave = radio.channel;
   bool _isChMode = radio.isChMode;
-  if (chToSave >= 0) {
+  if (_isChMode) {
     // save only active channel number
     // to load it instead of full VFO
     // and to prevent overwrite VFO with MR
@@ -846,9 +847,9 @@ void RADIO_VfoLoadCH() {
 }
 
 void RADIO_TuneToBand(uint16_t num) {
+  Log("Tune to band");
   if (CHANNELS_GetMeta(num).type == TYPE_BAND) {
     BANDS_Select(num, true);
-    // radio.allowTx = gCurrentBand.allowTx;
     if (BANDS_InRange(radio.rxF, gCurrentBand)) {
       return;
     }
@@ -872,7 +873,7 @@ void RADIO_TuneToCH(uint16_t num) {
 }
 
 bool RADIO_TuneToMR(uint16_t num) {
-  // Log("Tune to MR %u", num);
+  Log("Tune to MR %u", num);
   if (CHANNELS_Existing(num)) {
     // Log("MR existing, type=%u", CHANNELS_GetMeta(num).type);
     switch (CHANNELS_GetMeta(num).type) {

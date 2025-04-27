@@ -197,6 +197,7 @@ void SCANER_render(void) {
     PrintSmallEx(LCD_WIDTH, 18, POS_R, C_FILL, "Zoom %u",
                  BANDS_RangeIndex() + 1);
   }
+  PrintSmallEx(0, 24, POS_L, C_FILL, "CPS %u", SCAN_GetCps());
 
   if (isAnalyserMode) {
     renderAnalyzerUI();

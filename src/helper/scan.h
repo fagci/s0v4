@@ -14,5 +14,6 @@ void SCAN_setEndF(uint32_t f);
 void SCAN_setBand(Band b);
 void SCAN_Check(bool isAnalyserMode);
 void SCAN_Next(bool up);
+uint32_t SCAN_GetCps();
 
 #endif /* end of include guard: SCAN_H */

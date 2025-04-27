@@ -28,7 +28,7 @@ void UI_TxBar(uint8_t y) {
 }
 
 void UI_RSSIBar(uint8_t y) {
-#if 1
+#if 0
   uint16_t rssi = RADIO_GetRSSI();
   if (rssi == 0) {
     return;
@@ -70,6 +70,7 @@ void drawTicks(uint8_t y, uint32_t fs, uint32_t fe, uint32_t div, uint8_t h) {
 }
 
 void UI_DrawTicks(uint8_t y, const Band *band) {
+#if 1
   uint32_t fs = band->rxF;
   uint32_t fe = band->txF;
   uint32_t bw = fe - fs;
@@ -81,9 +82,11 @@ void UI_DrawTicks(uint8_t y, const Band *band) {
       return;
     }
   }
+#endif
 }
 
 void UI_Scanlists(uint8_t baseX, uint8_t baseY, uint16_t sl) {
+#if 1
   for (uint8_t i = 0; i < 16; ++i) {
     bool isActive = (sl >> i) & 1;
     uint8_t xi = i % 8;
@@ -92,6 +95,7 @@ void UI_Scanlists(uint8_t baseX, uint8_t baseY, uint16_t sl) {
     uint8_t y = baseY + yi * 3 + (yi && !isActive);
     FillRect(x, y, 2, 1 + isActive, C_INVERT);
   }
+#endif
 }
 
 void UI_DrawLoot(const Loot *loot, uint8_t x, uint8_t y, TextPos pos) {
