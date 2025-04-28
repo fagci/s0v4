@@ -197,7 +197,7 @@ static void checkKeys(void *attr) {
   for (;;) {
     KEYBOARD_Poll();
     KEYBOARD_CheckKeys();
-    vTaskDelay(pdMS_TO_TICKS(20));
+    vTaskDelay(pdMS_TO_TICKS(12));
   }
 }
 
