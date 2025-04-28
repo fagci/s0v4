@@ -95,6 +95,7 @@ static void nextWithTimeout() {
 } */
 
 static void next() {
+  RADIO_ToggleRX(false);
   radio.rxF += StepFrequencyTable[radio.step];
 
   if (radio.rxF > gCurrentBand.txF) {
