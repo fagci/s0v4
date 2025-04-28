@@ -611,6 +611,15 @@ void RADIO_SwitchRadioPure() {
 }
 
 void RADIO_SwitchRadio() {
+  if (radio.rxF < BK4819_F_MIN && hasSi) {
+    radio.radio = RADIO_SI4732;
+  }
+  if (radio.rxF > SI47XX_F_MAX && radio.rxF < BK1080_F_MIN) {
+    radio.radio = RADIO_BK4819;
+  }
+  if (radio.rxF > BK1080_F_MAX) {
+    radio.radio = RADIO_BK4819;
+  }
   radio.modulation = getNextModulation(true, false);
   RADIO_SwitchRadioPure();
 }
