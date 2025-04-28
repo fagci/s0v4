@@ -26,15 +26,6 @@ static uint16_t measure(uint32_t f) {
   return (RADIO_TuneToPure(f, true), vTaskDelay(delay / 100), RADIO_GetRSSI());
 }
 
-/* static uint16_t measure(uint32_t f) {
-  taskENTER_CRITICAL();
-  RADIO_TuneToPure(f, true);
-  SYSTICK_DelayUs(delay / 100);
-  uint16_t rssi = RADIO_GetRSSI();
-  taskEXIT_CRITICAL();
-  return rssi;
-} */
-
 static void onNewBand() {
   radio.rxF = gCurrentBand.rxF;
   RADIO_Setup();
@@ -62,37 +53,6 @@ void SCAN_setEndF(uint32_t f) {
   gCurrentBand.txF = f;
   onNewBand();
 }
-
-/* static void next() {
-  radio.rxF += StepFrequencyTable[radio.step];
-
-  if (radio.rxF > gCurrentBand.txF) {
-    if (isMultiband) {
-      BANDS_SelectBandRelativeByScanlist(true);
-      onNewBand();
-    }
-    radio.rxF = gCurrentBand.rxF;
-    gRedrawScreen = true;
-  }
-  RADIO_TuneToPure(radio.rxF, true);
-  SetTimeout(&timeout, 0);
-
-  scanCycles++;
-}
-
-static void nextWithTimeout() {
-  if (lastListenState != gIsListening) {
-    lastListenState = gIsListening;
-    SetTimeout(&timeout, gIsListening
-                             ? SCAN_TIMEOUTS[gSettings.sqOpenedTimeout]
-                             : SCAN_TIMEOUTS[gSettings.sqClosedTimeout]);
-  }
-
-  if (CheckTimeout(&timeout)) {
-    next();
-    return;
-  }
-} */
 
 static void next() {
   RADIO_ToggleRX(false);

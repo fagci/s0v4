@@ -32,10 +32,8 @@ void SCANER_init(void) {
   SPECTRUM_H = 44;
 
   gMonitorMode = false;
-  if (!gCurrentBand.rxF) {
-    RADIO_LoadCurrentVFO();
-    BANDS_SelectByFrequency(radio.rxF, true);
-  }
+  RADIO_LoadCurrentVFO();
+  BANDS_SelectByFrequency(radio.rxF, radio.fixedBoundsMode);
 
   gCurrentBand.meta.type = TYPE_BAND_DETACHED;
 
@@ -43,7 +41,6 @@ void SCANER_init(void) {
                       // outside
 
   BANDS_RangePush(gCurrentBand);
-  BANDS_SetRadioParamsFromCurrentBand();
 
   SCAN_Init(false);
 }

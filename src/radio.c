@@ -624,6 +624,7 @@ static void checkVisibleBand() {
 
 void RADIO_SetupByCurrentVFO(void) {
   Log("RADIO setup by VFO");
+
   checkVisibleBand();
 
   RADIO_SwitchRadio();
@@ -669,10 +670,13 @@ void RADIO_SaveCurrentVFO(void) {
   }
   CHANNELS_Save(vfoChNum, &radio);
 }
-
+static bool initialized = false;
 void RADIO_LoadCurrentVFO(void) {
   gMonitorMode = false;
-  loadVFO();
+  if (!initialized || radio.fixedBoundsMode) {
+    loadVFO();
+    initialized = true;
+  }
   if (RADIO_IsChMode()) {
     RADIO_VfoLoadCH();
   }

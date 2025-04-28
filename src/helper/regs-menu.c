@@ -230,6 +230,7 @@ bool REGSMENU_Key(KEY_Code_t key, Key_State_t state) {
   case KEY_2:
   case KEY_8:
     if (inMenu) {
+      radio.fixedBoundsMode = false;
       updateValue(key == KEY_2);
       return true;
     }
@@ -237,6 +238,7 @@ bool REGSMENU_Key(KEY_Code_t key, Key_State_t state) {
   case KEY_1:
   case KEY_7:
     if (inMenu) {
+      radio.fixedBoundsMode = false;
       updateValueAlt(key == KEY_1);
       return true;
     }
