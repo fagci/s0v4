@@ -610,16 +610,33 @@ void RADIO_SwitchRadioPure() {
   oldRadio = radio.radio;
 }
 
+static const Band SI4732_LB = {.rxF = SI47XX_F_MIN, .txF = SI47XX_F_MAX};
+static const Band SI4732_FM = {.rxF = 76 * MHZ, .txF = 108 * MHZ};
+static const Band BK1080_FM = {.rxF = BK1080_F_MIN, .txF = BK1080_F_MAX};
+static const Band BK4819_RANGE = {.rxF = BK4819_F_MIN, .txF = BK4819_F_MAX};
+
 void RADIO_SwitchRadio() {
-  if (radio.rxF < BK4819_F_MIN && hasSi) {
-    radio.radio = RADIO_SI4732;
+  bool si4732Support = (BANDS_InRange(radio.rxF, SI4732_LB) ||
+                        BANDS_InRange(radio.rxF, SI4732_FM));
+  bool bk4819Support = BANDS_InRange(radio.rxF, BK4819_RANGE);
+  bool bk1080Support = BANDS_InRange(radio.rxF, BK1080_FM);
+
+  if (radio.radio == RADIO_BK4819 && !bk4819Support) {
+    if (hasSi && si4732Support) {
+      radio.radio = RADIO_SI4732;
+    } else if (!hasSi && bk1080Support) {
+      radio.radio = RADIO_BK1080;
+    }
   }
-  if (radio.rxF > SI47XX_F_MAX && radio.rxF < BK1080_F_MIN) {
+
+  if (radio.radio == RADIO_SI4732 && !si4732Support && bk4819Support) {
     radio.radio = RADIO_BK4819;
   }
-  if (radio.rxF > BK1080_F_MAX) {
+
+  if (radio.radio == RADIO_SI4732 && !bk1080Support && bk4819Support) {
     radio.radio = RADIO_BK4819;
   }
+
   radio.modulation = getNextModulation(true, false);
   RADIO_SwitchRadioPure();
 }
