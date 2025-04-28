@@ -129,9 +129,11 @@ bool SCANER_key(KEY_Code_t key, Key_State_t state) {
       return true;
     case KEY_SIDE1:
       LOOT_BlacklistLast();
+      SCAN_Next(true);
       return true;
     case KEY_SIDE2:
       LOOT_WhitelistLast();
+      SCAN_Next(true);
       return true;
     case KEY_STAR:
       APPS_run(APP_LOOT_LIST);

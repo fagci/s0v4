@@ -82,7 +82,7 @@ bool BANDSCAN_key(KEY_Code_t key, Key_State_t state) {
 void BANDSCAN_render(void) {
   STATUSLINE_RenderRadioSettings();
   if (gScanlistSize) {
-    PrintMediumEx(LCD_XCENTER, 18, POS_C, C_FILL, "%s", gCurrentBand.name);
+    PrintMediumBoldEx(LCD_XCENTER, 18, POS_C, C_FILL, "%s", gCurrentBand.name);
   }
   if (gIsListening) {
     PrintMediumEx(LCD_XCENTER, 26, POS_C, C_FILL, "%u.%05u", radio.rxF / MHZ,
@@ -95,7 +95,7 @@ void BANDSCAN_render(void) {
       PrintMediumEx(LCD_XCENTER, 26, POS_C, C_FILL, "%u.%05u", radio.rxF / MHZ,
                     radio.rxF % MHZ);
     } else {
-      PrintMediumEx(LCD_XCENTER, 18, POS_C, C_FILL, "Scanlist empty");
+      PrintMediumBoldEx(LCD_XCENTER, 18, POS_C, C_FILL, "Scanlist empty");
     }
   }
   UI_DisplayScanlists(44);
