@@ -65,6 +65,10 @@ StackType_t appRenderTaskStack[configMINIMAL_STACK_SIZE + 120];
 
 static uint32_t lastUartDataTime;
 
+static bool isUartWaiting() {
+  return lastUartDataTime && Now() - lastUartDataTime < 5000;
+}
+
 static void appUpdate(void *arg) {
   for (;;) {
     APPS_update();
@@ -181,7 +185,7 @@ void SYS_Main(void *params) {
   for (;;) {
     if (xQueueReceive(systemMessageQueue, &n, pdMS_TO_TICKS(40))) {
       // Process system notifications
-      if (n.message == MSG_KEYPRESSED && Now() - lastUartDataTime >= 1000) {
+      if (n.message == MSG_KEYPRESSED && !isUartWaiting()) {
         BACKLIGHT_On();
 
         if (checkKeylock(n.state, n.key)) {
@@ -211,17 +215,16 @@ void SYS_Main(void *params) {
       }
     }
 
-    while (UART_IsCommandAvailable() || Now() - lastUartDataTime < 1000) {
-      while (UART_IsCommandAvailable()) {
-        UART_HandleCommand();
-        lastUartDataTime = Now();
-      }
+    while (UART_IsCommandAvailable()) {
+      UART_HandleCommand();
+      lastUartDataTime = Now();
     }
 
-    STATUSLINE_update();
-
-    if (Now() >= notificationTimeoutAt) {
-      notificationMessage[0] = '\0';
+    if (!isUartWaiting()) {
+      STATUSLINE_update();
+      if (Now() >= notificationTimeoutAt) {
+        notificationMessage[0] = '\0';
+      }
     }
     // vTaskDelay(1);
   }

@@ -32,7 +32,7 @@ class QuanshengUVK5Radio(Serial):
         
         status = Status()
         status.msg = f"Reading settings..."
-        status.max = 8192
+        status.max = 262144
         while addr < status.max:
             d = self.readmem(addr, self.BLOCK_SIZE)
             data += d
