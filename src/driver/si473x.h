@@ -591,6 +591,7 @@ void SI47XX_SetSsbCapacitor(uint16_t v);
 void SI47XX_TuneTo(uint32_t f);
 void SI47XX_SetVolume(uint8_t volume);
 void SI47xx_GetStatus(uint8_t intack, uint8_t cancel);
+void SI47XX_SetProperty(uint16_t prop, uint16_t value);
 
 extern SI47XX_MODE si4732mode;
 extern RSQStatus rsqStatus;

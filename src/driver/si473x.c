@@ -74,15 +74,18 @@ void SI47XX_downloadPatch() {
   // Log("DL patch OK");
 }
 
-void sendProperty(uint16_t prop, uint16_t parameter) {
+void SI47XX_SetProperty(uint16_t prop, uint16_t value) {
   waitToSend();
-  uint8_t tmp[6] = {CMD_SET_PROPERTY, 0, prop >> 8, prop & 0xff, parameter >> 8,
-                    parameter & 0xff};
+  uint8_t tmp[6] = {
+      CMD_SET_PROPERTY, 0,           //
+      prop >> 8,        prop & 0xff, //
+      value >> 8,       value & 0xff //
+  };
   SI47XX_WriteBuffer(tmp, 6);
   SYS_DelayMs(8); // irrespective of CTS coming up earlier than that
 }
 
-uint16_t getProperty(uint16_t prop, bool *valid) {
+/* uint16_t SI47XX_GetProperty(uint16_t prop, bool *valid) {
   uint8_t response[4] = {0};
   uint8_t tmp[4] = {CMD_GET_PROPERTY, 0, prop >> 8, prop & 0xff};
   waitToSend();
@@ -94,7 +97,7 @@ uint16_t getProperty(uint16_t prop, bool *valid) {
   }
 
   return MAKE_WORD(response[2], response[3]);
-}
+} */
 
 void RSQ_GET() {
   uint8_t cmd[2] = {CMD_FM_RSQ_STATUS, 0x01};
@@ -110,23 +113,23 @@ void RSQ_GET() {
 void SI47XX_SetVolume(uint8_t volume) {
   if (volume > 63)
     volume = 63;
-  sendProperty(PROP_RX_VOLUME, volume);
+  SI47XX_SetProperty(PROP_RX_VOLUME, volume);
 }
 
 void setAvcAmMaxGain(uint8_t gain) {
   if (gain < 12 || gain > 90)
     return;
-  sendProperty(PROP_AM_AUTOMATIC_VOLUME_CONTROL_MAX_GAIN, gain * 340);
+  SI47XX_SetProperty(PROP_AM_AUTOMATIC_VOLUME_CONTROL_MAX_GAIN, gain * 340);
 }
 
 void enableRDS(void) {
   // Enable and configure RDS reception
   if (si4732mode == SI47XX_FM) {
-    sendProperty(PROP_FM_RDS_INT_SOURCE, FLG_RDSRECV);
+    SI47XX_SetProperty(PROP_FM_RDS_INT_SOURCE, FLG_RDSRECV);
     // Set the FIFO high-watermark to 12 RDS blocks, which is safe even for
     // old chips, yet large enough to improve performance.
-    sendProperty(PROP_FM_RDS_INT_FIFO_COUNT, 12);
-    sendProperty(
+    SI47XX_SetProperty(PROP_FM_RDS_INT_FIFO_COUNT, 12);
+    SI47XX_SetProperty(
         PROP_FM_RDS_CONFIG,
         ((FLG_BLETHA_35 | FLG_BLETHB_35 | FLG_BLETHC_35 | FLG_BLETHD_35) << 8) |
             FLG_RDSEN);
@@ -173,8 +176,8 @@ void SI47XX_PowerUp() {
   } else if (si4732mode == SI47XX_AM) {
     Log("set AM settings");
     SI47XX_SetAutomaticGainControl(1, 0);
-    sendProperty(PROP_AM_SOFT_MUTE_MAX_ATTENUATION, 0);
-    sendProperty(PROP_AM_AGC_RELEASE_RATE, 20);
+    SI47XX_SetProperty(PROP_AM_SOFT_MUTE_MAX_ATTENUATION, 0);
+    SI47XX_SetProperty(PROP_AM_AGC_RELEASE_RATE, 20);
     setAvcAmMaxGain(40);
   }
   SI47XX_SetFreq(siCurrentFreq);
@@ -189,8 +192,8 @@ void SI47XX_SsbSetup(SI47XX_SsbFilterBW AUDIOBW, uint8_t SBCUTFLT,
   currentSsbMode.param.SMUTESEL = SMUTESEL;
   currentSsbMode.param.DSP_AFCDIS = DSP_AFCDIS;
   currentSsbMode.param.AUDIOBW = AUDIOBW;
-  sendProperty(PROP_SSB_MODE,
-               (currentSsbMode.raw[1] << 8) | currentSsbMode.raw[0]);
+  SI47XX_SetProperty(PROP_SSB_MODE,
+                     (currentSsbMode.raw[1] << 8) | currentSsbMode.raw[0]);
 }
 
 void SI47XX_PatchPowerUp() {
@@ -211,8 +214,8 @@ void SI47XX_PatchPowerUp() {
   SI47XX_SetVolume(63);
 
   SI47XX_SetFreq(siCurrentFreq);
-  sendProperty(PROP_SSB_SOFT_MUTE_MAX_ATTENUATION, 0);
-  sendProperty(PROP_AM_AUTOMATIC_VOLUME_CONTROL_MAX_GAIN, 0x7800);
+  SI47XX_SetProperty(PROP_SSB_SOFT_MUTE_MAX_ATTENUATION, 0);
+  SI47XX_SetProperty(PROP_AM_AUTOMATIC_VOLUME_CONTROL_MAX_GAIN, 0x7800);
 
   si4732mode = SI47XX_USB; // FIXME: modulation must be set before power on to
                            // prevent repowering
@@ -281,6 +284,7 @@ void SI47XX_SwitchMode(SI47XX_MODE mode) {
     }
   }
 }
+
 void SI47XX_SetFreq(uint16_t freq) {
   if (siCurrentFreq == freq) {
     return;
@@ -315,14 +319,15 @@ void SI47XX_SetFreq(uint16_t freq) {
 }
 
 void SI47XX_SetAMFrontendAGC(uint8_t minGainIdx, uint8_t attnBackup) {
-  sendProperty(PROP_AM_FRONTEND_AGC_CONTROL, minGainIdx << 8 | attnBackup);
+  SI47XX_SetProperty(PROP_AM_FRONTEND_AGC_CONTROL,
+                     minGainIdx << 8 | attnBackup);
 }
 
 void SI47XX_SetBandwidth(SI47XX_FilterBW AMCHFLT, bool AMPLFLT) {
   SI47XX_BW_Config cfg = {0};
   cfg.param.AMCHFLT = AMCHFLT;
   cfg.param.AMPLFLT = AMPLFLT;
-  sendProperty(PROP_AM_CHANNEL_FILTER, (cfg.raw[1] << 8) | cfg.raw[0]);
+  SI47XX_SetProperty(PROP_AM_CHANNEL_FILTER, (cfg.raw[1] << 8) | cfg.raw[0]);
 }
 
 void SI47XX_ReadRDS(uint8_t buf[13]) {
@@ -336,37 +341,37 @@ void SI47XX_SetSeekFmLimits(uint32_t bottom, uint32_t top) {
   uint16_t divider = fDiv();
   bottom /= divider;
   top /= divider;
-  sendProperty(PROP_FM_SEEK_BAND_BOTTOM, bottom);
-  sendProperty(PROP_FM_SEEK_BAND_TOP, top);
+  SI47XX_SetProperty(PROP_FM_SEEK_BAND_BOTTOM, bottom);
+  SI47XX_SetProperty(PROP_FM_SEEK_BAND_TOP, top);
 }
 
 void SI47XX_SetSeekAmLimits(uint32_t bottom, uint32_t top) {
   uint16_t divider = fDiv();
   bottom /= divider;
   top /= divider;
-  sendProperty(PROP_AM_SEEK_BAND_BOTTOM, bottom);
-  sendProperty(PROP_AM_SEEK_BAND_TOP, top);
+  SI47XX_SetProperty(PROP_AM_SEEK_BAND_BOTTOM, bottom);
+  SI47XX_SetProperty(PROP_AM_SEEK_BAND_TOP, top);
 }
 
 void SI47XX_SetSeekFmSpacing(uint32_t spacing) {
   spacing /= fDiv();
-  sendProperty(PROP_FM_SEEK_FREQ_SPACING, spacing);
+  SI47XX_SetProperty(PROP_FM_SEEK_FREQ_SPACING, spacing);
 }
 
 void SI47XX_SetSeekAmSpacing(uint32_t spacing) {
   spacing /= fDiv();
-  sendProperty(PROP_AM_SEEK_FREQ_SPACING, spacing);
+  SI47XX_SetProperty(PROP_AM_SEEK_FREQ_SPACING, spacing);
 }
 
 void SI47XX_SetSeekFmRssiThreshold(uint16_t value) {
-  sendProperty(PROP_FM_SEEK_TUNE_RSSI_THRESHOLD, value);
+  SI47XX_SetProperty(PROP_FM_SEEK_TUNE_RSSI_THRESHOLD, value);
 }
 
 void SI47XX_SetSeekAmRssiThreshold(uint16_t value) {
-  sendProperty(PROP_AM_SEEK_TUNE_RSSI_THRESHOLD, value);
+  SI47XX_SetProperty(PROP_AM_SEEK_TUNE_RSSI_THRESHOLD, value);
 }
 
-void SI47XX_SetBFO(int16_t bfo) { sendProperty(PROP_SSB_BFO, bfo); }
+void SI47XX_SetBFO(int16_t bfo) { SI47XX_SetProperty(PROP_SSB_BFO, bfo); }
 
 void SI47XX_TuneTo(uint32_t f) {
   if (SI47XX_IsSSB()) {

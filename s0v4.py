@@ -191,6 +191,7 @@ class QuanshengUVK5Radio(chirp_common.CloneModeRadio):
     BOUND_240_280_NAMES = ["Bound 240", "Bound 280"]
     CODE_TYPES = ["None", "CTCSS", "DCS", "-DCS"]
 
+    RADIO_NAMES = ["BK4819", "BK1080", "SI473X"]
     SQL_OPEN_NAMES = [f"{i}ms" for i in range(0, 35, 5)]
     SQL_CLOSE_NAMES = [f"{i}ms" for i in range(0, 15, 5)]
 
@@ -481,6 +482,7 @@ class QuanshengUVK5Radio(chirp_common.CloneModeRadio):
             if _mem.gainIndex == 0:
                 _mem.gainIndex = 21
 
+
         mem.extra = RadioSettingGroup(
             "extra",
             "extra",
@@ -496,6 +498,10 @@ class QuanshengUVK5Radio(chirp_common.CloneModeRadio):
                 self.BW_NAMES,
                 current_index = _mem.bw
             )),
+            RadioSetting("radio", "Radio", RadioSettingValueList(
+                self.RADIO_NAMES,
+                current_index = _mem.radio
+            )),
             RadioSetting("sq_type", "SQ type", RadioSettingValueList(
                 self.SQUELCH_TYPES,
                 current_index = _mem.squelch.type
@@ -503,7 +509,8 @@ class QuanshengUVK5Radio(chirp_common.CloneModeRadio):
             RadioSetting("sq_value", "SQ", RadioSettingValueList(
                 self.SQUELCH_LEVELS,
                 current_index = _mem.squelch.value
-            ))
+            )),
+            RadioSetting("allowTx", "TX", RadioSettingValueBoolean(_mem.allowTx))
         )
 
         return mem
@@ -545,8 +552,12 @@ class QuanshengUVK5Radio(chirp_common.CloneModeRadio):
                     _mem.gainIndex = 21
             if sname == "bw":
                 _mem.bw = self.BW_NAMES.index(svalue)
+            if sname == "allowTx":
+                _mem.allowTx = bool(svalue)
             if sname == "batteryCalibration":
                 _mem.batteryCalibration = svalue - 1900
+            if sname == "radio":
+                _mem.radio = self.RADIO_NAMES.index(svalue)
             if sname == "sq_type":
                 _mem.squelch.type = self.SQUELCH_TYPES.index(svalue)
             if sname == "sq_value":
