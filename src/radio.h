@@ -67,6 +67,7 @@ void RADIO_TuneToBand(uint16_t num);
 
 void RADIO_Setup();
 void RADIO_SwitchRadioPure();
+void RADIO_SwitchRadio();
 
 void RADIO_VfoLoadCH();
 void RADIO_SetupByCurrentVFO();

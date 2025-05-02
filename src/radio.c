@@ -99,6 +99,7 @@ static const SI47XX_SsbFilterBW SI_BW_MAP_SSB[] = {
     [BK4819_FILTER_BW_12k] = SI47XX_SSB_BW_3_kHz,
     [BK4819_FILTER_BW_14k] = SI47XX_SSB_BW_4_kHz,
 };
+
 static const SI47XX_FilterBW SI_BW_MAP_AMFM[] = {
     [BK4819_FILTER_BW_6k] = SI47XX_BW_1_kHz,
     [BK4819_FILTER_BW_7k] = SI47XX_BW_1_8_kHz,
@@ -108,6 +109,11 @@ static const SI47XX_FilterBW SI_BW_MAP_AMFM[] = {
     [BK4819_FILTER_BW_14k] = SI47XX_BW_4_kHz,
     [BK4819_FILTER_BW_17k] = SI47XX_BW_6_kHz,
 };
+
+static const Band SI4732_LB = {.rxF = SI47XX_F_MIN, .txF = SI47XX_F_MAX};
+static const Band SI4732_FM = {.rxF = SI47XX_FM_F_MIN, .txF = SI47XX_FM_F_MAX};
+static const Band BK1080_FM = {.rxF = BK1080_F_MIN, .txF = BK1080_F_MAX};
+static const Band BK4819_RANGE = {.rxF = BK4819_F_MIN, .txF = BK4819_F_MAX};
 
 static ModulationType MODS_BK4819[] = {
     MOD_FM,
@@ -169,7 +175,7 @@ static ModulationType getNextModulation(bool next, bool apply) {
       items = MODS_BOTH;
       sz = ARRAY_SIZE(MODS_BOTH);
     }
-  } else if (radio.rxF <= SI47XX_F_MAX) {
+  } else if (BANDS_InRange(radio.rxF, SI4732_LB)) {
     if (hasSsbPatch) {
       items = MODS_SI4732_PATCH;
       sz = ARRAY_SIZE(MODS_SI4732_PATCH);
@@ -179,7 +185,7 @@ static ModulationType getNextModulation(bool next, bool apply) {
     }
   }
 
-  const uint8_t curIndex = indexOfMod(items, sz, radio.modulation);
+  uint8_t curIndex = indexOfMod(items, sz, radio.modulation);
 
   return items[apply ? IncDecU(curIndex, 0, sz, next) : curIndex];
 }
@@ -610,34 +616,41 @@ void RADIO_SwitchRadioPure() {
   oldRadio = radio.radio;
 }
 
-static const Band SI4732_LB = {.rxF = SI47XX_F_MIN, .txF = SI47XX_F_MAX};
-static const Band SI4732_FM = {.rxF = 76 * MHZ, .txF = 108 * MHZ};
-static const Band BK1080_FM = {.rxF = BK1080_F_MIN, .txF = BK1080_F_MAX};
-static const Band BK4819_RANGE = {.rxF = BK4819_F_MIN, .txF = BK4819_F_MAX};
-
 void RADIO_SwitchRadio() {
   bool si4732Support = (BANDS_InRange(radio.rxF, SI4732_LB) ||
                         BANDS_InRange(radio.rxF, SI4732_FM));
   bool bk4819Support = BANDS_InRange(radio.rxF, BK4819_RANGE);
   bool bk1080Support = BANDS_InRange(radio.rxF, BK1080_FM);
 
-  if (radio.radio == RADIO_BK4819 && !bk4819Support) {
-    if (hasSi && si4732Support) {
-      radio.radio = RADIO_SI4732;
-    } else if (!hasSi && bk1080Support) {
-      radio.radio = RADIO_BK1080;
+  switch (radio.radio) {
+  case RADIO_BK4819:
+    if (!bk4819Support) {
+      if (hasSi && si4732Support) {
+        radio.radio = RADIO_SI4732;
+      } else if (!hasSi && bk1080Support) {
+        radio.radio = RADIO_BK1080;
+      }
     }
-  }
-
-  if (radio.radio == RADIO_SI4732 && !si4732Support && bk4819Support) {
-    radio.radio = RADIO_BK4819;
-  }
-
-  if (radio.radio == RADIO_SI4732 && !bk1080Support && bk4819Support) {
-    radio.radio = RADIO_BK4819;
+    break;
+  case RADIO_BK1080:
+    if (!bk1080Support && bk4819Support) {
+      radio.radio = RADIO_BK4819;
+    }
+    break;
+  case RADIO_SI4732:
+    if (!si4732Support && bk4819Support) {
+      radio.radio = RADIO_BK4819;
+    }
+    break;
   }
 
   radio.modulation = getNextModulation(true, false);
+
+  if (radio.radio != MOD_AM && !RADIO_IsSSB() && radio.radio == RADIO_SI4732 &&
+      BANDS_InRange(radio.rxF, SI4732_LB)) {
+    radio.modulation = MOD_AM;
+  }
+
   RADIO_SwitchRadioPure();
 }
 
@@ -987,10 +1000,11 @@ void RADIO_ToggleTxPower(void) {
 }
 
 void RADIO_ToggleModulationEx(bool next) {
-  if (radio.modulation == getNextModulation(next, true)) {
+  ModulationType nextMod = getNextModulation(next, true);
+  if (radio.modulation == nextMod) {
     return;
   }
-  radio.modulation = getNextModulation(next, true);
+  radio.modulation = nextMod;
 
   // NOTE: for right BW after switching from WFM to another
   RADIO_Setup();

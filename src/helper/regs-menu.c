@@ -63,9 +63,9 @@ static void updateValue(bool inc) {
     } else {
       radio.radio = RADIO_BK4819;
     }
-    RADIO_SwitchRadioPure();
-    RADIO_Setup();
-    RADIO_SaveCurrentVFODelayed();
+    RADIO_SwitchRadio();
+    RADIO_SaveCurrentVFO();
+    RADIO_SetupByCurrentVFO();
     break;
   case REG_BW:
     RADIO_SetFilterBandwidth(radio.bw =

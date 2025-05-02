@@ -276,7 +276,7 @@ void VFO1_render(void) {
   uint32_t f = gTxState == TX_ON ? RADIO_GetTXF() : GetScreenF(radio.rxF);
   const char *mod = modulationTypeOptions[radio.modulation];
 
-  if (RADIO_IsChMode() && !gVfo1ProMode) {
+  if (RADIO_IsChMode()) {
     PrintMediumEx(LCD_XCENTER, BASE - 16, POS_C, C_FILL, radio.name);
   }
 
