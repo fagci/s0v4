@@ -211,9 +211,11 @@ void SYS_Main(void *params) {
       }
     }
 
-    while (UART_IsCommandAvailable()) {
-      UART_HandleCommand();
-      lastUartDataTime = Now();
+    while (UART_IsCommandAvailable() || Now() - lastUartDataTime < 1000) {
+      while (UART_IsCommandAvailable()) {
+        UART_HandleCommand();
+        lastUartDataTime = Now();
+      }
     }
 
     STATUSLINE_update();

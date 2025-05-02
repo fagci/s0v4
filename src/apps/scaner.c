@@ -24,6 +24,20 @@ static uint32_t cursorRangeTimeout = 0;
 
 static bool isAnalyserMode = false;
 
+static void setStartF(uint32_t f) {
+  radio.fixedBoundsMode = false;
+  BANDS_RangeClear();
+  SCAN_setStartF(f);
+  BANDS_RangePush(gCurrentBand);
+}
+
+static void setEndF(uint32_t f) {
+  radio.fixedBoundsMode = false;
+  BANDS_RangeClear();
+  SCAN_setEndF(f);
+  BANDS_RangePush(gCurrentBand);
+}
+
 void SCANER_init(void) {
   gMonitorMode = false;
   RADIO_ToggleRX(false);
@@ -33,9 +47,11 @@ void SCANER_init(void) {
 
   gMonitorMode = false;
   RADIO_LoadCurrentVFO();
-  BANDS_SelectByFrequency(radio.rxF, radio.fixedBoundsMode);
 
-  gCurrentBand.meta.type = TYPE_BAND_DETACHED;
+  if (gCurrentBand.meta.type != TYPE_BAND_DETACHED) {
+    BANDS_SelectByFrequency(radio.rxF, radio.fixedBoundsMode);
+    gCurrentBand.meta.type = TYPE_BAND_DETACHED;
+  }
 
   BANDS_RangeClear(); // TODO: push only if gCurrentBand was changed from
                       // outside
@@ -93,7 +109,7 @@ bool SCANER_key(KEY_Code_t key, Key_State_t state) {
     switch (key) {
     case KEY_1:
     case KEY_7:
-      delay = AdjustU(delay, 200, 10000, key == KEY_1 ? 100 : -100);
+      delay = AdjustU(delay, 100, 10000, key == KEY_1 ? 100 : -100);
       return true;
     case KEY_3:
     case KEY_9:
@@ -121,7 +137,7 @@ bool SCANER_key(KEY_Code_t key, Key_State_t state) {
       minMaxRssi = SP_GetMinMax();
       return true;
     case KEY_5:
-      gFInputCallback = selStart ? SCAN_setStartF : SCAN_setEndF;
+      gFInputCallback = selStart ? setStartF : setEndF;
       APPS_run(APP_FINPUT);
       return true;
     case KEY_SIDE1:

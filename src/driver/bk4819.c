@@ -472,6 +472,37 @@ uint8_t BK4819_GetAFC() {
   return 8 - ((afc >> 11) & 0b111);
 }
 
+XtalMode BK4819_XtalGet() {
+  return (XtalMode)((BK4819_ReadRegister(0x3C) >> 6) & 0b11);
+}
+
+void BK4819_XtalSet(XtalMode mode) {
+  uint16_t ifset = 0x2AAB;
+  uint16_t xtal = 20360;
+  switch (mode) {
+  case XTAL_0_13M:
+    xtal = 20232;
+    ifset = 0x3555;
+    // ctcCoef = 103190;
+    break;
+  case XTAL_1_19_2M:
+    xtal = 20296;
+    ifset = 0x2E39;
+    // ctcCoef = 154740;
+    break;
+  case XTAL_2_26M:
+    // ctcCoef = 206322;
+    break;
+  case XTAL_3_38_4M:
+    xtal = 20424;
+    ifset = 0x271C;
+    // ctcCoef = 309500;
+    break;
+  }
+  BK4819_WriteRegister(0x3C, xtal);
+  BK4819_WriteRegister(0x3D, ifset);
+}
+
 void BK4819_SetModulation(ModulationType type) {
   bool isSsb = type == MOD_LSB || type == MOD_USB;
   bool isFm = type == MOD_FM || type == MOD_WFM;
@@ -483,14 +514,17 @@ void BK4819_SetModulation(ModulationType type) {
     BK4819_SetRegValue(RS_RF_FILT_BW_WEAK, 7);
     BK4819_SetRegValue(RS_BW_MODE, 3);
 
-    BK4819_SetRegValue(RS_XTAL_MODE, 0);
-    BK4819_SetRegValue(RS_IF_F, 14223);
+    /* BK4819_SetRegValue(RS_XTAL_MODE, 0);
+    BK4819_SetRegValue(RS_IF_F, 0x3555); // was 0x378F */
+    BK4819_XtalSet(XTAL_0_13M);
   } else if (isSsb) {
-    BK4819_SetRegValue(RS_XTAL_MODE, 3);
+    BK4819_XtalSet(XTAL_3_38_4M);
+    // BK4819_SetRegValue(RS_XTAL_MODE, 3);
     BK4819_SetRegValue(RS_IF_F, 0);
   } else {
-    BK4819_SetRegValue(RS_XTAL_MODE, 2);
-    BK4819_SetRegValue(RS_IF_F, 10923);
+    /* BK4819_SetRegValue(RS_XTAL_MODE, 2);
+    BK4819_SetRegValue(RS_IF_F, 0x2AAB); */
+    BK4819_XtalSet(XTAL_2_26M);
   }
 }
 

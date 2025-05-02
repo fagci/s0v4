@@ -14,6 +14,7 @@ typedef enum {
   REG_AFC,
   REG_DEV,
   REG_MIC,
+  REG_XTAL,
   REG_TX_POWER,
 
   REG_COUNT,
@@ -36,6 +37,7 @@ static char *MENU_NAMES[] = {
     [REG_AFC] = "AFC",         //
     [REG_DEV] = "DEV",         //
     [REG_MIC] = "MIC",         //
+    [REG_XTAL] = "XTAL",       //
     [REG_TX_POWER] = "TX POW", //
 };
 
@@ -72,6 +74,9 @@ static void updateValue(bool inc) {
     break;
   case REG_AFC:
     BK4819_SetAFC(IncDecU(BK4819_GetAFC(), 0, 8 + 1, inc));
+    break;
+  case REG_XTAL:
+    BK4819_XtalSet(IncDecU(BK4819_XtalGet(), 0, XTAL_3_38_4M + 1, inc));
     break;
   case REG_DEV:
     v = AdjustU(BK4819_GetRegValue(RS_DEV), 0, 1450, inc ? 10 : -10);
@@ -168,6 +173,9 @@ static void getValue(MenuReg reg) {
     break;
   case REG_AFC:
     snprintf(buf, 16, "%u", BK4819_GetAFC());
+    break;
+  case REG_XTAL:
+    snprintf(buf, 16, "%u", BK4819_XtalGet());
     break;
   case REG_DEV:
     snprintf(buf, 16, "%u", BK4819_GetRegValue(RS_DEV));

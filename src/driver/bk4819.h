@@ -43,6 +43,13 @@ typedef enum {
 } ModulationType;
 
 typedef enum {
+  XTAL_0_13M,
+  XTAL_1_19_2M,
+  XTAL_2_26M,
+  XTAL_3_38_4M,
+} XtalMode;
+
+typedef enum {
   SQUELCH_RSSI_NOISE_GLITCH,
   SQUELCH_RSSI_GLITCH,
   SQUELCH_RSSI_NOISE,
@@ -201,5 +208,8 @@ void BK4819_SetTone2Frequency(uint16_t f);
 void BK4819_SetModulation(ModulationType type);
 bool BK4819_IsSquelchOpen();
 void BK4819_ResetRSSI();
+
+XtalMode BK4819_XtalGet();
+void BK4819_XtalSet(XtalMode mode);
 
 #endif
