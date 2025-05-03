@@ -1,3 +1,4 @@
+import time
 from binascii import crc_hqx
 from itertools import cycle
 from struct import pack
@@ -829,21 +830,37 @@ class QuanshengUVK5Radio(chirp_common.CloneModeRadio):
 
     def readmem(self, offset, n):
         readmem = b"\x1b\x05\x0A\x00" + pack("<IBBBB", offset, n, 0, 0, 0) + b"\x6a\x39\x57\x64"
-        self._send_command(readmem)
-        return self._receive_reply()[12:]
-
-
+        
+        for attempt in range(5):
+            try:
+                self._send_command(readmem)
+                return self._receive_reply()[12:]
+            except Exception as e:
+                if attempt == 4:  # Last attempt
+                    raise errors.RadioError(f"Failed to read memory after 5 attempts: {str(e)}{ERROR_TIP}")
+                delay = (2 ** attempt) * 0.1  # Exponential backoff: 0.1, 0.2, 0.4, 0.8 seconds
+                time.sleep(delay)
+                
+                
     def writemem(self, data, addr):
         n = len(data)
-        writemem = b"\x1d\x05" + pack("<BBIBBBB", n + 10, 0, addr, n, 0, 0, 1) + b"\x6a\x39\x57\x64" + data
-
-        self._send_command(writemem)
-        o = self._receive_reply()
-
-        if (o[0] == 0x1e and o[4] == (addr & 0xff) and o[5] == (addr >> 8) & 0xff):
-            return True
-        else:
-            raise errors.RadioError("Bad response to writemem{}".format(ERROR_TIP))
+        writemem = b"\x1d\x05" + pack("<BBIBBBB", n + 10, 0, addr, n, 0, 0, 1) + b"\x6a\x39\x57\x64"
+        
+        for attempt in range(5):
+            try:
+                self._send_command(writemem)
+                o = self._receive_reply()
+                
+                if (o[0] == 0x1e and o[4] == (addr & 0xff) and o[5] == (addr >> 8) & 0xff):
+                    return True
+                else:
+                    raise errors.RadioError("Bad response to writemem{}".format(ERROR_TIP))
+                    
+            except Exception as e:
+                if attempt == 4:  # Last attempt
+                    raise errors.RadioError(f"Failed to write memory after 5 attempts: {str(e)}{ERROR_TIP}")
+                delay = (2 ** attempt) * 0.1  # Exponential backoff: 0.1, 0.2, 0.4, 0.8 seconds
+                time.sleep(delay)
 
 
     def reset(self):
