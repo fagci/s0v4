@@ -844,7 +844,7 @@ class QuanshengUVK5Radio(chirp_common.CloneModeRadio):
                 
     def writemem(self, data, addr):
         n = len(data)
-        writemem = b"\x1d\x05" + pack("<BBIBBBB", n + 10, 0, addr, n, 0, 0, 1) + b"\x6a\x39\x57\x64"
+        writemem = b"\x1d\x05" + pack("<BBIBBBB", n + 10, 0, addr, n, 0, 0, 1) + b"\x6a\x39\x57\x64" + data
         
         for attempt in range(5):
             try:
