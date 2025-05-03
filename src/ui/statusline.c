@@ -52,7 +52,7 @@ void STATUSLINE_SetTickerText(const char *pattern, ...) {
 }
 
 void STATUSLINE_update(void) {
-  BATTERY_UpdateBatteryInfo();
+  // BATTERY_UpdateBatteryInfo();
   uint8_t level = gBatteryPercent / 10;
   if (gBatteryPercent < BAT_WARN_PERCENT) {
     showBattery = !showBattery;

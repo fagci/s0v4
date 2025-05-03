@@ -111,6 +111,15 @@ void SCAN_Init(bool multiband) {
 }
 
 void SCAN_Check(bool isAnalyserMode) {
+  if (isAnalyserMode) {
+    m->f = radio.rxF;
+    m->rssi = measure(radio.rxF);
+    SP_AddPoint(m);
+    gRedrawScreen = true;
+    next();
+    return;
+  }
+
   if (m->open) {
     m->open = RADIO_IsSquelchOpen();
   } else {
@@ -129,9 +138,6 @@ void SCAN_Check(bool isAnalyserMode) {
     }
 
     m->open = m->rssi >= sqLevel;
-    if (isAnalyserMode) {
-      m->open = false;
-    }
 
     SP_AddPoint(m);
   }
@@ -141,7 +147,7 @@ void SCAN_Check(bool isAnalyserMode) {
   }
 
   // really good level?
-  if (m->open && !gIsListening && !isAnalyserMode) {
+  if (m->open && !gIsListening) {
     thinking = true;
     wasThinkingEarlier = true;
     gRedrawScreen = true;
