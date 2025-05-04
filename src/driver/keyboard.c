@@ -128,10 +128,8 @@ static void ResetKeyboardPins() {
 
 static uint8_t ScanKeyboardMatrix() {
   for (uint8_t i = 0; i < ROWS; i++) {
-    taskENTER_CRITICAL();
     ResetKeyboardRow(i);
     uint16_t reg = ReadStableGpioData();
-    taskEXIT_CRITICAL();
 
     for (uint8_t j = 0; j < COLS; j++) {
       const uint16_t mask = 1u << keyboard[i].pins[j].pin;
@@ -195,7 +193,9 @@ void KEYBOARD_CheckKeys() {
 
 static void checkKeys(void *attr) {
   for (;;) {
+    taskENTER_CRITICAL();
     KEYBOARD_Poll();
+    taskEXIT_CRITICAL();
     KEYBOARD_CheckKeys();
     vTaskDelay(pdMS_TO_TICKS(12));
   }
