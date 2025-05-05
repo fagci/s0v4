@@ -218,6 +218,7 @@ void SYS_Main(void *params) {
     while (UART_IsCommandAvailable()) {
       UART_HandleCommand();
       lastUartDataTime = Now();
+      vTaskDelay(1);
     }
 
     if (!isUartWaiting()) {

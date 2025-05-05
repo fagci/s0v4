@@ -1086,7 +1086,7 @@ void RADIO_CheckAndListen() {
     checkTone(&m);
   }
 
-  if (!gMonitorMode) {
+  if (!gMonitorMode && radio.radio == RADIO_BK4819) {
     LOOT_Update(&m);
   }
   RADIO_ToggleRX(m.open);

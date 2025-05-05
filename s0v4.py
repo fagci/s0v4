@@ -396,7 +396,8 @@ class QuanshengUVK5Radio(chirp_common.CloneModeRadio):
 
         addr = 0
 
-        status.max = self.get_patch_address()
+        # status.max = self.get_patch_address()
+        status.max = self.settings_size + self.ch_size * self.ch_count
         while addr < status.max:
             self.writemem(self.get_mmap()[addr:addr + self.BLOCK_SIZE], addr)
             status.cur = addr
@@ -406,9 +407,10 @@ class QuanshengUVK5Radio(chirp_common.CloneModeRadio):
 
 
         if self.is_patch_can_be_sent():
-            addr = self.get_patch_address()
-            i = 0
             status.max = self.eeprom_size
+            addr = self.get_patch_address()
+            status.cur = addr
+            i = 0
             while addr < status.max:
                 left = status.max - addr
                 n = self.BLOCK_SIZE if left > self.BLOCK_SIZE else left
