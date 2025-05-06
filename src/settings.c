@@ -33,8 +33,6 @@ char *SCAN_TIMEOUT_NAMES[15] = {
     "5s", "10s",   "30s",   "1min",  "2min",  "5min",  "None",
 };
 
-/* static const uint8_t PATCH1_PREAMBLE[] = {0x15, 0x00, 0x0F, 0xE0,
-                                          0xF2, 0x73, 0x76, 0x2F}; */
 static const uint8_t PATCH3_PREAMBLE[] = {0x15, 0x00, 0x03, 0x74,
                                           0x0b, 0xd4, 0x84, 0x60};
 
@@ -56,7 +54,7 @@ Settings gSettings = (Settings){
     .dtmfdecode = false,
     .brightness = 8,
     .contrast = 8,
-    .mainApp = 0,
+    .mainApp = 13,
     .sqOpenedTimeout = SCAN_TO_NONE,
     .sqClosedTimeout = SCAN_TO_2s,
     .sqlOpenTime = 1,

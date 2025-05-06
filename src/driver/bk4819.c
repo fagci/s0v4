@@ -509,6 +509,7 @@ void BK4819_SetModulation(ModulationType type) {
   BK4819_SetAF(modTypeReg47Values[type]);
   BK4819_SetRegValue(RS_AF_DAC_GAIN, 0x8);
   BK4819_SetRegValue(RS_AFC_DIS, !isFm);
+  return;
   if (type == MOD_WFM) {
     BK4819_SetRegValue(RS_RF_FILT_BW, 7);
     BK4819_SetRegValue(RS_RF_FILT_BW_WEAK, 7);
@@ -518,9 +519,9 @@ void BK4819_SetModulation(ModulationType type) {
     BK4819_SetRegValue(RS_IF_F, 0x3555); // was 0x378F */
     BK4819_XtalSet(XTAL_0_13M);
   } else if (isSsb) {
-    BK4819_XtalSet(XTAL_3_38_4M);
+    // BK4819_XtalSet(XTAL_3_38_4M);
     // BK4819_SetRegValue(RS_XTAL_MODE, 3);
-    BK4819_SetRegValue(RS_IF_F, 0);
+    // BK4819_SetRegValue(RS_IF_F, 0);
   } else {
     /* BK4819_SetRegValue(RS_XTAL_MODE, 2);
     BK4819_SetRegValue(RS_IF_F, 0x2AAB); */
