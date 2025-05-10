@@ -115,5 +115,8 @@ void CHSCAN_render(void) {
       PrintMediumEx(LCD_XCENTER, 18, POS_C, C_FILL, "Scanlist empty");
     }
   }
-  UI_DisplayScanlists(44);
+  if (gLastActiveLoot) {
+    UI_DrawLoot(gLastActiveLoot, LCD_XCENTER, 50, POS_C);
+  }
+  UI_DisplayScanlists(60);
 }

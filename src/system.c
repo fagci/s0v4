@@ -132,7 +132,10 @@ static bool checkKeylock(Key_State_t state, KEY_Code_t key) {
     return true;
   } */
 
-  if (gSettings.keylock && (gSettings.pttLock ? true : key != KEY_PTT) &&
+  if (gSettings.keylock &&
+      (gSettings.pttLock
+           ? true
+           : (key != KEY_PTT && key != KEY_SIDE1 && key != KEY_SIDE2)) &&
       !(state == KEY_LONG_PRESSED && key == KEY_F)) {
     return true;
   }

@@ -190,8 +190,8 @@ bool VFO1_key(KEY_Code_t key, Key_State_t state) {
       APPS_run(APP_SCANER);
       return true;
     case KEY_SIDE1:
-      return true;
     case KEY_SIDE2:
+      SP_NextGraphUnit(key == KEY_SIDE1);
       return true;
     default:
       break;
@@ -311,10 +311,37 @@ void VFO1_render(void) {
   }
 
   if (gMonitorMode) {
-    SPECTRUM_Y = BASE + 8;
+    SPECTRUM_Y = BASE + 2;
     SPECTRUM_H = LCD_HEIGHT - SPECTRUM_Y;
     if (gSettings.showLevelInVFO) {
-      SP_RenderGraph(RSSI_MIN, RSSI_MAX);
+      char *graphMeasurementNames[] = {
+          [GRAPH_RSSI] = "RSSI",           //
+          [GRAPH_REL_RSSI] = "REL RSSI",   //
+          [GRAPH_PEAK_RSSI] = "Peak RSSI", //
+          [GRAPH_NOISE] = "Noise",         //
+          [GRAPH_GLITCH] = "Glitch",       //
+          [GRAPH_SNR] = "SNR",             //
+      };
+      switch (graphMeasurement) {
+      case GRAPH_RSSI:
+      case GRAPH_COUNT:
+        SP_RenderGraph(RSSI_MIN, RSSI_MAX);
+        break;
+      case GRAPH_REL_RSSI:
+      case GRAPH_NOISE:
+      case GRAPH_GLITCH:
+        SP_RenderGraph(0, 256);
+        break;
+      case GRAPH_SNR:
+        SP_RenderGraph(0, 30);
+        break;
+      case GRAPH_PEAK_RSSI:
+        SP_RenderGraph(46, 380);
+        break;
+      }
+      PrintSmallEx(0, SPECTRUM_Y + 5, POS_L, C_FILL, "%s %+3u",
+                   graphMeasurementNames[graphMeasurement],
+                   SP_GetLastGraphValue());
     } else {
       UI_RSSIBar(BASE + 8);
     }

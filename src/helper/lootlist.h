@@ -26,6 +26,8 @@ typedef struct {
   uint16_t duration;
   uint16_t timeUs;
   uint16_t rssi;
+  uint16_t lnaPeakRssi;
+  uint16_t rssiRel;
   uint8_t noise;
   uint8_t glitch;
   uint8_t snr;

@@ -9,6 +9,7 @@
 
 uint8_t SPECTRUM_Y = 8;
 uint8_t SPECTRUM_H = 44;
+GraphMeasurement graphMeasurement = GRAPH_RSSI;
 
 static uint8_t S_BOTTOM;
 
@@ -118,6 +119,8 @@ void SP_RenderLine(uint16_t rssi, VMinMax v) {
 uint16_t SP_GetNoiseFloor() { return Std(rssiHistory, filledPoints); }
 uint16_t SP_GetRssiMax() { return Max(rssiHistory, filledPoints); }
 
+uint16_t SP_GetLastGraphValue() { return rssiGraphHistory[MAX_POINTS - 1]; }
+
 void SP_RenderGraph(uint16_t min, uint16_t max) {
   const VMinMax v = {
       /* .vMin = 78,
@@ -126,6 +129,8 @@ void SP_RenderGraph(uint16_t min, uint16_t max) {
       .vMax = max,
   };
   S_BOTTOM = SPECTRUM_Y + SPECTRUM_H; // TODO: mv to separate function
+
+  FillRect(0, SPECTRUM_Y, LCD_WIDTH, SPECTRUM_H, C_CLEAR);
 
   uint8_t oVal =
       ConvertDomain(rssiGraphHistory[0], v.vMin, v.vMax, 0, SPECTRUM_H);
@@ -144,8 +149,35 @@ void SP_RenderGraph(uint16_t min, uint16_t max) {
   }
 }
 
+void SP_NextGraphUnit(bool next) {
+  graphMeasurement = IncDecU(graphMeasurement, 0, GRAPH_COUNT, next);
+}
+
 void SP_AddGraphPoint(const Measurement *msm) {
-  rssiGraphHistory[MAX_POINTS - 1] = msm->rssi;
+  uint16_t v = msm->rssi;
+
+  switch (graphMeasurement) {
+  case GRAPH_PEAK_RSSI:
+    v = msm->lnaPeakRssi;
+    break;
+  case GRAPH_REL_RSSI:
+    v = msm->rssiRel;
+    break;
+  case GRAPH_NOISE:
+    v = msm->noise;
+    break;
+  case GRAPH_GLITCH:
+    v = msm->glitch;
+    break;
+  case GRAPH_SNR:
+    v = msm->snr;
+    break;
+  case GRAPH_RSSI:
+  case GRAPH_COUNT:
+    break;
+  }
+
+  rssiGraphHistory[MAX_POINTS - 1] = v;
   filledPoints = MAX_POINTS;
 }
 

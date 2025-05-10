@@ -98,6 +98,11 @@ void BANDSCAN_render(void) {
       PrintMediumBoldEx(LCD_XCENTER, 18, POS_C, C_FILL, "Scanlist empty");
     }
   }
-  UI_DisplayScanlists(44);
+
+  if (gLastActiveLoot) {
+    UI_DrawLoot(gLastActiveLoot, LCD_XCENTER, 50, POS_C);
+  }
+
+  UI_DisplayScanlists(60);
   REGSMENU_Draw();
 }

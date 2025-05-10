@@ -11,6 +11,16 @@ typedef struct {
   uint16_t vMax;
 } VMinMax;
 
+typedef enum {
+  GRAPH_RSSI,
+  GRAPH_PEAK_RSSI,
+  GRAPH_REL_RSSI,
+  GRAPH_NOISE,
+  GRAPH_GLITCH,
+  GRAPH_SNR,
+  GRAPH_COUNT,
+} GraphMeasurement;
+
 void SP_AddPoint(const Measurement *msm);
 void SP_ResetHistory();
 void SP_Init(Band *b);
@@ -23,10 +33,12 @@ uint16_t SP_GetNoiseFloor();
 uint16_t SP_GetRssiMax();
 VMinMax SP_GetMinMax();
 
+void SP_NextGraphUnit(bool next);
 void SP_RenderGraph(uint16_t min, uint16_t max);
 void SP_AddGraphPoint(const Measurement *msm);
 void SP_Shift(int16_t n);
 void SP_ShiftGraph(int16_t n);
+uint16_t SP_GetLastGraphValue();
 
 uint8_t SP_F2X(uint32_t f);
 
@@ -39,5 +51,6 @@ bool CUR_Size(bool up);
 
 extern uint8_t SPECTRUM_Y;
 extern uint8_t SPECTRUM_H;
+extern GraphMeasurement graphMeasurement;
 
 #endif /* end of include guard: UI_SPECTRUM_H */

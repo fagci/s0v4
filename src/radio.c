@@ -1073,9 +1073,14 @@ static Measurement m;
 void RADIO_CheckAndListen() {
   m.f = radio.rxF;
   m.rssi = RADIO_GetRSSI();
-  m.snr = RADIO_GetSNR();
-  m.noise = BK4819_GetNoise();
-  m.glitch = BK4819_GetGlitch();
+
+  if (gSettings.showLevelInVFO) {
+    m.snr = RADIO_GetSNR();
+    m.noise = BK4819_GetNoise();
+    m.glitch = BK4819_GetGlitch();
+    m.lnaPeakRssi = BK4819_GetLnaPeakRSSI();
+    m.rssiRel = BK4819_GetRSSIRelative();
+  }
 
   if (radio.code.rx.type == CODE_TYPE_OFF) {
     m.open = RADIO_IsSquelchOpen();

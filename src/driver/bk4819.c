@@ -521,7 +521,7 @@ void BK4819_SetModulation(ModulationType type) {
   } else if (isSsb) {
     // BK4819_XtalSet(XTAL_3_38_4M);
     // BK4819_SetRegValue(RS_XTAL_MODE, 3);
-    // BK4819_SetRegValue(RS_IF_F, 0);
+    BK4819_SetRegValue(RS_IF_F, 0);
   } else {
     /* BK4819_SetRegValue(RS_XTAL_MODE, 2);
     BK4819_SetRegValue(RS_IF_F, 0x2AAB); */
@@ -866,6 +866,10 @@ void BK4819_EnableCTCSS(void) {
   // BK4819_GenTail(2); // CTC180
   BK4819_GenTail(4); // CTC55
   BK4819_WriteRegister(BK4819_REG_51, 0x904A);
+}
+
+uint16_t BK4819_GetLnaPeakRSSI(void) {
+  return BK4819_ReadRegister(0x62) & 0x1FF;
 }
 
 uint16_t BK4819_GetRSSI(void) {
