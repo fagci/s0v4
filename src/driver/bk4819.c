@@ -868,11 +868,9 @@ void BK4819_EnableCTCSS(void) {
   BK4819_WriteRegister(BK4819_REG_51, 0x904A);
 }
 
-uint16_t BK4819_GetLnaPeakRSSI(void) {
-  return BK4819_ReadRegister(0x62) & 0xFF;
-}
+uint8_t BK4819_GetLnaPeakRSSI(void) { return BK4819_ReadRegister(0x62) & 0xFF; }
 
-uint16_t BK4819_GetAgcRSSI(void) {
+uint8_t BK4819_GetAgcRSSI(void) {
   return (BK4819_ReadRegister(0x62) >> 8) & 0xFF;
 }
 

@@ -335,10 +335,10 @@ void VFO1_render(void) {
         SP_RenderGraph(0, 30);
         break;
       case GRAPH_PEAK_RSSI:
-        SP_RenderGraph(46, 88);
+        SP_RenderGraph(15, 88);
         break;
       case GRAPH_AGC_RSSI:
-        SP_RenderGraph(0, 256);
+        SP_RenderGraph(25, 128);
         break;
       }
       PrintSmallEx(0, SPECTRUM_Y + 5, POS_L, C_FILL, "%s %+3u",

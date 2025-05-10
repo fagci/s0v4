@@ -165,8 +165,8 @@ void BK4819_GenTail(uint8_t Tail);
 void BK4819_EnableCDCSS(void);
 void BK4819_EnableCTCSS(void);
 
-uint16_t BK4819_GetAgcRSSI(void);
-uint16_t BK4819_GetLnaPeakRSSI(void);
+uint8_t BK4819_GetAgcRSSI(void);
+uint8_t BK4819_GetLnaPeakRSSI(void);
 uint16_t BK4819_GetRSSI(void);
 uint8_t BK4819_GetRSSIRelative(void);
 uint8_t BK4819_GetNoise(void);
