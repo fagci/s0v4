@@ -1,4 +1,5 @@
 #include "radio.h"
+#include "apps/vfo1.h"
 #include "board.h"
 #include "dcs.h"
 #include "driver/audio.h"
@@ -1068,33 +1069,31 @@ static void checkTone(Measurement *m) {
   }
 }
 
-static Measurement m;
-
 void RADIO_CheckAndListen() {
-  m.f = radio.rxF;
-  m.rssi = RADIO_GetRSSI();
+  gLoot.f = radio.rxF;
+  gLoot.rssi = RADIO_GetRSSI();
 
-  if (gSettings.showLevelInVFO) {
-    m.snr = RADIO_GetSNR();
-    m.noise = BK4819_GetNoise();
-    m.glitch = BK4819_GetGlitch();
-    m.lnaPeakRssi = BK4819_GetLnaPeakRSSI();
-    m.rssiRel = BK4819_GetRSSIRelative();
+  if ((gMonitorMode || gVfo1ProMode) && gSettings.showLevelInVFO) {
+    gLoot.snr = RADIO_GetSNR();
+    gLoot.noise = BK4819_GetNoise();
+    gLoot.glitch = BK4819_GetGlitch();
+    gLoot.lnaPeakRssi = BK4819_GetLnaPeakRSSI();
+    gLoot.rssiRel = BK4819_GetRSSIRelative();
   }
 
   if (radio.code.rx.type == CODE_TYPE_OFF) {
-    m.open = RADIO_IsSquelchOpen();
-    if (m.open) {
-      checkTone(&m);
+    gLoot.open = RADIO_IsSquelchOpen();
+    if (gLoot.open) {
+      checkTone(&gLoot);
     }
   } else {
-    checkTone(&m);
+    checkTone(&gLoot);
   }
 
   if (!gMonitorMode && radio.radio == RADIO_BK4819) {
-    LOOT_Update(&m);
+    LOOT_Update(&gLoot);
   }
-  RADIO_ToggleRX(m.open);
+  RADIO_ToggleRX(gLoot.open);
   SP_ShiftGraph(-1);
-  SP_AddGraphPoint(&m);
+  SP_AddGraphPoint(&gLoot);
 }

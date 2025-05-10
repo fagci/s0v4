@@ -255,12 +255,10 @@ static void renderChannelName(uint8_t y, uint16_t channel) {
 
 static void renderProModeInfo(uint8_t y) {
   if (radio.radio == RADIO_BK4819) {
-    PrintSmall(0, LCD_HEIGHT - 1, "R %+3u N %+3u G %+3u SNR %+2u",
-               RADIO_GetRSSI(), BK4819_GetNoise(), BK4819_GetGlitch(),
-               RADIO_GetSNR());
+    PrintSmall(0, LCD_HEIGHT - 1, "R %+3u N %+3u G %+3u SNR %+2u", gLoot.rssi,
+               gLoot.noise, gLoot.glitch, gLoot.snr);
   } else {
-    PrintSmall(0, LCD_HEIGHT - 1, "R %+3u SNR %+2u", RADIO_GetRSSI(),
-               RADIO_GetSNR());
+    PrintSmall(0, LCD_HEIGHT - 1, "R %+3u SNR %+2u", gLoot.rssi, gLoot.snr);
   }
 }
 

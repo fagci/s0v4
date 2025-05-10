@@ -29,7 +29,7 @@ void UI_TxBar(uint8_t y) {
 
 void UI_RSSIBar(uint8_t y) {
 #if 1
-  uint16_t rssi = RADIO_GetRSSI();
+  uint16_t rssi = gLoot.rssi;
   if (rssi == 0) {
     return;
   }
@@ -44,7 +44,7 @@ void UI_RSSIBar(uint8_t y) {
   const uint16_t SNR_MAX = 30;
 
   uint8_t rssiW = ConvertDomain(rssi, RSSI_MIN, RSSI_MAX, 0, BAR_WIDTH);
-  uint8_t snrW = ConvertDomain(RADIO_GetSNR(), SNR_MIN, SNR_MAX, 0, BAR_WIDTH);
+  uint8_t snrW = ConvertDomain(gLoot.snr, SNR_MIN, SNR_MAX, 0, BAR_WIDTH);
 
   FillRect(BAR_LEFT_MARGIN, y + 2, rssiW, 4, C_FILL);
   FillRect(BAR_LEFT_MARGIN, y + 7, snrW, 1, C_FILL);
