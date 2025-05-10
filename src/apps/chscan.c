@@ -49,17 +49,7 @@ void CHSCAN_deinit(void) {}
 void CHSCAN_update(void) {
   nextWithTimeout();
   vTaskDelay(pdMS_TO_TICKS(SQL_DELAY));
-  Measurement m = {
-      .f = radio.rxF,
-      .rssi = RADIO_GetRSSI(),
-      .snr = RADIO_GetSNR(),
-      .noise = BK4819_GetNoise(),
-      .glitch = BK4819_GetGlitch(),
-  };
-  m.open = RADIO_IsSquelchOpen();
-  LOOT_Update(&m);
-  RADIO_ToggleRX(m.open);
-
+  RADIO_CheckAndListen();
   gRedrawScreen = true;
 }
 
@@ -100,23 +90,14 @@ bool CHSCAN_key(KEY_Code_t key, Key_State_t state) {
 }
 
 void CHSCAN_render(void) {
-  if (gIsListening) {
-    PrintMediumBoldEx(LCD_XCENTER, 18, POS_C, C_FILL, "%s", activeCh.name);
-    PrintMediumEx(LCD_XCENTER, 26, POS_C, C_FILL, "%u.%05u", radio.rxF / MHZ,
-                  radio.rxF % MHZ);
-    UI_RSSIBar(28);
-  } else {
-    if (gScanlistSize) {
+  if (gScanlistSize) {
+    if (gIsListening) {
+      PrintMediumBoldEx(LCD_XCENTER, 18, POS_C, C_FILL, "%s", activeCh.name);
+    } else {
       PrintMediumEx(LCD_XCENTER, 18, POS_C, C_FILL,
                     isWaiting ? "Waiting..." : "Scanning...");
-      PrintMediumEx(LCD_XCENTER, 26, POS_C, C_FILL, "%u.%05u", radio.rxF / MHZ,
-                    radio.rxF % MHZ);
-    } else {
-      PrintMediumEx(LCD_XCENTER, 18, POS_C, C_FILL, "Scanlist empty");
     }
   }
-  if (gLastActiveLoot) {
-    UI_DrawLoot(gLastActiveLoot, LCD_XCENTER, 50, POS_C);
-  }
-  UI_DisplayScanlists(60);
+
+  UI_RenderScanScreen();
 }

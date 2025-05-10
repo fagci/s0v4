@@ -84,25 +84,7 @@ void BANDSCAN_render(void) {
   if (gScanlistSize) {
     PrintMediumBoldEx(LCD_XCENTER, 18, POS_C, C_FILL, "%s", gCurrentBand.name);
   }
-  if (gIsListening) {
-    PrintMediumEx(LCD_XCENTER, 26, POS_C, C_FILL, "%u.%05u", radio.rxF / MHZ,
-                  radio.rxF % MHZ);
-    UI_RSSIBar(28);
-  } else {
-    if (gScanlistSize) {
-      /* PrintMediumEx(LCD_XCENTER, 18, POS_C, C_FILL,
-                    isWaiting ? "Waiting..." : "Scanning..."); */
-      PrintMediumEx(LCD_XCENTER, 26, POS_C, C_FILL, "%u.%05u", radio.rxF / MHZ,
-                    radio.rxF % MHZ);
-    } else {
-      PrintMediumBoldEx(LCD_XCENTER, 18, POS_C, C_FILL, "Scanlist empty");
-    }
-  }
 
-  if (gLastActiveLoot) {
-    UI_DrawLoot(gLastActiveLoot, LCD_XCENTER, 50, POS_C);
-  }
-
-  UI_DisplayScanlists(60);
+  UI_RenderScanScreen();
   REGSMENU_Draw();
 }

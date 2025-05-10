@@ -20,4 +20,6 @@ void UI_DrawLoot(const Loot *loot, uint8_t x, uint8_t y, TextPos pos);
 void UI_BigFrequency(uint8_t y, uint32_t f);
 void UI_DisplayScanlists(uint32_t y);
 
+void UI_RenderScanScreen();
+
 #endif /* end of include guard: COMPONENTS_H */

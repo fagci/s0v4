@@ -164,3 +164,21 @@ void UI_DisplayScanlists(uint32_t y) {
                 buf + 4, buf + 8, buf + 12);
 #endif
 }
+
+void UI_RenderScanScreen() {
+  if (gScanlistSize) {
+    PrintMediumEx(LCD_XCENTER, 26, POS_C, C_FILL, "%u.%05u", radio.rxF / MHZ,
+                  radio.rxF % MHZ);
+  } else {
+    PrintMediumBoldEx(LCD_XCENTER, 18, POS_C, C_FILL, "Scanlist empty");
+  }
+
+  if (gIsListening) {
+    UI_RSSIBar(28);
+  }
+
+  if (gLastActiveLoot) {
+    UI_DrawLoot(gLastActiveLoot, LCD_XCENTER, 50, POS_C);
+  }
+  UI_DisplayScanlists(60);
+}

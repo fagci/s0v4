@@ -9,7 +9,6 @@
 uint32_t delay = 1500;
 uint16_t sqLevel = 0;
 
-static Measurement *m;
 static bool thinking = false;
 static bool wasThinkingEarlier = false;
 
@@ -101,8 +100,7 @@ void SCAN_Next(bool up) { next(); }
 
 void SCAN_Init(bool multiband) {
   isMultiband = multiband;
-  m = &gLoot;
-  m->snr = 0;
+  gLoot.snr = 0;
 
   lastCpsTime = Now();
   scanCycles = 0;
@@ -112,69 +110,72 @@ void SCAN_Init(bool multiband) {
 
 void SCAN_Check(bool isAnalyserMode) {
   if (isAnalyserMode) {
-    m->f = radio.rxF;
-    m->rssi = measure(radio.rxF);
-    SP_AddPoint(m);
+    gLoot.f = radio.rxF;
+    gLoot.rssi = measure(radio.rxF);
+    SP_AddPoint(&gLoot);
     gRedrawScreen = true;
     next();
     return;
   }
 
-  if (m->open) {
-    m->open = RADIO_IsSquelchOpen();
+  if (gLoot.open) {
+    // gLoot.open = RADIO_IsSquelchOpen();
+    RADIO_CheckAndListen();
+    gRedrawScreen = true;
   } else {
-    m->f = radio.rxF;
-    m->rssi = measure(radio.rxF);
+    gLoot.f = radio.rxF;
+    gLoot.rssi = measure(radio.rxF);
 
-    if (!sqLevel && m->rssi) {
-      sqLevel = m->rssi - 1;
+    if (!sqLevel && gLoot.rssi) {
+      sqLevel = gLoot.rssi - 1;
     }
 
-    if (sqLevel > m->rssi) {
-      uint16_t perc = (sqLevel - m->rssi) * 100 / ((sqLevel + m->rssi) / 2);
+    if (sqLevel > gLoot.rssi) {
+      uint16_t perc =
+          (sqLevel - gLoot.rssi) * 100 / ((sqLevel + gLoot.rssi) / 2);
       if (perc >= 25) {
-        sqLevel = m->rssi - 1;
+        sqLevel = gLoot.rssi - 1;
       }
     }
 
-    m->open = m->rssi >= sqLevel;
+    gLoot.open = gLoot.rssi >= sqLevel;
 
-    SP_AddPoint(m);
+    SP_AddPoint(&gLoot);
   }
 
   if (gSettings.skipGarbageFrequencies && (radio.rxF % 1300000 == 0)) {
-    m->open = false;
+    gLoot.open = false;
   }
 
   // really good level?
-  if (m->open && !gIsListening) {
+  if (gLoot.open && !gIsListening) {
     thinking = true;
     wasThinkingEarlier = true;
     gRedrawScreen = true;
     vTaskDelay(pdMS_TO_TICKS(SQL_DELAY));
-    m->open = RADIO_IsSquelchOpen();
+    gLoot.open = RADIO_IsSquelchOpen();
     thinking = false;
     gRedrawScreen = true;
-    if (!m->open) {
+    if (!gLoot.open) {
       sqLevel++;
     }
   }
 
-  LOOT_Update(m);
+  LOOT_Update(&gLoot);
 
   // reset sql to noise floor when sql closed to check next freq better
-  if (gIsListening && !m->open) {
+  if (gIsListening && !gLoot.open) {
     sqLevel = SP_GetNoiseFloor();
   }
-  RADIO_ToggleRX(m->open);
+  RADIO_ToggleRX(gLoot.open);
 
-  if (m->open) {
+  if (gLoot.open) {
     gRedrawScreen = true;
   }
 
   static uint8_t stepsPassed;
 
-  if (!m->open) {
+  if (!gLoot.open) {
     if (stepsPassed++ > 64) {
       stepsPassed = 0;
       gRedrawScreen = true;
