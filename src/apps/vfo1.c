@@ -313,9 +313,10 @@ void VFO1_render(void) {
     SPECTRUM_H = LCD_HEIGHT - SPECTRUM_Y;
     if (gSettings.showLevelInVFO) {
       char *graphMeasurementNames[] = {
-          [GRAPH_RSSI] = "RSSI",           //
-          [GRAPH_REL_RSSI] = "REL RSSI",   //
+          [GRAPH_RSSI] = "RSSI", //
+          // [GRAPH_REL_RSSI] = "REL RSSI",   //
           [GRAPH_PEAK_RSSI] = "Peak RSSI", //
+          [GRAPH_AGC_RSSI] = "AGC RSSI",   //
           [GRAPH_NOISE] = "Noise",         //
           [GRAPH_GLITCH] = "Glitch",       //
           [GRAPH_SNR] = "SNR",             //
@@ -325,7 +326,7 @@ void VFO1_render(void) {
       case GRAPH_COUNT:
         SP_RenderGraph(RSSI_MIN, RSSI_MAX);
         break;
-      case GRAPH_REL_RSSI:
+      // case GRAPH_REL_RSSI:
       case GRAPH_NOISE:
       case GRAPH_GLITCH:
         SP_RenderGraph(0, 256);
@@ -334,7 +335,10 @@ void VFO1_render(void) {
         SP_RenderGraph(0, 30);
         break;
       case GRAPH_PEAK_RSSI:
-        SP_RenderGraph(46, 380);
+        SP_RenderGraph(46, 88);
+        break;
+      case GRAPH_AGC_RSSI:
+        SP_RenderGraph(0, 256);
         break;
       }
       PrintSmallEx(0, SPECTRUM_Y + 5, POS_L, C_FILL, "%s %+3u",

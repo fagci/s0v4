@@ -1078,7 +1078,8 @@ void RADIO_CheckAndListen() {
     gLoot.noise = BK4819_GetNoise();
     gLoot.glitch = BK4819_GetGlitch();
     gLoot.lnaPeakRssi = BK4819_GetLnaPeakRSSI();
-    gLoot.rssiRel = BK4819_GetRSSIRelative();
+    // gLoot.rssiRel = BK4819_GetRSSIRelative();
+    gLoot.rssiAgc = BK4819_GetAgcRSSI();
   }
 
   if (radio.code.rx.type == CODE_TYPE_OFF) {
