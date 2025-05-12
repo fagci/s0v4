@@ -187,8 +187,7 @@ void BK4819_WriteRegister(BK4819_REGISTER_t Register, uint16_t Data) {
 }
 
 void BK4819_SetAGC(bool useDefault, uint8_t gainIndex) {
-  const uint8_t GAIN_AUTO = 18;
-  const bool enableAgc = gainIndex == GAIN_AUTO;
+  const bool enableAgc = gainIndex == AUTO_GAIN_INDEX;
   uint16_t regVal = BK4819_ReadRegister(BK4819_REG_7E);
 
   BK4819_WriteRegister(BK4819_REG_7E, (regVal & ~(1 << 15) & ~(0b111 << 12)) |
@@ -197,7 +196,7 @@ void BK4819_SetAGC(bool useDefault, uint8_t gainIndex) {
                                           // IJV
                                           | (5u << 3) | (6u << 0));
 
-  if (gainIndex == GAIN_AUTO) {
+  if (gainIndex == AUTO_GAIN_INDEX) {
     BK4819_WriteRegister(BK4819_REG_13, 0x03BE);
     // BK4819_WriteRegister(BK4819_REG_13, 0x0295);
   } else {
