@@ -93,7 +93,7 @@ static void appRender(void *arg) {
       ST7565_Blit();
       gRedrawScreen = false;
     }
-    vTaskDelay(pdMS_TO_TICKS(40)); // 25 fps
+    vTaskDelay(pdMS_TO_TICKS(20)); //    50 fps
   }
 }
 

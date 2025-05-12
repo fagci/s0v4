@@ -111,9 +111,12 @@ void SCAN_Init(bool multiband) {
 void SCAN_Check(bool isAnalyserMode) {
   if (isAnalyserMode) {
     gLoot.f = radio.rxF;
+    taskENTER_CRITICAL();
     gLoot.rssi = measure(radio.rxF);
     SP_AddPoint(&gLoot);
-    gRedrawScreen = true;
+    taskEXIT_CRITICAL();
+    /* gRedrawScreen = true;
+    vTaskDelay(0); */
     next();
     return;
   }
@@ -124,6 +127,7 @@ void SCAN_Check(bool isAnalyserMode) {
     gRedrawScreen = true;
   } else {
     gLoot.f = radio.rxF;
+    taskENTER_CRITICAL();
     gLoot.rssi = measure(radio.rxF);
 
     if (!sqLevel && gLoot.rssi) {
@@ -141,6 +145,7 @@ void SCAN_Check(bool isAnalyserMode) {
     gLoot.open = gLoot.rssi >= sqLevel;
 
     SP_AddPoint(&gLoot);
+    taskEXIT_CRITICAL();
   }
 
   if (gSettings.skipGarbageFrequencies && (radio.rxF % 1300000 == 0)) {

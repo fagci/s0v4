@@ -12,6 +12,7 @@
 void Main(void) {
   SYSTICK_Init();
   SYS_ConfigureSysCon();
+  SYS_ConfigureClocks();
   BOARD_GPIO_Init();
   BOARD_PORTCON_Init();
   BOARD_ADC_Init();

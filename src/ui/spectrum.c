@@ -21,7 +21,7 @@ static uint8_t ox = UINT8_MAX;
 static uint8_t filledPoints;
 
 static Band *range;
-static uint32_t step;
+static uint16_t step;
 
 void SP_ResetHistory(void) {
   filledPoints = 0;
@@ -56,7 +56,7 @@ void SP_AddPoint(const Measurement *msm) {
   const uint32_t xe = SP_F2X(msm->f + step);
 
   // TODO: debug this range
-  for (x = xs; x < MAX_POINTS && x <= xe; ++x) {
+  for (x = xs; x < MAX_POINTS && x < xe; ++x) {
     if (ox != x) {
       ox = x;
       rssiHistory[x] = 0;
