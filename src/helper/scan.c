@@ -6,7 +6,7 @@
 #include "../ui/spectrum.h"
 #include "bands.h"
 
-uint32_t delay = 1500;
+uint32_t delay = 500;
 uint16_t sqLevel = 0;
 
 static bool thinking = false;
