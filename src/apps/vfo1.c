@@ -18,10 +18,7 @@
 #include "chlist.h"
 #include "finput.h"
 
-bool gVfo1ProMode = false;
-
 static uint8_t menuIndex = 0;
-static bool registerActive = false;
 
 static char String[16];
 
@@ -36,12 +33,7 @@ static void tuneTo(uint32_t f) {
   RADIO_SaveCurrentVFO();
 }
 
-void VFO1_init(void) {
-  if (!gVfo1ProMode) {
-    gVfo1ProMode = gSettings.iAmPro;
-  }
-  RADIO_LoadCurrentVFO();
-}
+void VFO1_init(void) { RADIO_LoadCurrentVFO(); }
 
 void VFO1_update(void) {
   RADIO_CheckAndListen();
@@ -49,63 +41,8 @@ void VFO1_update(void) {
   vTaskDelay(pdMS_TO_TICKS(SQL_DELAY));
 }
 
-bool VFOPRO_key(KEY_Code_t key, Key_State_t state) {
-  if (key == KEY_PTT) {
-    RADIO_ToggleTX(state == KEY_PRESSED);
-    return true;
-  }
-  if (state == KEY_LONG_PRESSED) {
-    switch (key) {
-    case KEY_4: // freq catch
-      if (RADIO_GetRadio() != RADIO_BK4819) {
-        gShowAllRSSI = !gShowAllRSSI;
-      }
-      return true;
-    case KEY_5:
-      registerActive = !registerActive;
-      return true;
-    default:
-      break;
-    }
-  }
-
-  bool isSsb = RADIO_IsSSB();
-
-  if (state == KEY_RELEASED) {
-    switch (key) {
-    case KEY_SIDE1:
-    case KEY_SIDE2:
-      if (RADIO_GetRadio() == RADIO_SI4732 && isSsb) {
-        RADIO_TuneToSave(radio.rxF + (key == KEY_SIDE1 ? 1 : -1));
-        return true;
-      }
-      break;
-    case KEY_EXIT:
-      if (registerActive) {
-        registerActive = false;
-        return true;
-      }
-      break;
-    case KEY_0:
-      RADIO_ToggleModulation();
-      return true;
-    case KEY_6:
-      RADIO_ToggleListeningBW();
-      return true;
-    case KEY_5:
-      gFInputCallback = tuneTo;
-      APPS_run(APP_FINPUT);
-      return true;
-    default:
-      break;
-    }
-  }
-
-  return false;
-}
-
 bool VFO1_key(KEY_Code_t key, Key_State_t state) {
-  if ((!gVfo1ProMode) && state == KEY_RELEASED && RADIO_IsChMode()) {
+  if (state == KEY_RELEASED && RADIO_IsChMode()) {
     if (!gIsNumNavInput && key <= KEY_9) {
       NUMNAV_Init(radio.channel, 0, CHANNELS_GetCountMax() - 1);
       gNumNavCallback = setChannel;
@@ -117,10 +54,6 @@ bool VFO1_key(KEY_Code_t key, Key_State_t state) {
   }
 
   if (state == KEY_RELEASED && REGSMENU_Key(key, state)) {
-    return true;
-  }
-
-  if (gVfo1ProMode && VFOPRO_key(key, state)) {
     return true;
   }
 
@@ -163,7 +96,6 @@ bool VFO1_key(KEY_Code_t key, Key_State_t state) {
     case KEY_2:
       if (gCurrentApp == APP_VFO1) {
         gSettings.iAmPro = !gSettings.iAmPro;
-        gVfo1ProMode = gSettings.iAmPro;
         SETTINGS_Save();
         return true;
       }
@@ -265,7 +197,7 @@ static void renderProModeInfo(uint8_t y) {
 void VFO1_render(void) {
   const uint8_t BASE = 40;
 
-  if (gVfo1ProMode) {
+  if (gSettings.iAmPro) {
     STATUSLINE_RenderRadioSettings();
   } else {
     STATUSLINE_renderCurrentBand();
@@ -313,8 +245,7 @@ void VFO1_render(void) {
     SPECTRUM_H = LCD_HEIGHT - SPECTRUM_Y;
     if (gSettings.showLevelInVFO) {
       char *graphMeasurementNames[] = {
-          [GRAPH_RSSI] = "RSSI", //
-          // [GRAPH_REL_RSSI] = "REL RSSI",   //
+          [GRAPH_RSSI] = "RSSI",           //
           [GRAPH_PEAK_RSSI] = "Peak RSSI", //
           [GRAPH_AGC_RSSI] = "AGC RSSI",   //
           [GRAPH_NOISE] = "Noise",         //
@@ -326,7 +257,6 @@ void VFO1_render(void) {
       case GRAPH_COUNT:
         SP_RenderGraph(RSSI_MIN, RSSI_MAX);
         break;
-      // case GRAPH_REL_RSSI:
       case GRAPH_NOISE:
       case GRAPH_GLITCH:
         SP_RenderGraph(0, 256);
@@ -348,13 +278,13 @@ void VFO1_render(void) {
       UI_RSSIBar(BASE + 8);
     }
   } else {
-    if (gIsListening || gVfo1ProMode) {
+    if (gIsListening || gSettings.iAmPro) {
       UI_RSSIBar(BASE + 8);
     }
     if (gTxState == TX_ON) {
       UI_TxBar(BASE + 8);
     }
-    if (gVfo1ProMode) {
+    if (gSettings.iAmPro) {
       renderProModeInfo(BASE);
     }
   }

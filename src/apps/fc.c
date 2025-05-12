@@ -176,7 +176,6 @@ bool FC_key(KEY_Code_t key, Key_State_t state) {
       if (gLastActiveLoot) {
         FC_deinit();
         RADIO_TuneToSave(gLastActiveLoot->f);
-        gVfo1ProMode = true;
         APPS_run(APP_VFO1);
       }
       return true;

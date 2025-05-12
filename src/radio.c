@@ -1073,12 +1073,11 @@ void RADIO_CheckAndListen() {
   gLoot.f = radio.rxF;
   gLoot.rssi = RADIO_GetRSSI();
 
-  if ((gMonitorMode || gVfo1ProMode) && gSettings.showLevelInVFO) {
+  if ((gMonitorMode || gSettings.iAmPro) && gSettings.showLevelInVFO) {
     gLoot.snr = RADIO_GetSNR();
     gLoot.noise = BK4819_GetNoise();
     gLoot.glitch = BK4819_GetGlitch();
     gLoot.lnaPeakRssi = BK4819_GetLnaPeakRSSI();
-    // gLoot.rssiRel = BK4819_GetRSSIRelative();
     gLoot.rssiAgc = BK4819_GetAgcRSSI();
   }
 

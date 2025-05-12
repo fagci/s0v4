@@ -12,6 +12,4 @@ bool VFO1_keyEx(KEY_Code_t key, Key_State_t state,
 bool VFO1_key(KEY_Code_t key, Key_State_t state);
 void VFO1_render();
 
-extern bool gVfo1ProMode;
-
 #endif /* end of include guard: VFO1_APP_H */

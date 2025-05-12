@@ -881,10 +881,6 @@ uint8_t BK4819_GetNoise(void) {
   return BK4819_ReadRegister(BK4819_REG_65) & 0x7F;
 }
 
-uint8_t BK4819_GetRSSIRelative(void) {
-  return (BK4819_ReadRegister(BK4819_REG_65) >> 8) & 0xFF;
-}
-
 uint8_t BK4819_GetGlitch(void) {
   return BK4819_ReadRegister(BK4819_REG_63) & 0xFF;
 }

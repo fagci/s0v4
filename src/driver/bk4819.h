@@ -168,7 +168,6 @@ void BK4819_EnableCTCSS(void);
 uint8_t BK4819_GetAgcRSSI(void);
 uint8_t BK4819_GetLnaPeakRSSI(void);
 uint16_t BK4819_GetRSSI(void);
-uint8_t BK4819_GetRSSIRelative(void);
 uint8_t BK4819_GetNoise(void);
 uint8_t BK4819_GetGlitch(void);
 uint8_t BK4819_GetSNR(void);
