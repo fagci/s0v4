@@ -226,7 +226,7 @@ void VFO1_render(void) {
 
   if (radio.code.rx.type) {
     PrintRTXCode(String, radio.code.rx.type, radio.code.rx.value);
-    PrintSmallEx(0, BASE, POS_L, C_FILL, "R%s", String);
+    PrintSmallEx(0, BASE - 12, POS_L, C_FILL, "R%s", String);
   }
   if (radio.code.tx.type) {
     PrintRTXCode(String, radio.code.tx.type, radio.code.tx.value);
