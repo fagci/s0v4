@@ -104,6 +104,9 @@ bool VFO1_key(KEY_Code_t key, Key_State_t state) {
       RADIO_ToggleVfoMR();
       VFO1_init();
       return true;
+    case KEY_4:
+      gShowAllRSSI = !gShowAllRSSI;
+      return true;
     case KEY_5:
       return true;
     case KEY_6:
