@@ -1,16 +1,11 @@
 #include "keyboard.h"
-#include "../config/FreeRTOSConfig.h"
-#include "../external/FreeRTOS/portable/GCC/ARM_CM0/portmacro.h"
 #include "../inc/dp32g030/gpio.h"
-#include "../misc.h"
 #include "../system.h"
-#include "FreeRTOS.h"
 #include "gpio.h"
+#include "../scheduler.h"
 #include "systick.h"
-#include "task.h"
 
-static StaticTask_t mKeyTaskBuffer;
-static StackType_t mKeyTaskStack[configMINIMAL_STACK_SIZE + 100];
+static SystemMessages n;
 
 static const uint32_t LONG_PRESS_TIME = 500;
 static const uint32_t LONG_PRESS_REPEAT_TIME = 100;
@@ -22,8 +17,8 @@ static KEY_Code_t mKeyPressed = KEY_INVALID;
 static KEY_Code_t mPrevKeyPressed = KEY_INVALID;
 static Key_State_t mPrevStatePtt;
 static Key_State_t mPrevKeyState;
-static TickType_t mLongPressTimer;
-static TickType_t mLongPressRepeatTimer;
+static uint32_t mLongPressTimer;
+static uint32_t mLongPressRepeatTimer;
 
 typedef const struct {
   uint16_t setToZeroMask;
@@ -84,7 +79,6 @@ static Keyboard keyboard[5] = {
 };
 
 static void HandlePttKey() {
-  taskENTER_CRITICAL();
   mKeyPtt = !GPIO_CheckBit(&GPIOC->DATA, GPIOC_PIN_PTT);
 
   if (mPrevStatePtt == KEY_PRESSED && !mKeyPtt) {
@@ -94,7 +88,6 @@ static void HandlePttKey() {
     SYS_MsgKey(KEY_PTT, KEY_PRESSED);
     mPrevStatePtt = KEY_PRESSED;
   }
-  taskEXIT_CRITICAL();
 }
 
 static void ResetKeyboardRow(uint8_t row) {
@@ -108,8 +101,7 @@ static uint16_t ReadStableGpioData() {
   uint8_t ii;
 
   for (ii = 0, reg = 0; ii < 3; ii++) {
-    // vTaskDelay(pdMS_TO_TICKS(1));
-    // SYSTICK_DelayUs(0);
+    SYSTICK_DelayUs(1);
     reg2 = (uint16_t)GPIOA->DATA;
     if (reg != reg2) {
       reg = reg2;
@@ -147,8 +139,14 @@ void KEYBOARD_Poll(void) {
   ResetKeyboardPins();
 }
 
+void SYS_MsgKey(KEY_Code_t key, Key_State_t state) {
+  n.message = MSG_KEYPRESSED;
+  n.key = key;
+  n.state = state;
+}
+
 void KEYBOARD_CheckKeys() {
-  TickType_t currentTick = xTaskGetTickCount();
+  uint32_t currentTick = Now();
 
   if (mKeyPressed != KEY_INVALID) {
     if (mPrevKeyState == KEY_RELEASED) {
@@ -158,15 +156,15 @@ void KEYBOARD_CheckKeys() {
       mLongPressTimer = currentTick;
       mPrevKeyPressed = mKeyPressed;
     } else if (mPrevKeyState == KEY_PRESSED) {
-      TickType_t elapsedTime = currentTick - mLongPressTimer;
-      if (elapsedTime >= pdMS_TO_TICKS(LONG_PRESS_TIME)) {
+      uint32_t elapsedTime = currentTick - mLongPressTimer;
+      if (elapsedTime >= LONG_PRESS_TIME) {
         mLongPressTimer = 0;
         mPrevKeyState = KEY_LONG_PRESSED;
       }
     } else if (mPrevKeyState == KEY_LONG_PRESSED ||
                mPrevKeyState == KEY_LONG_PRESSED_CONT) {
-      TickType_t elapsedTime = currentTick - mLongPressRepeatTimer;
-      if (elapsedTime >= pdMS_TO_TICKS(LONG_PRESS_REPEAT_TIME)) {
+      uint32_t elapsedTime = currentTick - mLongPressRepeatTimer;
+      if (elapsedTime >= LONG_PRESS_REPEAT_TIME) {
         mLongPressRepeatTimer = currentTick;
         SYS_MsgKey(mKeyPressed, mPrevKeyState);
         mPrevKeyState = KEY_LONG_PRESSED_CONT;
@@ -191,17 +189,9 @@ void KEYBOARD_CheckKeys() {
   }
 }
 
-static void checkKeys(void *attr) {
-  for (;;) {
-    taskENTER_CRITICAL();
-    KEYBOARD_Poll();
-    taskEXIT_CRITICAL();
-    KEYBOARD_CheckKeys();
-    vTaskDelay(pdMS_TO_TICKS(12));
-  }
-}
-
-void KEYBOARD_Init() {
-  xTaskCreateStatic(checkKeys, "KEY", ARRAY_SIZE(mKeyTaskStack), NULL, 2,
-                    mKeyTaskStack, &mKeyTaskBuffer);
+SystemMessages KEYBOARD_GetKey() {
+  n.message = MSG_NONE;
+  KEYBOARD_Poll();
+  KEYBOARD_CheckKeys();
+  return n;
 }

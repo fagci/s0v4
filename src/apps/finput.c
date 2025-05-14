@@ -2,6 +2,7 @@
 #include "../driver/bk4819.h"
 #include "../driver/st7565.h"
 #include "../driver/uart.h"
+#include "../scheduler.h"
 #include "../ui/graphics.h"
 #include "apps.h"
 
@@ -102,15 +103,18 @@ void FINPUT_init(void) {
   fillFromTempFreq();
 }
 
-void FINPUT_update() {
-  if (!dotEntered) {
-    blinkState = !blinkState;
-    gRedrawScreen = true;
-  } else {
-    blinkState = true;
-  }
+static uint32_t lastUpdate;
 
-  vTaskDelay(pdMS_TO_TICKS(500));
+void FINPUT_update() {
+  if (Now() - lastUpdate >= 500) {
+    if (!dotEntered) {
+      blinkState = !blinkState;
+      gRedrawScreen = true;
+    } else {
+      blinkState = true;
+    }
+    lastUpdate = Now();
+  }
 }
 
 void FINPUT_deinit(void) {}

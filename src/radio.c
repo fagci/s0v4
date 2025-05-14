@@ -11,10 +11,6 @@
 #include "driver/st7565.h"
 #include "driver/system.h"
 #include "driver/uart.h"
-#include "external/FreeRTOS/include/FreeRTOS.h"
-#include "external/FreeRTOS/include/projdefs.h"
-#include "external/FreeRTOS/include/task.h"
-#include "external/FreeRTOS/include/timers.h"
 #include "external/printf/printf.h"
 #include "helper/bands.h"
 #include "helper/battery.h"
@@ -270,19 +266,7 @@ static void setSI4732Modulation(ModulationType mod) {
   }
 }
 
-static StaticTimer_t saveCurrentVfoTimerBuffer;
-static TimerHandle_t saveCurrentVfoTimer;
-void RADIO_SaveCurrentVFODelayed(void) {
-  /* Log("!!!VFO SAV delayed");
-  return; */
-  if (saveCurrentVfoTimer) {
-    xTimerStop(saveCurrentVfoTimer, 0);
-  }
-  saveCurrentVfoTimer =
-      xTimerCreateStatic("RS", pdMS_TO_TICKS(1000), pdFALSE, NULL,
-                         RADIO_SaveCurrentVFO, &saveCurrentVfoTimerBuffer);
-  xTimerStart(saveCurrentVfoTimer, 0);
-}
+void RADIO_SaveCurrentVFODelayed(void) { RADIO_SaveCurrentVFO(); }
 
 static void setupToneDetection() {
   // Log("setupToneDetection");
@@ -944,7 +928,6 @@ void RADIO_ToggleVfoMR(void) {
   } else {
     CHANNELS_LoadScanlist(TYPE_FILTER_CH, gSettings.currentScanlist);
     if (gScanlistSize == 0) {
-      SYS_MsgNotify("No channels", 1000);
       return;
     }
     // loadVFO();

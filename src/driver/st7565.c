@@ -123,9 +123,7 @@ void ST7565_Init(bool full) {
 }
 
 void ST7565_WriteByte(uint8_t Value) {
-  taskENTER_CRITICAL();
   GPIO_ClearBit(&GPIOB->DATA, GPIOB_PIN_ST7565_A0);
   waitToSend();
   SPI0->WDR = Value;
-  taskEXIT_CRITICAL();
 }

@@ -20,7 +20,6 @@
 	.global Stack
 	.global HandlerReset
 	.global Main
-#	.global Systick
 
 	.global OVERLAY_Install
 	.global BOARD_FLASH_Init
@@ -28,18 +27,6 @@
 
 	.global SystickHandler
 	.weak SystickHandler
-
-	.global HandlerSVCall
-	.weak HandlerSVCall
-
-	.global HandlerPendSV
-	.weak HandlerPendSV	
-
-	.global HandlerGPIOB
-	.weak HandlerGPIOB
-
-	.global HandlerUART1
-	.weak HandlerUART1
 
 	.section .text.isr
 
@@ -149,10 +136,10 @@ HandlerHardFault:
 	b	.
 
 HandlerSVCall:
-	bx	lr
+	b	.
 
 HandlerPendSV:
-	bx	lr
+	b	.
 
 SystickHandler:
 	bx	lr
@@ -200,7 +187,7 @@ HandlerUART0:
 	b	.
 
 HandlerUART1:
-	bx	lr
+	b	.
 
 HandlerUART2:
 	b	.
@@ -248,7 +235,7 @@ HandlerGPIOA:
 	b	.
 
 HandlerGPIOB:
-	bx	lr
+	b	.
 
 HandlerGPIOC:
 	b	.
@@ -260,3 +247,4 @@ HandlerReset:
 	bl	BSS_Init
 	bl	Main
 	b 	.
+

@@ -3,6 +3,7 @@
 
 #include "../misc.h"
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 static const uint16_t RSSI_MIN = 28;

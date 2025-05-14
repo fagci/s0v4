@@ -1,6 +1,7 @@
 #include "lootlist.h"
 #include "../dcs.h"
 #include "../driver/st7565.h"
+#include "../driver/systick.h"
 #include "../driver/uart.h"
 #include "../helper/bands.h"
 #include "../helper/channels.h"
@@ -8,14 +9,12 @@
 #include "../helper/measurements.h"
 #include "../radio.h"
 #include "../scheduler.h"
-#include "../system.h"
 #include "../ui/components.h"
 #include "../ui/graphics.h"
 #include "../ui/menu.h"
 #include "../ui/statusline.h"
 #include "apps.h"
 #include "chlist.h"
-#include "vfo1.h"
 #include <stdint.h>
 
 static uint8_t menuIndex = 0;
@@ -121,7 +120,7 @@ static void sort(Sort type) {
 void LOOTLIST_update() {
   RADIO_CheckAndListen();
   gRedrawScreen = true;
-  vTaskDelay(pdMS_TO_TICKS(SQL_DELAY));
+  SYSTICK_DelayUs(SQL_DELAY * 1000);
 }
 
 void LOOTLIST_render(void) {
@@ -144,7 +143,6 @@ static void saveLootToCh(const Loot *loot, int16_t chnum, uint16_t scanlist) {
 }
 
 static void saveToFreeChannels(bool saveWhitelist, uint16_t scanlist) {
-  SYS_MsgNotify("Wait!", 100000);
   uint32_t saved = 0;
   for (uint16_t i = 0; i < LOOT_Size(); ++i) {
     uint16_t chnum = CHANNELS_GetCountMax();
@@ -172,9 +170,8 @@ static void saveToFreeChannels(bool saveWhitelist, uint16_t scanlist) {
       }
     }
   }
-  char str[16];
-  snprintf(str, 15, "Saved: %u", saved);
-  SYS_MsgNotify(str, 1000);
+  /* char str[16];
+  snprintf(str, 15, "Saved: %u", saved); */
 }
 
 bool LOOTLIST_key(KEY_Code_t key, Key_State_t state) {

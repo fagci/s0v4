@@ -108,7 +108,6 @@ void APPS_update(void) {
     apps[gCurrentApp].update();
   } else {
     gRedrawScreen = true;
-    vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }
 

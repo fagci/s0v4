@@ -22,7 +22,7 @@ static uint32_t scanCycles = 0;
 static uint32_t lastCpsTime = 0;
 
 static uint16_t measure(uint32_t f) {
-  return (RADIO_TuneToPure(f, true), vTaskDelay(delay / 100), RADIO_GetRSSI());
+  return (RADIO_TuneToPure(f, true), SYSTICK_DelayUs(delay), RADIO_GetRSSI());
 }
 
 static void onNewBand() {
@@ -111,12 +111,9 @@ void SCAN_Init(bool multiband) {
 void SCAN_Check(bool isAnalyserMode) {
   if (isAnalyserMode) {
     gLoot.f = radio.rxF;
-    taskENTER_CRITICAL();
     gLoot.rssi = measure(radio.rxF);
     SP_AddPoint(&gLoot);
-    taskEXIT_CRITICAL();
-    /* gRedrawScreen = true;
-    vTaskDelay(0); */
+    gRedrawScreen = true;
     next();
     return;
   }
@@ -127,7 +124,6 @@ void SCAN_Check(bool isAnalyserMode) {
     gRedrawScreen = true;
   } else {
     gLoot.f = radio.rxF;
-    taskENTER_CRITICAL();
     gLoot.rssi = measure(radio.rxF);
 
     if (!sqLevel && gLoot.rssi) {
@@ -145,7 +141,6 @@ void SCAN_Check(bool isAnalyserMode) {
     gLoot.open = gLoot.rssi >= sqLevel;
 
     SP_AddPoint(&gLoot);
-    taskEXIT_CRITICAL();
   }
 
   if (gSettings.skipGarbageFrequencies && (radio.rxF % 1300000 == 0)) {
@@ -157,7 +152,7 @@ void SCAN_Check(bool isAnalyserMode) {
     thinking = true;
     wasThinkingEarlier = true;
     gRedrawScreen = true;
-    vTaskDelay(pdMS_TO_TICKS(SQL_DELAY));
+    SYSTICK_DelayUs(SQL_DELAY * 1000);
     gLoot.open = RADIO_IsSquelchOpen();
     thinking = false;
     gRedrawScreen = true;

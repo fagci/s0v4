@@ -414,6 +414,4 @@ void BOARD_Init(void) {
   ST7565_Init(true);
   Log("INIT BL");
   BACKLIGHT_Init();
-  Log("INIT KBD");
-  KEYBOARD_Init();
 }

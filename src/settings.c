@@ -1,9 +1,6 @@
 #include "settings.h"
 #include "driver/bk4819.h"
 #include "driver/eeprom.h"
-#include "external/FreeRTOS/include/FreeRTOS.h"
-#include "external/FreeRTOS/include/projdefs.h"
-#include "external/FreeRTOS/include/timers.h"
 #include <string.h>
 
 uint8_t BL_TIME_VALUES[7] = {0, 5, 10, 20, 60, 120, 255};
@@ -85,17 +82,7 @@ void SETTINGS_Load(void) {
   EEPROM_ReadBuffer(SETTINGS_OFFSET, &gSettings, SETTINGS_SIZE);
 }
 
-static StaticTimer_t settingsSaveTimerBuffer;
-static TimerHandle_t settingsSaveTimer;
-void SETTINGS_DelayedSave(void) {
-  if (settingsSaveTimer) {
-    xTimerStop(settingsSaveTimer, 0);
-  }
-  settingsSaveTimer =
-      xTimerCreateStatic("SS", pdMS_TO_TICKS(1000), pdFALSE, NULL,
-                         SETTINGS_Save, &settingsSaveTimerBuffer);
-  xTimerStart(settingsSaveTimer, 0);
-}
+void SETTINGS_DelayedSave(void) { SETTINGS_Save(); }
 
 uint32_t SETTINGS_GetFilterBound(void) {
   return gSettings.bound_240_280 ? VHF_UHF_BOUND2 : VHF_UHF_BOUND1;

@@ -1,12 +1,12 @@
 #include "fc.h"
 #include "../dcs.h"
+#include "../driver/systick.h"
 #include "../driver/uart.h"
 #include "../radio.h"
 #include "../settings.h"
 #include "../ui/components.h"
 #include "../ui/graphics.h"
 #include "apps.h"
-#include "vfo1.h"
 #include <stdint.h>
 
 static const uint8_t REQUIRED_FREQUENCY_HITS = 2;
@@ -116,10 +116,10 @@ void FC_update(void) {
       Log("FC switch filter");
       switchFilter();
     }
-    vTaskDelay(pdMS_TO_TICKS(200 << gSettings.fcTime));
+    SYSTICK_DelayUs((200 << gSettings.fcTime) * 1000);
   } else {
     if (!gIsListening) {
-      vTaskDelay(pdMS_TO_TICKS(SQL_DELAY));
+      SYSTICK_DelayUs(SQL_DELAY * 1000);
     }
     Log("FC checklisten");
     RADIO_CheckAndListen();
@@ -129,7 +129,6 @@ void FC_update(void) {
       enableScan();
     }
   }
-  vTaskDelay(pdMS_TO_TICKS(1));
 }
 
 bool FC_key(KEY_Code_t key, Key_State_t state) {

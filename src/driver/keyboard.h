@@ -34,8 +34,25 @@ typedef enum {
   KEY_LONG_PRESSED_CONT
 } Key_State_t;
 
+typedef enum {
+  MSG_NONE,
+  MSG_NOTIFY,
+  MSG_BKCLIGHT,
+  MSG_KEYPRESSED,
+  MSG_PLAY_BEEP,
+  MSG_RADIO_RX,
+  MSG_RADIO_TX,
+  MSG_APP_LOAD,
+} SystemMSG;
+
+typedef struct {
+  SystemMSG message;
+  KEY_Code_t key;
+  Key_State_t state;
+} SystemMessages;
+
 void KEYBOARD_Poll(void);
 void KEYBOARD_CheckKeys();
-void KEYBOARD_Init();
+SystemMessages KEYBOARD_GetKey();
 
 #endif

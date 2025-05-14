@@ -1,10 +1,7 @@
 #include "chscan.h"
 
+#include "../driver/systick.h"
 #include "../driver/uart.h"
-#include "../external/FreeRTOS/include/FreeRTOS.h"
-#include "../external/FreeRTOS/include/portable.h"
-#include "../external/FreeRTOS/include/timers.h"
-#include "../external/FreeRTOS/portable/GCC/ARM_CM0/portmacro.h"
 #include "../helper/channels.h"
 #include "../helper/lootlist.h"
 #include "../radio.h"
@@ -48,7 +45,7 @@ void CHSCAN_deinit(void) {}
 
 void CHSCAN_update(void) {
   nextWithTimeout();
-  vTaskDelay(pdMS_TO_TICKS(SQL_DELAY));
+  SYSTICK_DelayUs(SQL_DELAY * 1000);
   RADIO_CheckAndListen();
   gRedrawScreen = true;
 }

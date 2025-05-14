@@ -14,12 +14,6 @@ OBJS = $(OBJ_DIR)/start.o
 OBJS += $(OBJ_DIR)/init.o
 OBJS += $(OBJ_DIR)/external/printf/printf.o
 
-OBJS += $(OBJ_DIR)/external/FreeRTOS/list.o
-OBJS += $(OBJ_DIR)/external/FreeRTOS/queue.o
-OBJS += $(OBJ_DIR)/external/FreeRTOS/tasks.o
-OBJS += $(OBJ_DIR)/external/FreeRTOS/timers.o
-OBJS += $(OBJ_DIR)/external/FreeRTOS/portable/GCC/ARM_CM0/port.o
-
 OBJS += $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
 BSP_DEFINITIONS := $(wildcard hardware/*/*.def)
@@ -67,8 +61,6 @@ INC += -I ./src/external/CMSIS_5/CMSIS/Core/Include/
 INC += -I ./src/external/CMSIS_5/Device/ARM/ARMCM0/Include
 INC += -I ./src/external/mcufont/decoder/
 INC += -I ./src/external/mcufont/fonts/
-INC += -I ./src/external/FreeRTOS/include/.
-INC += -I ./src/external/FreeRTOS/portable/GCC/ARM_CM0/.
 
 DEPS = $(OBJS:.o=.d)
 

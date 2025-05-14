@@ -3,9 +3,6 @@
 #include "../driver/eeprom.h"
 #include "../driver/si473x.h"
 #include "../driver/st7565.h"
-#include "../external/FreeRTOS/include/FreeRTOS.h"
-#include "../external/FreeRTOS/include/projdefs.h"
-#include "../external/FreeRTOS/include/timers.h"
 #include "../helper/bands.h"
 #include "../helper/battery.h"
 #include "../helper/channels.h"
@@ -23,8 +20,6 @@ static uint32_t lastTickerUpdate = 0;
 
 static char statuslineText[32] = {0};
 static char statuslineTicker[32] = {0};
-static StaticTimer_t eepromRWTimerBuffer;
-static TimerHandle_t eepromRWTimer;
 
 void STATUSLINE_SetText(const char *pattern, ...) {
   char statuslineTextNew[32] = {0};

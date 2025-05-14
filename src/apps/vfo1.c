@@ -1,8 +1,7 @@
 #include "vfo1.h"
 #include "../dcs.h"
 #include "../driver/bk4819.h"
-#include "../external/FreeRTOS/include/FreeRTOS.h"
-#include "../external/FreeRTOS/include/timers.h"
+#include "../driver/systick.h"
 #include "../helper/channels.h"
 #include "../helper/measurements.h"
 #include "../helper/numnav.h"
@@ -22,9 +21,6 @@ static uint8_t menuIndex = 0;
 
 static char String[16];
 
-static TimerHandle_t eepromWriteTimer = NULL;
-static StaticTimer_t vfoSaveTimerBuffer;
-
 static void setChannel(uint16_t v) { RADIO_TuneToCH(v); }
 
 static void tuneTo(uint32_t f) {
@@ -38,7 +34,7 @@ void VFO1_init(void) { RADIO_LoadCurrentVFO(); }
 void VFO1_update(void) {
   RADIO_CheckAndListen();
   gRedrawScreen = true;
-  vTaskDelay(pdMS_TO_TICKS(SQL_DELAY));
+  SYSTICK_DelayUs(SQL_DELAY * 1000);
 }
 
 bool VFO1_key(KEY_Code_t key, Key_State_t state) {

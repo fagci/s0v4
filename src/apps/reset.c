@@ -182,7 +182,6 @@ void RESET_Update(void) {
   }
   if (!status) {
     gRedrawScreen = true;
-    vTaskDelay(pdMS_TO_TICKS(10));
     return;
   }
 
