@@ -56,7 +56,7 @@ void SP_AddPoint(const Measurement *msm) {
   const uint32_t xe = SP_F2X(msm->f + step);
 
   // TODO: debug this range
-  for (x = xs; x < MAX_POINTS && x < xe; ++x) {
+  for (x = xs; x < MAX_POINTS && x <= xe; ++x) {
     if (ox != x) {
       ox = x;
       rssiHistory[x] = 0;

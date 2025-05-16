@@ -1,6 +1,6 @@
 #include "fc.h"
 #include "../dcs.h"
-#include "../driver/systick.h"
+#include "../driver/system.h"
 #include "../driver/uart.h"
 #include "../radio.h"
 #include "../settings.h"
@@ -116,10 +116,10 @@ void FC_update(void) {
       Log("FC switch filter");
       switchFilter();
     }
-    SYSTICK_DelayUs((200 << gSettings.fcTime) * 1000);
+    SYS_DelayMs(200 << gSettings.fcTime);
   } else {
     if (!gIsListening) {
-      SYSTICK_DelayUs(SQL_DELAY * 1000);
+      SYS_DelayMs(SQL_DELAY);
     }
     Log("FC checklisten");
     RADIO_CheckAndListen();

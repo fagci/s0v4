@@ -1,7 +1,7 @@
 #include "lootlist.h"
 #include "../dcs.h"
 #include "../driver/st7565.h"
-#include "../driver/systick.h"
+#include "../driver/system.h"
 #include "../driver/uart.h"
 #include "../helper/bands.h"
 #include "../helper/channels.h"
@@ -120,7 +120,7 @@ static void sort(Sort type) {
 void LOOTLIST_update() {
   RADIO_CheckAndListen();
   gRedrawScreen = true;
-  SYSTICK_DelayUs(SQL_DELAY * 1000);
+  SYS_DelayMs(SQL_DELAY);
 }
 
 void LOOTLIST_render(void) {

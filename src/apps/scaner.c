@@ -109,7 +109,7 @@ bool SCANER_key(KEY_Code_t key, Key_State_t state) {
     switch (key) {
     case KEY_1:
     case KEY_7:
-      delay = AdjustU(delay, 0, 10000, key == KEY_1 ? 500 : -500);
+      delay = AdjustU(delay, 0, 10000, key == KEY_1 ? 100 : -100);
       return true;
     case KEY_3:
     case KEY_9:
@@ -204,8 +204,7 @@ void SCANER_render(void) {
     UI_DrawLoot(gLastActiveLoot, LCD_XCENTER, 14, POS_C);
   }
 
-  PrintSmallEx(0, 12, POS_L, C_FILL, "%uus",
-               delay + 1000); // 1000us is default delay for an app
+  PrintSmallEx(0, 12, POS_L, C_FILL, "%uus", delay);
 
   PrintSmallEx(LCD_WIDTH, 12, POS_R, C_FILL, "%u.%02uk", step / 100,
                step % 100);

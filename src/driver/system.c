@@ -12,7 +12,7 @@ void SYS_ConfigureClocks(void) {
       PMU_SRC_CFG_RCHF_SEL_BITS_48MHZ | PMU_SRC_CFG_RCHF_EN_BITS_ENABLE;
 
   // Divide by 2
-  SYSCON_CLK_SEL = SYSCON_CLK_SEL_DIV_BITS_1;
+  SYSCON_CLK_SEL = SYSCON_CLK_SEL_DIV_BITS_2;
 
   // Disable division clock gate
   SYSCON_DIV_CLK_GATE =

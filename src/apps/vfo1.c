@@ -1,7 +1,7 @@
 #include "vfo1.h"
 #include "../dcs.h"
 #include "../driver/bk4819.h"
-#include "../driver/systick.h"
+#include "../driver/system.h"
 #include "../helper/channels.h"
 #include "../helper/measurements.h"
 #include "../helper/numnav.h"
@@ -34,7 +34,7 @@ void VFO1_init(void) { RADIO_LoadCurrentVFO(); }
 void VFO1_update(void) {
   RADIO_CheckAndListen();
   gRedrawScreen = true;
-  SYSTICK_DelayUs(SQL_DELAY * 1000);
+  SYS_DelayMs(SQL_DELAY);
 }
 
 bool VFO1_key(KEY_Code_t key, Key_State_t state) {

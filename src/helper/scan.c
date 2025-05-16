@@ -1,5 +1,6 @@
 #include "scan.h"
 #include "../driver/st7565.h"
+#include "../driver/system.h"
 #include "../driver/systick.h"
 #include "../radio.h"
 #include "../scheduler.h"
@@ -22,11 +23,14 @@ static uint32_t scanCycles = 0;
 static uint32_t lastCpsTime = 0;
 
 static uint16_t measure(uint32_t f) {
-  return (RADIO_TuneToPure(f, true), SYSTICK_DelayUs(delay), RADIO_GetRSSI());
+  RADIO_TuneToPure(f, true);
+  SYSTICK_DelayUs(delay);
+  return RADIO_GetRSSI();
 }
 
 static void onNewBand() {
   radio.rxF = gCurrentBand.rxF;
+  radio.step = gCurrentBand.step;
   RADIO_Setup();
   SP_Init(&gCurrentBand);
 }
@@ -66,7 +70,7 @@ static void next() {
     gRedrawScreen = true;
   }
 
-  RADIO_TuneToPure(radio.rxF, true);
+  // RADIO_TuneToPure(radio.rxF, true);
   SetTimeout(&scan_listen_timeout, 0);
   SetTimeout(&stay_at_timeout, 0);
   scanCycles++;
@@ -151,8 +155,7 @@ void SCAN_Check(bool isAnalyserMode) {
   if (gLoot.open && !gIsListening) {
     thinking = true;
     wasThinkingEarlier = true;
-    gRedrawScreen = true;
-    SYSTICK_DelayUs(SQL_DELAY * 1000);
+    SYS_DelayMs(SQL_DELAY);
     gLoot.open = RADIO_IsSquelchOpen();
     thinking = false;
     gRedrawScreen = true;

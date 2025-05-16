@@ -1,6 +1,6 @@
 #include "chscan.h"
 
-#include "../driver/systick.h"
+#include "../driver/system.h"
 #include "../driver/uart.h"
 #include "../helper/channels.h"
 #include "../helper/lootlist.h"
@@ -45,7 +45,7 @@ void CHSCAN_deinit(void) {}
 
 void CHSCAN_update(void) {
   nextWithTimeout();
-  SYSTICK_DelayUs(SQL_DELAY * 1000);
+  SYS_DelayMs(SQL_DELAY);
   RADIO_CheckAndListen();
   gRedrawScreen = true;
 }

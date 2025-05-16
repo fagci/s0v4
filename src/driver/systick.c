@@ -3,7 +3,7 @@
 
 static const uint32_t TICK_MULTIPLIER = 48;
 
-void SYSTICK_Init(void) { SysTick_Config(96000); }
+void SYSTICK_Init(void) { SysTick_Config(48000); }
 
 void SYSTICK_DelayTicks(const uint32_t ticks) {
   uint32_t elapsed_ticks = 0;
