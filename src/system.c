@@ -24,7 +24,7 @@ static uint8_t DEAD_BUF[] = {0xDE, 0xAD};
 static char notificationMessage[16] = "";
 static uint32_t notificationTimeoutAt;
 
-static uint32_t appsUpdateTimer;
+static uint32_t secondTimer;
 static uint32_t appsRenderTimer;
 static uint32_t appsKeyboardTimer;
 
@@ -53,6 +53,7 @@ static void appRender() {
 }
 
 static void systemUpdate() {
+  RADIO_Update();
   BATTERY_UpdateBatteryInfo();
   BACKLIGHT_Update();
 }
@@ -162,6 +163,11 @@ void SYS_Main() {
       processKeyboard();
       appRender();
       appsRenderTimer = Now();
+    }
+
+    if (Now() - secondTimer >= 1000) {
+      systemUpdate();
+      secondTimer = Now();
     }
 
     while (UART_IsCommandAvailable()) {

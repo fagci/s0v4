@@ -74,8 +74,21 @@ void SP_AddPoint(const Measurement *msm) {
   }
 }
 
+static uint16_t MinRSSI(const uint16_t *array, size_t n) {
+  if (array == NULL || n == 0) {
+    return 0;
+  }
+  uint16_t min = array[0];
+  for (size_t i = 1; i < n; ++i) {
+    if (array[i] && array[i] < min) {
+      min = array[i];
+    }
+  }
+  return min;
+}
+
 VMinMax SP_GetMinMax() {
-  const uint16_t rssiMin = Min(rssiHistory, filledPoints);
+  const uint16_t rssiMin = MinRSSI(rssiHistory, filledPoints);
   const uint16_t rssiMax = Max(rssiHistory, filledPoints);
   const uint16_t rssiDiff = rssiMax - rssiMin;
   return (VMinMax){

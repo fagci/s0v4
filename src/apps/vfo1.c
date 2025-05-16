@@ -38,8 +38,12 @@ void VFO1_update(void) {
 }
 
 bool VFO1_key(KEY_Code_t key, Key_State_t state) {
+  if (!gIsNumNavInput && state == KEY_RELEASED && REGSMENU_Key(key, state)) {
+    return true;
+  }
+
   if (state == KEY_RELEASED && RADIO_IsChMode()) {
-    if (!gIsNumNavInput && key > KEY_0 && key <= KEY_9) {
+    if (!gIsNumNavInput && key <= KEY_9) {
       NUMNAV_Init(radio.channel, 0, CHANNELS_GetCountMax() - 1);
       gNumNavCallback = setChannel;
     }
@@ -47,10 +51,6 @@ bool VFO1_key(KEY_Code_t key, Key_State_t state) {
       NUMNAV_Input(key);
       return true;
     }
-  }
-
-  if (state == KEY_RELEASED && REGSMENU_Key(key, state)) {
-    return true;
   }
 
   if (key == KEY_PTT && !gIsNumNavInput) {

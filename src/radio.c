@@ -266,7 +266,15 @@ static void setSI4732Modulation(ModulationType mod) {
   }
 }
 
-void RADIO_SaveCurrentVFODelayed(void) { RADIO_SaveCurrentVFO(); }
+static uint32_t saveVfoTime;
+void RADIO_Update() {
+  if (saveVfoTime && Now() > saveVfoTime) {
+    RADIO_SaveCurrentVFO();
+    saveVfoTime = 0;
+  }
+}
+
+void RADIO_SaveCurrentVFODelayed(void) { saveVfoTime = Now() + 1000; }
 
 static void setupToneDetection() {
   // Log("setupToneDetection");

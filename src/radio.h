@@ -104,4 +104,6 @@ void RADIO_GetGainString(char *buf, Radio radio, uint8_t i);
 
 uint8_t RADIO_GetBWCount();
 
+void RADIO_Update();
+
 #endif /* end of include guard: RADIO_H */

@@ -70,7 +70,6 @@ static void next() {
     gRedrawScreen = true;
   }
 
-  // RADIO_TuneToPure(radio.rxF, false);
   LOOT_Replace(&gLoot, radio.rxF);
   SetTimeout(&scan_listen_timeout, 0);
   SetTimeout(&stay_at_timeout, 0);
