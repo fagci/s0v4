@@ -7,7 +7,7 @@
 #include "../ui/spectrum.h"
 #include "bands.h"
 
-uint32_t delay = 500;
+uint32_t delay = 1200;
 uint16_t sqLevel = 0;
 
 static bool thinking = false;
@@ -117,7 +117,6 @@ void SCAN_Check(bool isAnalyserMode) {
     gLoot.f = radio.rxF;
     gLoot.rssi = measure(radio.rxF);
     SP_AddPoint(&gLoot);
-    gRedrawScreen = true;
     next();
     return;
   }
