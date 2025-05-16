@@ -22,8 +22,8 @@ static bool isMultiband = false;
 static uint32_t scanCycles = 0;
 static uint32_t lastCpsTime = 0;
 
-static uint16_t measure(uint32_t f) {
-  RADIO_TuneToPure(f, true);
+static uint16_t measure(uint32_t f, bool precise) {
+  RADIO_TuneToPure(f, precise);
   SYSTICK_DelayUs(delay);
   return RADIO_GetRSSI();
 }
@@ -115,7 +115,7 @@ void SCAN_Init(bool multiband) {
 void SCAN_Check(bool isAnalyserMode) {
   if (isAnalyserMode) {
     gLoot.f = radio.rxF;
-    gLoot.rssi = measure(radio.rxF);
+    gLoot.rssi = measure(radio.rxF, !isAnalyserMode);
     SP_AddPoint(&gLoot);
     next();
     return;
@@ -127,7 +127,7 @@ void SCAN_Check(bool isAnalyserMode) {
     gRedrawScreen = true;
   } else {
     gLoot.f = radio.rxF;
-    gLoot.rssi = measure(radio.rxF);
+    gLoot.rssi = measure(radio.rxF, !isAnalyserMode);
 
     if (!sqLevel && gLoot.rssi) {
       sqLevel = gLoot.rssi - 1;

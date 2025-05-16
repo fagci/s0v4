@@ -39,7 +39,7 @@ void VFO1_update(void) {
 
 bool VFO1_key(KEY_Code_t key, Key_State_t state) {
   if (state == KEY_RELEASED && RADIO_IsChMode()) {
-    if (!gIsNumNavInput && key <= KEY_9) {
+    if (!gIsNumNavInput && key > KEY_0 && key <= KEY_9) {
       NUMNAV_Init(radio.channel, 0, CHANNELS_GetCountMax() - 1);
       gNumNavCallback = setChannel;
     }
