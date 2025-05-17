@@ -277,7 +277,7 @@ void RADIO_Update() {
 void RADIO_SaveCurrentVFODelayed(void) { saveVfoTime = Now() + 1000; }
 
 static void setupToneDetection() {
-  // Log("setupToneDetection");
+  Log("setupToneDetection");
   // HACK? to enable STE RX
   // Log("DC flt BW = 0");
   BK4819_WriteRegister(BK4819_REG_7E, 0x302E); // DC flt BW 0=BYP

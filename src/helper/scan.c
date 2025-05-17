@@ -112,11 +112,17 @@ void SCAN_Init(bool multiband) {
   onNewBand();
 }
 
+static uint32_t lastRender;
+
 void SCAN_Check(bool isAnalyserMode) {
   if (isAnalyserMode) {
     gLoot.f = radio.rxF;
     gLoot.rssi = measure(radio.rxF, !isAnalyserMode);
     SP_AddPoint(&gLoot);
+    if (Now() - lastRender > 500) {
+      gRedrawScreen = true;
+      lastRender = Now();
+    }
     next();
     return;
   }

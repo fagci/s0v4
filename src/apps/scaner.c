@@ -24,6 +24,9 @@ static uint32_t cursorRangeTimeout = 0;
 
 static bool isAnalyserMode = false;
 
+static uint8_t scanAFC;
+static uint32_t scanDelay;
+
 static void setStartF(uint32_t f) {
   radio.fixedBoundsMode = false;
   BANDS_RangeClear();
@@ -133,6 +136,15 @@ bool SCANER_key(KEY_Code_t key, Key_State_t state) {
   if (state == KEY_RELEASED) {
     switch (key) {
     case KEY_4:
+      if (isAnalyserMode) {
+        delay = scanDelay;
+        BK4819_SetAFC(scanAFC);
+      } else {
+        scanDelay = delay;
+        scanAFC = BK4819_GetAFC();
+        BK4819_SetAFC(0);
+        delay = 0;
+      }
       isAnalyserMode = !isAnalyserMode;
       minMaxRssi = SP_GetMinMax();
       return true;
@@ -192,12 +204,14 @@ void SCANER_render(void) {
 
   STATUSLINE_RenderRadioSettings();
 
-  if (!isAnalyserMode) {
+  if (isAnalyserMode) {
+    minMaxRssi.vMin = 55;
+    minMaxRssi.vMax = RSSI_MAX;
+  } else {
     minMaxRssi = SP_GetMinMax();
   }
 
   SP_Render(&gCurrentBand, minMaxRssi);
-  SP_RenderArrow(&gCurrentBand, radio.rxF);
 
   // top
   if (gLastActiveLoot) {
@@ -209,13 +223,14 @@ void SCANER_render(void) {
   PrintSmallEx(LCD_WIDTH, 12, POS_R, C_FILL, "%u.%02uk", step / 100,
                step % 100);
   if (BANDS_RangeIndex() > 0) {
-    PrintSmallEx(LCD_WIDTH, 18, POS_R, C_FILL, "Zoom %u",
-                 BANDS_RangeIndex() + 1);
+    PrintSmallEx(0, 18, POS_L, C_FILL, "Zoom %u", BANDS_RangeIndex() + 1);
   }
   PrintSmallEx(0, 24, POS_L, C_FILL, "CPS %u", SCAN_GetCps());
 
   if (isAnalyserMode) {
     renderAnalyzerUI();
+  } else {
+    SP_RenderArrow(&gCurrentBand, radio.rxF);
   }
 
   // bottom

@@ -1,8 +1,8 @@
 #include "keyboard.h"
 #include "../inc/dp32g030/gpio.h"
+#include "../scheduler.h"
 #include "../system.h"
 #include "gpio.h"
-#include "../scheduler.h"
 #include "systick.h"
 
 static SystemMessages n;
@@ -112,8 +112,6 @@ static uint16_t ReadStableGpioData() {
 }
 
 static void ResetKeyboardPins() {
-  /* GPIO_ClearBit(&GPIOA->DATA, GPIOA_PIN_KEYBOARD_6);
-  GPIO_SetBit(&GPIOA->DATA, GPIOA_PIN_KEYBOARD_7); */
   GPIOA->DATA = (GPIOA->DATA & ~(1u << GPIOA_PIN_KEYBOARD_6)) |
                 (1u << GPIOA_PIN_KEYBOARD_7);
 }

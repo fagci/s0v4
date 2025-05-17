@@ -159,7 +159,7 @@ void SYS_Main() {
 
     APPS_update();
 
-    if (Now() - appsRenderTimer > 12) {
+    if (Now() - appsRenderTimer > 16) {
       processKeyboard();
       appRender();
       appsRenderTimer = Now();
