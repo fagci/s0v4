@@ -27,5 +27,5 @@ void SYSTICK_DelayUs(const uint32_t Delay) {
 }
 
 void SYSTICK_Delay250ns(const uint32_t Delay) {
-  SYSTICK_DelayTicks(Delay * TICK_MULTIPLIER / 8); // experimental, was 4
+  SYSTICK_DelayTicks(Delay * TICK_MULTIPLIER / 4);
 }

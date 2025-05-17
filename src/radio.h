@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define SQL_DELAY 50
+#define SQL_DELAY 55
 
 typedef enum {
   TX_UNKNOWN,
