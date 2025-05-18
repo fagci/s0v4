@@ -100,8 +100,7 @@ static bool checkKeylock(Key_State_t state, KEY_Code_t key) {
 }
 
 static void processKeyboard() {
-  SystemMessages n;
-  n = KEYBOARD_GetKey();
+  SystemMessages n = KEYBOARD_GetKey();
   // Process system notifications
   if (n.message == MSG_KEYPRESSED && !isUartWaiting()) {
     BACKLIGHT_On();
@@ -134,7 +133,8 @@ void SYS_Main() {
   BOARD_Init();
   BATTERY_UpdateBatteryInfo();
 
-  if (resetNeeded()) {
+  SystemMessages n = KEYBOARD_GetKey();
+  if (resetNeeded() || n.key == KEY_EXIT) {
     gSettings.batteryCalibration = 2000;
     gSettings.backlight = 5;
     APPS_run(APP_RESET);
