@@ -26,6 +26,7 @@ extern Measurement gLoot;
 extern bool gIsListening;
 extern bool gMonitorMode;
 extern TXState gTxState;
+extern TXState potentialTxState;
 extern bool gShowAllRSSI;
 extern uint8_t gCurrentTxPower;
 

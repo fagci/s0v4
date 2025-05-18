@@ -35,6 +35,7 @@ bool gMonitorMode = false;
 uint8_t gCurrentTxPower = 0;
 TXState gTxState = TX_UNKNOWN;
 bool gShowAllRSSI = false;
+TXState potentialTxState;
 
 static bool hasSi = false;
 static bool hasSsbPatch = false;
@@ -662,6 +663,7 @@ void RADIO_SetupByCurrentVFO(void) {
   RADIO_SwitchRadio();
   RADIO_Setup();
   RADIO_TuneToPure(radio.rxF, !gMonitorMode);
+  potentialTxState = RADIO_GetTXState(RADIO_GetTXF());
 }
 
 // USE CASE: set vfo temporary for current app

@@ -224,7 +224,7 @@ void VFO1_render(void) {
   PrintMediumEx(LCD_WIDTH - 1, BASE - 12, POS_R, C_FILL, mod);
   renderChannelName(21, radio.channel);
   const uint32_t step = StepFrequencyTable[radio.step];
-  if (RADIO_GetTXState(RADIO_GetTXF()) == TX_ON) {
+  if (potentialTxState == TX_ON) {
     PrintSmallEx(LCD_XCENTER, BASE + 6, POS_C, C_FILL, "%s",
                  TX_POWER_NAMES[radio.power]);
   }
