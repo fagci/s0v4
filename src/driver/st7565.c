@@ -6,10 +6,10 @@
 #include "gpio.h"
 #include "spi.h"
 #include "system.h"
+#include "systick.h"
 #include "uart.h"
 #include <stdint.h>
-
-#define NEED_WAIT_FIFO
+#include <string.h>
 
 static void waitToSend() {
   while ((SPI0->FIFOST & SPI_FIFOST_TFF_MASK) != SPI_FIFOST_TFF_BITS_NOT_FULL) {
@@ -18,6 +18,7 @@ static void waitToSend() {
 }
 
 uint8_t gFrameBuffer[8][LCD_WIDTH];
+static uint8_t frameBufferSecond[8][LCD_WIDTH];
 
 bool gRedrawScreen = true;
 
@@ -61,11 +62,15 @@ void ST7565_Blit(void) {
   uint8_t Line;
   uint8_t Column;
 
-  // fix();
   SPI_ToggleMasterMode(&SPI0->CR, false);
   ST7565_WriteByte(0x40);
 
   for (Line = 0; Line < ARRAY_SIZE(gFrameBuffer); Line++) {
+    if (memcmp(gFrameBuffer[Line], frameBufferSecond[Line],
+               ARRAY_SIZE(frameBufferSecond[Line])) == 0) {
+      continue;
+    }
+
     ST7565_SelectColumnAndLine(4U, Line);
     GPIO_SetBit(&GPIOB->DATA, GPIOB_PIN_ST7565_A0);
     for (Column = 0; Column < ARRAY_SIZE(gFrameBuffer[0]); Column++) {
@@ -73,6 +78,9 @@ void ST7565_Blit(void) {
       SPI0->WDR = gFrameBuffer[Line][Column];
     }
     SPI_WaitForUndocumentedTxFifoStatusBit();
+
+    memcpy(frameBufferSecond[Line], gFrameBuffer[Line],
+           ARRAY_SIZE(frameBufferSecond[Line]));
   }
 
   SPI_ToggleMasterMode(&SPI0->CR, true);

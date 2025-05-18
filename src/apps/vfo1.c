@@ -1,12 +1,12 @@
 #include "vfo1.h"
 #include "../dcs.h"
 #include "../driver/bk4819.h"
-#include "../driver/system.h"
 #include "../helper/channels.h"
 #include "../helper/measurements.h"
 #include "../helper/numnav.h"
 #include "../helper/regs-menu.h"
 #include "../radio.h"
+#include "../scheduler.h"
 #include "../ui/components.h"
 #include "../ui/graphics.h"
 #include "../ui/menu.h"
@@ -31,10 +31,18 @@ static void tuneTo(uint32_t f) {
 
 void VFO1_init(void) { RADIO_LoadCurrentVFO(); }
 
+static uint32_t lastUpdate;
+static uint32_t lastRender;
+
 void VFO1_update(void) {
-  RADIO_CheckAndListen();
-  gRedrawScreen = true;
-  SYS_DelayMs(SQL_DELAY);
+  if (Now() - lastUpdate >= SQL_DELAY) {
+    RADIO_CheckAndListen();
+    lastUpdate = Now();
+  }
+  if (Now() - lastRender >= 500) {
+    lastRender = Now();
+    gRedrawScreen = true;
+  }
 }
 
 bool VFO1_key(KEY_Code_t key, Key_State_t state) {

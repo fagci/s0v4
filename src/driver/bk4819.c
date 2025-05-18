@@ -92,6 +92,8 @@ void BK4819_Init(void) {
 
   BK4819_WriteRegister(0x40, (BK4819_ReadRegister(0x40) & ~(0x7FF)) |
                                  (gSettings.deviation * 10) | (1 << 12));
+
+  BK4819_WriteRegister(0x4B, BK4819_ReadRegister(0x4B) & ~(1 << 5));
 }
 
 void BK4819_WriteU8(uint8_t Data) {
@@ -189,8 +191,8 @@ void BK4819_SetAGC(bool useDefault, uint8_t gainIndex) {
   BK4819_WriteRegister(BK4819_REG_7E, (regVal & ~(1 << 15) & ~(0b111 << 12)) |
                                           (!enableAgc << 15) // 0  AGC fix mode
                                           | (3u << 12)       // 3  AGC fix index
-                                          // IJV
-                                          | (5u << 3) | (6u << 0));
+                                          | (5u << 3) | (6u << 0) // def DC
+  );
 
   if (gainIndex == AUTO_GAIN_INDEX) {
     BK4819_WriteRegister(BK4819_REG_13, 0x03BE);
@@ -498,23 +500,33 @@ void BK4819_XtalSet(XtalMode mode) {
   BK4819_WriteRegister(0x3D, ifset);
 }
 
+static uint8_t oldMod = 255;
+
 void BK4819_SetModulation(ModulationType type) {
+  if (oldMod == type) {
+    return;
+  }
+
+  if (type == MOD_BYP) {
+    BK4819_EnterBypass();
+  } else if (oldMod == MOD_BYP) {
+    BK4819_ExitBypass();
+  }
+
+  oldMod = type;
   bool isSsb = type == MOD_LSB || type == MOD_USB;
   bool isFm = type == MOD_FM || type == MOD_WFM;
   BK4819_SetAF(modTypeReg47Values[type]);
   BK4819_SetRegValue(RS_AF_DAC_GAIN, 0x8);
   BK4819_SetRegValue(RS_AFC_DIS, !isFm);
-  return;
+  // return;
   if (type == MOD_WFM) {
     BK4819_SetRegValue(RS_RF_FILT_BW, 7);
     BK4819_SetRegValue(RS_RF_FILT_BW_WEAK, 7);
     BK4819_SetRegValue(RS_BW_MODE, 3);
-
-    /* BK4819_SetRegValue(RS_XTAL_MODE, 0);
-    BK4819_SetRegValue(RS_IF_F, 0x3555); // was 0x378F */
     BK4819_XtalSet(XTAL_0_13M);
   } else if (isSsb) {
-    // BK4819_XtalSet(XTAL_3_38_4M);
+    BK4819_XtalSet(XTAL_3_38_4M);
     // BK4819_SetRegValue(RS_XTAL_MODE, 3);
     BK4819_SetRegValue(RS_IF_F, 0);
   } else {
@@ -669,9 +681,16 @@ void BK4819_FskEnableTx(void) {
   BK4819_WriteRegister(BK4819_REG_59, (1u << 11) | fsk_reg59);
 }
 
+void BK4819_EnterBypass() {
+  uint16_t reg = BK4819_ReadRegister(BK4819_REG_7E);
+  BK4819_WriteRegister(BK4819_REG_7E, reg & ~(0b111 << 3) & ~(0b111 << 0));
+}
+
 void BK4819_ExitBypass(void) {
   BK4819_SetAF(BK4819_AF_MUTE);
-  BK4819_WriteRegister(BK4819_REG_7E, 0x302E);
+  uint16_t reg = BK4819_ReadRegister(BK4819_REG_7E);
+  BK4819_WriteRegister(BK4819_REG_7E, reg & ~(0b111 << 3) & ~(0b111 << 0) |
+                                          (0b101 << 3) | (0b110 << 0));
 }
 
 void BK4819_PrepareTransmit(void) {

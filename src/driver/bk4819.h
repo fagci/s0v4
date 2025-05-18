@@ -144,6 +144,7 @@ void BK4819_FskClearFifo(void);
 void BK4819_FskEnableRx(void);
 void BK4819_FskEnableTx(void);
 void BK4819_Idle(void);
+void BK4819_EnterBypass(void);
 void BK4819_ExitBypass(void);
 void BK4819_PrepareTransmit(void);
 void BK4819_TxOn_Beep(void);

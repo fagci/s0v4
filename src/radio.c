@@ -280,7 +280,7 @@ static void setupToneDetection() {
   Log("setupToneDetection");
   // HACK? to enable STE RX
   // Log("DC flt BW = 0");
-  BK4819_WriteRegister(BK4819_REG_7E, 0x302E); // DC flt BW 0=BYP
+  // BK4819_WriteRegister(BK4819_REG_7E, 0x302E); // DC flt BW 0=BYP
   uint16_t InterruptMask = BK4819_REG_3F_CxCSS_TAIL;
   if (gSettings.dtmfdecode) {
     BK4819_EnableDTMF();
@@ -375,7 +375,7 @@ static void sendEOT() {
     SYS_DelayMs(10);
     BK4819_GenTail(4);
     BK4819_WriteRegister(BK4819_REG_51, 0x9033);
-    SYS_DelayMs(100);
+    SYS_DelayMs(250);
   }
   BK4819_ExitSubAu();
 }
@@ -560,7 +560,7 @@ void RADIO_ToggleTXEX(bool on, uint32_t txF, uint8_t power, bool paEnabled) {
     BK4819_ExitDTMF_TX(true); // also prepares to tx ste
 
     sendEOT();
-    toggleBK1080SI4732(false);
+    // toggleBK1080SI4732(false);
     BK4819_TurnsOffTones_TurnsOnRX();
 
     gCurrentTxPower = 0;
@@ -790,9 +790,9 @@ void RADIO_Setup() {
                    gSettings.sqlCloseTime);
     // Log("MOD: %s", modulationTypeOptions[mod]);
     BK4819_SetModulation(mod);
-    BK4819_SetScrambler(radio.scrambler);
 
     setupToneDetection();
+    BK4819_SetScrambler(radio.scrambler);
     break;
   case RADIO_BK1080:
     break;
@@ -1064,11 +1064,19 @@ void RADIO_CheckAndListen() {
   gLoot.f = radio.rxF;
   gLoot.rssi = RADIO_GetRSSI();
 
-  if ((gMonitorMode || gSettings.iAmPro) && gSettings.showLevelInVFO) {
+  if (gSettings.iAmPro || graphMeasurement == GRAPH_SNR) {
     gLoot.snr = RADIO_GetSNR();
+  }
+  if (gSettings.iAmPro || graphMeasurement == GRAPH_NOISE) {
     gLoot.noise = BK4819_GetNoise();
+  }
+  if (gSettings.iAmPro || graphMeasurement == GRAPH_GLITCH) {
     gLoot.glitch = BK4819_GetGlitch();
+  }
+  if (graphMeasurement == GRAPH_PEAK_RSSI) {
     gLoot.lnaPeakRssi = BK4819_GetLnaPeakRSSI();
+  }
+  if (graphMeasurement == GRAPH_AGC_RSSI) {
     gLoot.rssiAgc = BK4819_GetAgcRSSI();
   }
 
@@ -1081,8 +1089,12 @@ void RADIO_CheckAndListen() {
     checkTone(&gLoot);
   }
 
+  bool opn = gLoot.open;
   if (!gMonitorMode && radio.radio == RADIO_BK4819) {
     LOOT_Update(&gLoot);
+  }
+  if (gLoot.open) {
+    gLoot.open = opn; // TEST: maybe there STE broken
   }
   RADIO_ToggleRX(gLoot.open);
   SP_ShiftGraph(-1);
