@@ -92,8 +92,6 @@ void BK4819_Init(void) {
 
   BK4819_WriteRegister(0x40, (BK4819_ReadRegister(0x40) & ~(0x7FF)) |
                                  (gSettings.deviation * 10) | (1 << 12));
-
-  BK4819_WriteRegister(0x4B, BK4819_ReadRegister(0x4B) & ~(1 << 5));
 }
 
 void BK4819_WriteU8(uint8_t Data) {
@@ -517,7 +515,7 @@ void BK4819_SetModulation(ModulationType type) {
   bool isSsb = type == MOD_LSB || type == MOD_USB;
   bool isFm = type == MOD_FM || type == MOD_WFM;
   BK4819_SetAF(modTypeReg47Values[type]);
-  BK4819_SetRegValue(RS_AF_DAC_GAIN, 0x8);
+  BK4819_SetRegValue(RS_AF_DAC_GAIN, 8);
   BK4819_SetRegValue(RS_AFC_DIS, !isFm);
   // return;
   if (type == MOD_WFM) {
@@ -688,9 +686,10 @@ void BK4819_EnterBypass() {
 
 void BK4819_ExitBypass(void) {
   BK4819_SetAF(BK4819_AF_MUTE);
-  uint16_t reg = BK4819_ReadRegister(BK4819_REG_7E);
+  /* uint16_t reg = BK4819_ReadRegister(BK4819_REG_7E);
   BK4819_WriteRegister(BK4819_REG_7E, reg & ~(0b111 << 3) & ~(0b111 << 0) |
-                                          (0b101 << 3) | (0b110 << 0));
+                                          (0b101 << 3) | (0b110 << 0)); */
+  BK4819_WriteRegister(BK4819_REG_7E, 0x302E);
 }
 
 void BK4819_PrepareTransmit(void) {

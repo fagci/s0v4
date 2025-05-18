@@ -15,6 +15,7 @@ typedef enum {
   REG_DEV,
   REG_MIC,
   REG_XTAL,
+  REG_AF_DAC_GAIN,
   REG_TX_POWER,
 
   REG_COUNT,
@@ -28,17 +29,18 @@ static bool inMenu;
 static char buf[16];
 
 static char *MENU_NAMES[] = {
-    [REG_GAIN] = "Gain",       //
-    [REG_BW] = "BW",           //
-    [REG_MOD] = "Mod",         //
-    [REG_STEP] = "Step",       //
-    [REG_SQL] = "SQL",         //
-    [REG_RADIO] = "Radio",     //
-    [REG_AFC] = "AFC",         //
-    [REG_DEV] = "DEV",         //
-    [REG_MIC] = "MIC",         //
-    [REG_XTAL] = "XTAL",       //
-    [REG_TX_POWER] = "TX POW", //
+    [REG_GAIN] = "Gain",             //
+    [REG_BW] = "BW",                 //
+    [REG_MOD] = "Mod",               //
+    [REG_STEP] = "Step",             //
+    [REG_SQL] = "SQL",               //
+    [REG_RADIO] = "Radio",           //
+    [REG_AFC] = "AFC",               //
+    [REG_DEV] = "DEV",               //
+    [REG_MIC] = "MIC",               //
+    [REG_XTAL] = "XTAL",             //
+    [REG_AF_DAC_GAIN] = "AF_DAC_GAIN", //
+    [REG_TX_POWER] = "TX POW",       //
 };
 
 static void updateValue(bool inc) {
@@ -89,6 +91,10 @@ static void updateValue(bool inc) {
     BK4819_SetRegValue(RS_MIC, v);
     gSettings.mic = v;
     SETTINGS_DelayedSave();
+    break;
+  case REG_AF_DAC_GAIN:
+    BK4819_SetRegValue(RS_AF_DAC_GAIN, IncDecU(BK4819_GetRegValue(RS_AF_DAC_GAIN),
+                                              0, 0b111111 + 1, inc));
     break;
   case REG_TX_POWER:
     radio.power = IncDecU(radio.power, 0, TX_POW_HIGH + 1, inc);
@@ -186,6 +192,9 @@ static void getValue(MenuReg reg) {
   case REG_SQL:
     snprintf(buf, 16, "%s %u", sqTypeNames[radio.squelch.type],
              radio.squelch.value);
+    break;
+  case REG_AF_DAC_GAIN:
+    snprintf(buf, 16, "%u", BK4819_GetRegValue(RS_AF_DAC_GAIN));
     break;
   case REG_COUNT:
     break;

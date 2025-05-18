@@ -28,7 +28,8 @@ typedef struct RegisterSpec {
 
 static const RegisterSpec RS_AFC_DIS = {"AFC Dis", 0x73, 4, 1, 1};
 static const RegisterSpec RS_AF_OUT = {"AF Out", 0x47, 8, 0xF, 1};
-static const RegisterSpec RS_AF_DAC_GAIN = {"AF DAC Gain", 0x48, 0, 0xF, 1};
+static const RegisterSpec RS_AF_DAC_GAIN = {"AF DAC G", 0x48, 0, 0xF, 1};
+static const RegisterSpec RS_AF_RX_GAIN = {"AF RX G", 0x48, 4, 0b111111, 1};
 static const RegisterSpec RS_XTAL_MODE = {"XtalFMode", 0x3C, 6, 0b11, 1};
 static const RegisterSpec RS_RF_FILT_BW = {"RF BW", 0x43, 12, 0b111, 1};
 static const RegisterSpec RS_RF_FILT_BW_WEAK = {"RF BWw", 0x43, 9, 0b111, 1};
@@ -38,6 +39,7 @@ static const RegisterSpec RS_SQ_TYPE = {"SQ type", 0x77, 8, 0xFF, 1};
 static const RegisterSpec RS_DEV = {"DEV", 0x40, 0, 0xFFF, 10};
 static const RegisterSpec RS_PEAK_RSSI = {"Peak RSSI", 0x62, 0, 0xFF, 1};
 static const RegisterSpec RS_MIC = {"MIC", 0x7D, 0, 0xF, 1};
+static const RegisterSpec RS_AVC = {"AVC", 0x4B, 5, 1, 1};
 /* {"Gain", BK4819_REG_13, 0, 0xFFFF, 1},
 
 {"IF", 0x3D, 0, 0xFFFF, 100},
