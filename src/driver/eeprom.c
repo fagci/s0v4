@@ -27,7 +27,6 @@ void EEPROM_WriteBuffer(uint32_t address, void *pBuffer, uint16_t size) {
   if (pBuffer == NULL) {
     return;
   }
-  Log("EE W");
   const uint16_t PAGE_SIZE = SETTINGS_GetPageSize();
 
   while (size) {
@@ -55,7 +54,6 @@ void EEPROM_WriteBuffer(uint32_t address, void *pBuffer, uint16_t size) {
     size -= n;
     gEepromWrite = true;
   }
-  Log("EE W end");
 }
 
 void EEPROM_ClearPage(uint16_t page) {

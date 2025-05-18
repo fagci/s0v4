@@ -47,6 +47,8 @@ typedef enum {
   TYPE_FILTER_BAND_SAVE = (1 << TYPE_BAND) | (1 << TYPE_EMPTY),
   TYPE_FILTER_CH = (1 << TYPE_CH),
   TYPE_FILTER_CH_SAVE = (1 << TYPE_CH) | (1 << TYPE_EMPTY),
+  TYPE_FILTER_VFO = (1 << TYPE_VFO),
+  TYPE_FILTER_VFO_SAVE = (1 << TYPE_VFO) | (1 << TYPE_EMPTY),
 } CHTypeFilter;
 
 typedef enum {

@@ -495,13 +495,7 @@ void CHCFG_init(void) {
   }
 }
 
-void CHCFG_deinit(void) {
-  if (gChEd.meta.type == TYPE_VFO) {
-    radio = gChEd;
-    RADIO_SaveCurrentVFO();
-  }
-  gChNum = -1;
-}
+void CHCFG_deinit(void) { gChNum = -1; }
 
 static bool accept(void) {
   const MenuItem *item = &menu[menuIndex];
@@ -534,11 +528,7 @@ static bool accept(void) {
       return true;
     }
     gChSaveMode = true;
-    if (gChEd.meta.type == TYPE_VFO) {
-      gChEd.meta.type = TYPE_CH; // to prevent override on deinit
-    }
-    gChListFilter = gChEd.meta.type == TYPE_BAND ? TYPE_FILTER_BAND_SAVE
-                                                 : TYPE_FILTER_CH_SAVE;
+    gChListFilter = (1 << gChEd.meta.type) | (1 << TYPE_EMPTY);
     APPS_run(APP_CH_LIST);
     return true;
   case M_STEP:

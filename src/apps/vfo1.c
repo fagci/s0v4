@@ -5,6 +5,7 @@
 #include "../helper/measurements.h"
 #include "../helper/numnav.h"
 #include "../helper/regs-menu.h"
+#include "../helper/vfo.h"
 #include "../radio.h"
 #include "../scheduler.h"
 #include "../ui/components.h"
@@ -29,7 +30,10 @@ static void tuneTo(uint32_t f) {
   RADIO_SaveCurrentVFO();
 }
 
-void VFO1_init(void) { RADIO_LoadCurrentVFO(); }
+void VFO1_init(void) {
+  VFO_LoadScanlist(0);
+  RADIO_LoadCurrentVFO();
+}
 
 static uint32_t lastUpdate;
 static uint32_t lastRender;
@@ -168,6 +172,12 @@ bool VFO1_key(KEY_Code_t key, Key_State_t state) {
       return true;
     case KEY_SIDE2:
       break;
+    case KEY_EXIT:
+      if (!APPS_exit()) {
+        VFO_Next(true);
+        RADIO_SetupByCurrentVFO();
+      }
+      return true;
     default:
       break;
     }
@@ -188,7 +198,9 @@ static void renderChannelName(uint8_t y, uint16_t channel) {
     PrintSmallEx(14, y - 9, POS_C, C_INVERT, "MR %03u", channel);
     UI_Scanlists(LCD_XCENTER - 13, y - 13, gSettings.currentScanlist);
   } else {
-    PrintSmallEx(14, y - 9, POS_C, C_INVERT, "VFO");
+    PrintSmallEx(14, y - 9, POS_C, C_INVERT, "VFO %u/%u",
+                 gSettings.activeVFO + 1, VFO_GetSize());
+    PrintSmallEx(30, y - 9, POS_L, C_INVERT, "%s", radio.name);
   }
 }
 
@@ -294,6 +306,10 @@ void VFO1_render(void) {
     if (gSettings.iAmPro) {
       renderProModeInfo(BASE);
     }
+
+    VFO nv = VFO_GetNext(true);
+    PrintMediumEx(LCD_XCENTER, LCD_HEIGHT - 2, POS_C, C_FILL, "%u.%05u",
+                  nv.rxF / MHZ, nv.rxF % MHZ);
   }
 
   REGSMENU_Draw();

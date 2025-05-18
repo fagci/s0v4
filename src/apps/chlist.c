@@ -33,10 +33,12 @@ static char *VIEW_MODE_NAMES[] = {
 };
 
 static char *CH_TYPE_FILTER_NAMES[] = {
-    [TYPE_FILTER_CH] = "CH",
-    [TYPE_FILTER_CH_SAVE] = "CH sav",
-    [TYPE_FILTER_BAND] = "BAND",
-    [TYPE_FILTER_BAND_SAVE] = "BAND sav",
+    [TYPE_FILTER_CH] = "CH",              //
+    [TYPE_FILTER_CH_SAVE] = "CH sav",     //
+    [TYPE_FILTER_BAND] = "BAND",          //
+    [TYPE_FILTER_BAND_SAVE] = "BAND sav", //
+    [TYPE_FILTER_VFO] = "VFO",            //
+    [TYPE_FILTER_VFO_SAVE] = "VFO sav",   //
 };
 
 // TODO:
@@ -103,9 +105,6 @@ static void setMenuIndex(uint16_t i) { channelIndex = i - 1; }
 
 static void save() {
   gChEd.scanlists = 0;
-  if (gChEd.meta.type == TYPE_VFO) {
-    gChEd.meta.type = TYPE_CH;
-  }
   CHANNELS_Save(getChannelNumber(channelIndex), &gChEd);
   RADIO_LoadCurrentVFO();
   APPS_exit();
@@ -206,12 +205,18 @@ bool CHLIST_key(KEY_Code_t key, Key_State_t state) {
         gChListFilter = TYPE_FILTER_BAND;
         break;
       case TYPE_FILTER_BAND:
+        gChListFilter = TYPE_FILTER_VFO;
+        break;
+      case TYPE_FILTER_VFO:
         gChListFilter = TYPE_FILTER_CH;
         break;
       case TYPE_FILTER_CH_SAVE:
         gChListFilter = TYPE_FILTER_BAND_SAVE;
         break;
       case TYPE_FILTER_BAND_SAVE:
+        gChListFilter = TYPE_FILTER_VFO_SAVE;
+        break;
+      case TYPE_FILTER_VFO_SAVE:
         gChListFilter = TYPE_FILTER_CH_SAVE;
         break;
       }
@@ -223,11 +228,8 @@ bool CHLIST_key(KEY_Code_t key, Key_State_t state) {
     case KEY_MENU:
       if (gChSaveMode) {
         CHANNELS_LoadScanlist(gChListFilter, gSettings.currentScanlist);
-        if (strncmp(gChEd.name, "VFO-", 4) == 0) {
-          memset(gChEd.name, 0, ARRAY_SIZE(gChEd.name));
-        }
 
-        if (gChEd.name[0] == '\0' || strncmp(gChEd.name, "VFO-", 4) == 0) {
+        if (gChEd.name[0] == '\0') {
           gTextinputText = tempName;
           snprintf(gTextinputText, 9, "%lu.%05lu", gChEd.rxF / MHZ,
                    gChEd.rxF % MHZ);

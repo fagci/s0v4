@@ -17,6 +17,7 @@
 #include "helper/channels.h"
 #include "helper/lootlist.h"
 #include "helper/measurements.h"
+#include "helper/vfo.h"
 #include "misc.h"
 #include "scheduler.h"
 #include "settings.h"
@@ -142,7 +143,7 @@ static ModulationType MODS_WFM[] = {
     MOD_WFM,
 };
 
-static uint16_t getVfoChannel() { return CHANNELS_GetCountMax() - 1; }
+static uint16_t getVfoChannel() { return VFO_GetCh(gSettings.activeVFO); }
 
 static void loadVFO() { CHANNELS_Load(getVfoChannel(), &radio); }
 
@@ -278,7 +279,7 @@ void RADIO_Update() {
 void RADIO_SaveCurrentVFODelayed(void) { saveVfoTime = Now() + 1000; }
 
 static void setupToneDetection() {
-  Log("setupToneDetection");
+  // Log("setupToneDetection");
   // HACK? to enable STE RX
   // Log("DC flt BW = 0");
   // BK4819_WriteRegister(BK4819_REG_7E, 0x302E); // DC flt BW 0=BYP
@@ -688,17 +689,16 @@ void RADIO_TuneToSave(uint32_t f) {
 
 void RADIO_SaveCurrentVFO(void) {
   int16_t vfoChNum = getVfoChannel();
-  int16_t chToSave = radio.channel;
   bool _isChMode = radio.isChMode;
   if (_isChMode) {
     // save only active channel number
     // to load it instead of full VFO
     // and to prevent overwrite VFO with MR
     VFO oldVfo;
+    int16_t chToSave = radio.channel;
     CHANNELS_Load(vfoChNum, &oldVfo);
     oldVfo.channel = chToSave;
     oldVfo.isChMode = _isChMode;
-    strncpy(oldVfo.name, "VFO-A", 6); // to fix save named channels
     CHANNELS_Save(vfoChNum, &oldVfo);
     return;
   }
