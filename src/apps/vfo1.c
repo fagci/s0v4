@@ -1,11 +1,12 @@
 #include "vfo1.h"
 #include "../dcs.h"
-#include "../driver/bk4819.h"
+#include "../driver/gpio.h"
 #include "../helper/channels.h"
 #include "../helper/measurements.h"
 #include "../helper/numnav.h"
 #include "../helper/regs-menu.h"
 #include "../helper/vfo.h"
+#include "../inc/dp32g030/gpio.h"
 #include "../radio.h"
 #include "../scheduler.h"
 #include "../ui/components.h"
@@ -17,9 +18,6 @@
 #include "chcfg.h"
 #include "chlist.h"
 #include "finput.h"
-
-static bool live = false;
-static Band liveBand;
 
 static char String[16];
 
@@ -40,34 +38,6 @@ static uint32_t lastUpdate;
 static uint32_t lastRender;
 
 static const Step liveStep = STEP_5_0kHz;
-
-static void updateLive() {
-  if (live) {
-    Measurement m;
-    const uint32_t stp = StepFrequencyTable[liveStep];
-    const uint32_t span = stp * 32;
-    liveBand.rxF = radio.rxF - span;
-    liveBand.txF = radio.rxF + span;
-
-    // fix turbo
-    liveBand.rxF -= stp;
-    liveBand.txF -= stp;
-
-    liveBand.step = liveStep;
-    SP_Init(&liveBand);
-
-    BK4819_SetRegValue(RS_AF_DAC_GAIN, 2);
-    BK4819_TuneTo(liveBand.rxF, true);
-    for (uint32_t f = liveBand.rxF; f <= liveBand.txF; f += stp) {
-      m.f = f;
-      BK4819_TuneTo(f, false);
-      m.rssi = BK4819_GetRSSI();
-      SP_AddPoint(&m);
-    }
-    RADIO_TuneToPure(radio.rxF, false);
-    BK4819_SetRegValue(RS_AF_DAC_GAIN, 8);
-  }
-}
 
 void VFO1_update(void) {
   if (Now() - lastUpdate >= SQL_DELAY) {
@@ -202,7 +172,7 @@ bool VFO1_key(KEY_Code_t key, Key_State_t state) {
       gMonitorMode = !gMonitorMode;
       return true;
     case KEY_SIDE2:
-      live = !live;
+      GPIO_FlipBit(&GPIOC->DATA, GPIOC_PIN_FLASHLIGHT);
       break;
     case KEY_EXIT:
       if (!APPS_exit()) {
@@ -291,64 +261,57 @@ void VFO1_render(void) {
     PrintSmallEx(0, BASE + 6, POS_L, C_FILL, "%s", String);
   }
 
-  if (live) {
-    SPECTRUM_Y = BASE + 2 + 6;
+  if (gMonitorMode) {
+    SPECTRUM_Y = BASE + 2;
     SPECTRUM_H = LCD_HEIGHT - SPECTRUM_Y;
-    updateLive();
-    SP_Render(&liveBand, (VMinMax){55, RSSI_MAX});
-  } else {
-    if (gMonitorMode) {
-      SPECTRUM_Y = BASE + 2;
-      SPECTRUM_H = LCD_HEIGHT - SPECTRUM_Y;
-      if (gSettings.showLevelInVFO) {
-        char *graphMeasurementNames[] = {
-            [GRAPH_RSSI] = "RSSI",           //
-            [GRAPH_PEAK_RSSI] = "Peak RSSI", //
-            [GRAPH_AGC_RSSI] = "AGC RSSI",   //
-            [GRAPH_NOISE] = "Noise",         //
-            [GRAPH_GLITCH] = "Glitch",       //
-            [GRAPH_SNR] = "SNR",             //
-        };
-        switch (graphMeasurement) {
-        case GRAPH_RSSI:
-        case GRAPH_COUNT:
-          SP_RenderGraph(RSSI_MIN, RSSI_MAX);
-          break;
-        case GRAPH_NOISE:
-        case GRAPH_GLITCH:
-          SP_RenderGraph(0, 256);
-          break;
-        case GRAPH_SNR:
-          SP_RenderGraph(0, 30);
-          break;
-        case GRAPH_PEAK_RSSI:
-          SP_RenderGraph(15, 88);
-          break;
-        case GRAPH_AGC_RSSI:
-          SP_RenderGraph(25, 128);
-          break;
-        }
-        PrintSmallEx(0, SPECTRUM_Y + 5, POS_L, C_FILL, "%s %+3u",
-                     graphMeasurementNames[graphMeasurement],
-                     SP_GetLastGraphValue());
-      } else {
-        UI_RSSIBar(BASE + 8);
+    if (gSettings.showLevelInVFO) {
+      char *graphMeasurementNames[] = {
+          [GRAPH_RSSI] = "RSSI",           //
+          [GRAPH_PEAK_RSSI] = "Peak RSSI", //
+          [GRAPH_AGC_RSSI] = "AGC RSSI",   //
+          [GRAPH_NOISE] = "Noise",         //
+          [GRAPH_GLITCH] = "Glitch",       //
+          [GRAPH_SNR] = "SNR",             //
+      };
+      switch (graphMeasurement) {
+      case GRAPH_RSSI:
+      case GRAPH_COUNT:
+        SP_RenderGraph(RSSI_MIN, RSSI_MAX);
+        break;
+      case GRAPH_NOISE:
+      case GRAPH_GLITCH:
+        SP_RenderGraph(0, 256);
+        break;
+      case GRAPH_SNR:
+        SP_RenderGraph(0, 30);
+        break;
+      case GRAPH_PEAK_RSSI:
+        SP_RenderGraph(15, 88);
+        break;
+      case GRAPH_AGC_RSSI:
+        SP_RenderGraph(25, 128);
+        break;
       }
+      PrintSmallEx(0, SPECTRUM_Y + 5, POS_L, C_FILL, "%s %+3u",
+                   graphMeasurementNames[graphMeasurement],
+                   SP_GetLastGraphValue());
     } else {
-      if (gIsListening || gSettings.iAmPro) {
-        UI_RSSIBar(BASE + 8);
-      }
-      if (gTxState == TX_ON) {
-        UI_TxBar(BASE + 8);
-      }
-      if (gSettings.iAmPro) {
-        renderProModeInfo(BASE);
-      }
-
-      /* VFO nv = VFO_GetNext(true);
-      PrintMediumEx(LCD_XCENTER, LCD_HEIGHT - 2, POS_C, C_FILL, "%u.%05u",
-                    nv.rxF / MHZ, nv.rxF % MHZ); */
+      UI_RSSIBar(BASE + 8);
     }
+  } else {
+    if (gIsListening || gSettings.iAmPro) {
+      UI_RSSIBar(BASE + 8);
+    }
+    if (gTxState == TX_ON) {
+      UI_TxBar(BASE + 8);
+    }
+    if (gSettings.iAmPro) {
+      renderProModeInfo(BASE);
+    }
+
+    /* VFO nv = VFO_GetNext(true);
+    PrintMediumEx(LCD_XCENTER, LCD_HEIGHT - 2, POS_C, C_FILL, "%u.%05u",
+                  nv.rxF / MHZ, nv.rxF % MHZ); */
   }
 
   REGSMENU_Draw();
