@@ -688,21 +688,20 @@ void RADIO_TuneToSave(uint32_t f) {
 }
 
 void RADIO_SaveCurrentVFO(void) {
-  int16_t vfoChNum = getVfoChannel();
-  bool _isChMode = radio.isChMode;
-  if (_isChMode) {
+  if (RADIO_IsChMode()) {
     // save only active channel number
     // to load it instead of full VFO
     // and to prevent overwrite VFO with MR
     VFO oldVfo;
+    int16_t vfoChNum = getVfoChannel();
     int16_t chToSave = radio.channel;
     CHANNELS_Load(vfoChNum, &oldVfo);
     oldVfo.channel = chToSave;
-    oldVfo.isChMode = _isChMode;
+    oldVfo.isChMode = true;
     CHANNELS_Save(vfoChNum, &oldVfo);
     return;
   }
-  CHANNELS_Save(vfoChNum, &radio);
+  VFO_SaveCurrent();
 }
 static bool initialized = false;
 void RADIO_LoadCurrentVFO(void) {
