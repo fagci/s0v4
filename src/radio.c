@@ -778,41 +778,42 @@ void RADIO_SetFilterBandwidth(BK4819_FilterBandwidth_t bw) {
   }
 }
 
-void RADIO_Setup() {
+void RADIO_SetupEx(VFO vfo) {
   // Log("---------- %s RADIO_Setup ----------", radioNames[RADIO_GetRadio()]);
-  ModulationType mod = RADIO_GetModulation();
-  RADIO_SetGain(radio.gainIndex);
-  RADIO_SetFilterBandwidth(radio.bw);
+  RADIO_SetGain(vfo.gainIndex);
+  RADIO_SetFilterBandwidth(vfo.bw);
   switch (RADIO_GetRadio()) {
   case RADIO_BK4819:
-    // Log("SQ %s,%u", sqTypeNames[radio.squelch.type], radio.squelch.value);
-    BK4819_SquelchType(radio.squelch.type);
-    BK4819_Squelch(radio.squelch.value, gSettings.sqlOpenTime,
+    // Log("SQ %s,%u", sqTypeNames[vfo.squelch.type], vfo.squelch.value);
+    BK4819_SquelchType(vfo.squelch.type);
+    BK4819_Squelch(vfo.squelch.value, gSettings.sqlOpenTime,
                    gSettings.sqlCloseTime);
     // Log("MOD: %s", modulationTypeOptions[mod]);
-    BK4819_SetModulation(mod);
+    BK4819_SetModulation(vfo.modulation);
 
     setupToneDetection();
-    BK4819_SetScrambler(radio.scrambler);
+    BK4819_SetScrambler(vfo.scrambler);
     break;
   case RADIO_BK1080:
     break;
   case RADIO_SI4732:
-    if (mod == MOD_FM) {
+    if (vfo.modulation == MOD_FM) {
       SI47XX_SetSeekFmLimits(gCurrentBand.rxF, gCurrentBand.txF);
       SI47XX_SetSeekFmSpacing(StepFrequencyTable[gCurrentBand.step]);
-    } else if (mod == MOD_AM) {
+    } else if (vfo.modulation == MOD_AM) {
       SI47XX_SetSeekAmLimits(gCurrentBand.rxF, gCurrentBand.txF);
       SI47XX_SetSeekAmSpacing(StepFrequencyTable[gCurrentBand.step]);
     }
 
-    setSI4732Modulation(mod);
+    setSI4732Modulation(vfo.modulation);
 
     break;
   default:
     break;
   }
 }
+
+void RADIO_Setup() { RADIO_SetupEx(radio); }
 
 uint16_t RADIO_GetRSSI(void) {
   switch (RADIO_GetRadio()) {

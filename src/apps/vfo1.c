@@ -39,10 +39,24 @@ static uint32_t lastRender;
 
 static const Step liveStep = STEP_5_0kHz;
 
+static uint8_t mWatchVfoIndex = 0;
+
+static VFO shadowVfo;
+
 void VFO1_update(void) {
   if (Now() - lastUpdate >= SQL_DELAY) {
     RADIO_CheckAndListen();
     lastUpdate = Now();
+    if (gSettings.mWatch) {
+      if (!gIsListening) {
+        mWatchVfoIndex = IncDecU(mWatchVfoIndex, 0, VFO_GetSize(), true);
+        shadowVfo = VFO_Get(mWatchVfoIndex);
+        RADIO_SetupEx(shadowVfo);
+        BK4819_TuneTo(shadowVfo.rxF, true);
+      } else {
+        VFO_Select(mWatchVfoIndex);
+      }
+    }
   }
   if (Now() - lastRender >= (gIsListening ? 1000 : 250)) {
     lastRender = Now();

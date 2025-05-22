@@ -62,7 +62,7 @@ bool BANDSCAN_key(KEY_Code_t key, Key_State_t state) {
       APPS_run(APP_LOOT_LIST);
       return true;
     case KEY_PTT:
-      if (gLastActiveLoot) {
+      if (gLastActiveLoot && !gSettings.keylock) {
         RADIO_TuneToSave(gLastActiveLoot->f);
         APPS_run(APP_VFO1);
         return true;

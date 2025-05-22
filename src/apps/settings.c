@@ -46,6 +46,7 @@ typedef enum {
   M_FC_TIME,
   M_RESET,
   M_LEVEL_IN_VFO,
+  M_MWATCH,
 } Menu;
 
 static uint8_t DEAD_BUF[] = {0xDE, 0xAD};
@@ -88,6 +89,7 @@ static const MenuItem menu[] = {
     {"Roger", M_ROGER, ARRAY_SIZE(rogerNames)},
     {"Tone local", M_TONE_LOCAL, 2},
     {"Lock PTT", M_PTT_LOCK, 2},
+    {"Mutliwatch", M_MWATCH, 2},
     {"Reset", M_RESET, 2},
 };
 
@@ -151,6 +153,9 @@ static void getSubmenuItemText(uint16_t index, char *name) {
     return;
   case M_CH_DISP_MODE:
     strncpy(name, CH_DISPLAY_MODE_NAMES[index], 31);
+    return;
+  case M_MWATCH:
+    strncpy(name, MW_NAMES[index], 31);
     return;
   case M_ROGER:
     strncpy(name, rogerNames[index], 31);
@@ -265,6 +270,10 @@ static void accept(void) {
     gSettings.chDisplayMode = subMenuIndex;
     SETTINGS_Save();
     break;
+  case M_MWATCH:
+    gSettings.mWatch = subMenuIndex;
+    SETTINGS_Save();
+    break;
   case M_RESET:
     if (subMenuIndex > 0) {
       EEPROM_WriteBuffer(0, DEAD_BUF, 2);
@@ -339,6 +348,8 @@ static const char *getValue(Menu type) {
     return rogerNames[gSettings.roger];
   case M_CH_DISP_MODE:
     return CH_DISPLAY_MODE_NAMES[gSettings.chDisplayMode];
+  case M_MWATCH:
+    return MW_NAMES[gSettings.mWatch];
   default:
     break;
   }
@@ -442,6 +453,9 @@ static void setInitialSubmenuIndex(void) {
     break;
   case M_CH_DISP_MODE:
     subMenuIndex = gSettings.chDisplayMode;
+    break;
+  case M_MWATCH:
+    subMenuIndex = gSettings.mWatch;
     break;
   case M_MAIN_APP:
     for (i = 0; i < ARRAY_SIZE(appsAvailableToRun); ++i) {

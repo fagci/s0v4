@@ -17,5 +17,6 @@ void VFO_SaveCurrent();
 uint16_t VFO_GetCh(uint8_t n);
 VFO VFO_GetNext(bool next);
 uint8_t VFO_GetSize();
+VFO VFO_Get(uint8_t n);
 
 #endif /* end of include guard: VFO_H */

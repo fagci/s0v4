@@ -40,12 +40,16 @@ VFO VFO_GetNext(bool next) {
       .vfo;
 }
 
-bool VFO_Next(bool next) {
-  vfoScanlist[gSettings.activeVFO].vfo = radio; // preserve radio
-  gSettings.activeVFO = IncDecU(gSettings.activeVFO, 0, vfoScanlistSize, next);
+void VFO_Select(uint8_t index) {
+  gSettings.activeVFO = index;
   radio = vfoScanlist[gSettings.activeVFO].vfo;
   Log("!!! Next VFO CH=%u, f=%u", vfoScanlist[gSettings.activeVFO].mr, radio);
   SETTINGS_Save();
+}
+
+bool VFO_Next(bool next) {
+  vfoScanlist[gSettings.activeVFO].vfo = radio; // preserve radio
+  VFO_Select(IncDecU(gSettings.activeVFO, 0, vfoScanlistSize, next));
   return true;
 }
 
@@ -53,6 +57,8 @@ uint16_t VFO_GetCh(uint8_t n) {
   Log("CURRENT VFO CH IS: %u", vfoScanlist[n].mr);
   return vfoScanlist[n].mr;
 }
+
+VFO VFO_Get(uint8_t n) { return vfoScanlist[n].vfo; }
 
 void VFO_SaveCurrent() {
   CHANNELS_Save(VFO_GetCh(gSettings.activeVFO), &radio);

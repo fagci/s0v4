@@ -177,7 +177,7 @@ bool SCANER_key(KEY_Code_t key, Key_State_t state) {
       return true;
 
     case KEY_PTT:
-      if (gLastActiveLoot) {
+      if (gLastActiveLoot && !gSettings.keylock) {
         RADIO_TuneToSave(gLastActiveLoot->f);
         APPS_run(APP_VFO1);
         return true;

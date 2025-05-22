@@ -62,6 +62,7 @@ extern const char *EEPROM_TYPE_NAMES[6];
 extern const uint32_t EEPROM_SIZES[6];
 extern char *SCAN_TIMEOUT_NAMES[15];
 extern uint32_t SCAN_TIMEOUTS[15];
+extern const char *MW_NAMES[4];
 
 typedef struct {
   uint32_t upconverter : 27;
@@ -111,7 +112,7 @@ typedef struct {
   BatteryStyle batteryStyle : 2;
   bool noListen : 1;
   bool si4732PowerOff : 1;
-  uint8_t dw : 2;
+  uint8_t mWatch : 2;
 
   uint8_t reserved6;
 
