@@ -17,6 +17,8 @@ static uint8_t cursorPos = 0;
 static uint8_t dotEntered = 0;
 static uint8_t blinkState = 0;
 
+static bool isManualDot = false;
+
 static uint32_t getFrequencyHz() {
   uint32_t integerPart = 0;
   uint32_t fractionalPart = 0;
@@ -57,6 +59,7 @@ static void input(KEY_Code_t key) {
   } else if (key == KEY_STAR && !dotEntered) {
     if (cursorPos < MAX_FREQ_LENGTH) {
       freqInputArr[cursorPos++] = '.';
+      isManualDot = true;
       freqInputArr[cursorPos] = '\0';
       dotEntered = 1;
     }
@@ -64,7 +67,9 @@ static void input(KEY_Code_t key) {
     if (cursorPos > 0) {
       if (freqInputArr[cursorPos - 1] == '.') {
         dotEntered = 0;
-        freqInputArr[--cursorPos] = '\0';
+        if (!isManualDot) {
+          freqInputArr[--cursorPos] = '\0';
+        }
       }
       freqInputArr[--cursorPos] = '\0';
     }
@@ -141,6 +146,7 @@ bool FINPUT_key(KEY_Code_t key, Key_State_t state) {
       input(key);
       if (gFInputTempFreq > 13000000) {
         input(KEY_STAR);
+        isManualDot = false;
       }
       gRedrawScreen = true;
       return true;
