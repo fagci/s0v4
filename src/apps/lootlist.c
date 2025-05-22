@@ -170,8 +170,12 @@ static void saveToFreeChannels(bool saveWhitelist, uint16_t scanlist) {
       }
     }
   }
-  /* char str[16];
-  snprintf(str, 15, "Saved: %u", saved); */
+
+  FillRect(0, LCD_YCENTER - 4, LCD_WIDTH, 9, C_FILL);
+  PrintMediumBoldEx(LCD_XCENTER, LCD_YCENTER + 3, POS_C, C_INVERT, "Saved: %u",
+                    saved);
+  ST7565_Blit();
+  SYS_DelayMs(2000);
 }
 
 bool LOOTLIST_key(KEY_Code_t key, Key_State_t state) {

@@ -51,8 +51,12 @@ void waitToSend() {
   } while (!(tmp & STATUS_CTS));
 }
 
+#include "../ui/graphics.h" // X_X
 void SI47XX_downloadPatch() {
   // Log("DL patch");
+  FillRect(0, LCD_YCENTER - 4, LCD_WIDTH, 9, C_FILL);
+  PrintMediumBoldEx(LCD_XCENTER, LCD_YCENTER + 3, POS_C, C_INVERT, "WAIT...");
+  ST7565_Blit();
 
   uint8_t buf[64]; // 64 is optimal, more has no sense
   const uint16_t BUF_SIZE = ARRAY_SIZE(buf);
