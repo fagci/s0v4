@@ -3,6 +3,7 @@
 #include "../driver/system.h"
 #include "../driver/uart.h"
 #include "../radio.h"
+#include "../scheduler.h"
 #include "../settings.h"
 #include "../ui/components.h"
 #include "../ui/graphics.h"
@@ -31,6 +32,8 @@ static uint8_t filterSwitchCounter = 0;
 
 static uint16_t hz = 0x244;
 
+static uint32_t fcTimeuot;
+
 static void enableScan() {
   Log("FC enable");
   BK4819_EnableFrequencyScanEx2(gSettings.fcTime, hz);
@@ -45,7 +48,6 @@ static void disableScan() {
 }
 
 void FC_init() {
-  // BK4819_Init();
   Log("FC init");
   RADIO_LoadCurrentVFO();
   bound = SETTINGS_GetFilterBound();
@@ -70,6 +72,10 @@ void switchFilter() {
 }
 
 void FC_update(void) {
+  if (!CheckTimeout(&fcTimeuot)) {
+    return;
+  }
+
   if (isScanning) {
     if (BK4819_GetFrequencyScanResult(&currentFrequency)) {
       Log("FC got %u", currentFrequency);
@@ -116,7 +122,7 @@ void FC_update(void) {
       Log("FC switch filter");
       switchFilter();
     }
-    SYS_DelayMs(200 << gSettings.fcTime);
+    SetTimeout(&fcTimeuot, 200 << gSettings.fcTime);
   } else {
     if (!gIsListening) {
       SYS_DelayMs(SQL_DELAY);
