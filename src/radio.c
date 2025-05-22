@@ -863,6 +863,9 @@ uint16_t RADIO_GetS() {
 }
 
 bool RADIO_IsSquelchOpen() {
+  if (gTxState == TX_ON) {
+    return false;
+  }
   if (gMonitorMode) {
     return true;
   }
@@ -931,8 +934,8 @@ bool RADIO_TuneToMR(uint16_t num) {
 void RADIO_ToggleVfoMR(void) {
   if (RADIO_IsChMode()) {
     // loadVFO();
+    loadVFO();
     radio.isChMode = false;
-    saveVFO();
     RADIO_SetupByCurrentVFO();
   } else {
     CHANNELS_LoadScanlist(TYPE_FILTER_CH, gSettings.currentScanlist);
@@ -947,7 +950,6 @@ void RADIO_ToggleVfoMR(void) {
     } else {
       CHANNELS_Next(true);
       Log("CH NEXT, radio.ch=%u", radio.channel);
-      saveVFO();
     }
   }
   RADIO_SaveCurrentVFO();
