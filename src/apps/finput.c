@@ -64,6 +64,7 @@ static void input(KEY_Code_t key) {
     if (cursorPos > 0) {
       if (freqInputArr[cursorPos - 1] == '.') {
         dotEntered = 0;
+        freqInputArr[--cursorPos] = '\0';
       }
       freqInputArr[--cursorPos] = '\0';
     }

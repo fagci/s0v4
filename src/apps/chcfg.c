@@ -61,9 +61,9 @@ static MenuItem menuBand[] = {
     {"TX offset dir", M_TX_OFFSET_DIR, ARRAY_SIZE(TX_OFFSET_NAMES)},
 
     {"Bank", M_BANK, 128},
-    {"P cal L", M_P_CAL_L, 255},
-    {"P cal M", M_P_CAL_M, 255},
-    {"P cal H", M_P_CAL_H, 255},
+    {"P cal L", M_P_CAL_L, 0},
+    {"P cal M", M_P_CAL_M, 0},
+    {"P cal H", M_P_CAL_H, 0},
     {"Last f", M_LAST_F, 0},
     {"ppm", M_PPM, 31},
 
@@ -87,6 +87,21 @@ static void apply() {
   default:
     break;
   }
+}
+
+static void setPCalL(uint32_t f) {
+  gChEd.misc.powCalib.s = Clamp(f / MHZ, 0, 255);
+  apply();
+}
+
+static void setPCalM(uint32_t f) {
+  gChEd.misc.powCalib.m = Clamp(f / MHZ, 0, 255);
+  apply();
+}
+
+static void setPCalH(uint32_t f) {
+  gChEd.misc.powCalib.e = Clamp(f / MHZ, 0, 255);
+  apply();
 }
 
 static void setRXF(uint32_t f) {
@@ -263,7 +278,7 @@ static void acceptRadioConfig(const MenuItem *item, uint8_t subMenuIndex) {
   case M_BANK:
     gChEd.misc.bank = subMenuIndex;
     break;
-  case M_P_CAL_L:
+  /* case M_P_CAL_L:
     gChEd.misc.powCalib.s = subMenuIndex;
     break;
   case M_P_CAL_M:
@@ -271,7 +286,7 @@ static void acceptRadioConfig(const MenuItem *item, uint8_t subMenuIndex) {
     break;
   case M_P_CAL_H:
     gChEd.misc.powCalib.e = subMenuIndex;
-    break;
+    break; */
   case M_RADIO:
     if (RADIO_HasSi() && subMenuIndex > 0) {
       gChEd.radio = RADIO_SI4732;
@@ -343,7 +358,7 @@ static void setInitialSubmenuIndex(void) {
   case M_BANK:
     subMenuIndex = gChEd.misc.bank;
     break;
-  case M_P_CAL_L:
+  /* case M_P_CAL_L:
     subMenuIndex = gChEd.misc.powCalib.s;
     break;
   case M_P_CAL_M:
@@ -351,7 +366,7 @@ static void setInitialSubmenuIndex(void) {
     break;
   case M_P_CAL_H:
     subMenuIndex = gChEd.misc.powCalib.e;
-    break;
+    break; */
   case M_RADIO:
     if (RADIO_HasSi() && gChEd.radio > 0) {
       subMenuIndex = RADIO_SI4732;
@@ -501,6 +516,21 @@ static bool accept(void) {
   const MenuItem *item = &menu[menuIndex];
   // RUN APPS HERE
   switch (item->type) {
+  case M_P_CAL_L:
+    gFInputCallback = setPCalL;
+    gFInputTempFreq = gChEd.misc.powCalib.s * MHZ;
+    APPS_run(APP_FINPUT);
+    return true;
+  case M_P_CAL_M:
+    gFInputCallback = setPCalM;
+    gFInputTempFreq = gChEd.misc.powCalib.m * MHZ;
+    APPS_run(APP_FINPUT);
+    return true;
+  case M_P_CAL_H:
+    gFInputCallback = setPCalH;
+    gFInputTempFreq = gChEd.misc.powCalib.e * MHZ;
+    APPS_run(APP_FINPUT);
+    return true;
   case M_F_RX:
     gFInputCallback = setRXF;
     gFInputTempFreq = gChEd.rxF;
