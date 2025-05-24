@@ -20,6 +20,7 @@ void UI_TxBar(uint8_t y) {
   const uint8_t BAR_LEFT_MARGIN = 0;
   const uint8_t BAR_WIDTH = LCD_WIDTH - BAR_LEFT_MARGIN - 22;
   const uint8_t BAR_BASE = y + 7;
+  FillRect(0, y, LCD_WIDTH, 8, C_CLEAR);
   PrintMediumEx(LCD_WIDTH - 1, BAR_BASE, 2, true, "%u", gCurrentTxPower);
   const unsigned int level = MIN(BK4819_GetVoiceAmplitude() * 8, 65535u);
   uint8_t audioW =
@@ -106,8 +107,7 @@ void UI_DrawLoot(const Loot *loot, uint8_t x, uint8_t y, TextPos pos) {
   }
 
   PrintMediumEx(x, y, pos, C_INVERT, "%c%u.%05u %c", c, loot->f / MHZ,
-                loot->f % MHZ,
-                gIsListening && loot->f == radio.rxF ? '!' : ' ');
+                loot->f % MHZ, loot->open ? '!' : ' ');
 }
 
 void UI_BigFrequency(uint8_t y, uint32_t f) {

@@ -21,6 +21,13 @@ typedef enum {
 } CHDisplayMode;
 
 typedef enum {
+  MW_OFF,
+  MW_ON,
+  MW_SWITCH,
+  MW_EXTRA,
+} MultiwatchType;
+
+typedef enum {
   BAT_1600,
   BAT_2200,
   BAT_3500,

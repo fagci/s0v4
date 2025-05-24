@@ -1,6 +1,7 @@
 #include "vfo1.h"
 #include "../dcs.h"
 #include "../driver/gpio.h"
+#include "../helper/bands.h"
 #include "../helper/channels.h"
 #include "../helper/measurements.h"
 #include "../helper/numnav.h"
@@ -41,23 +42,38 @@ static const Step liveStep = STEP_5_0kHz;
 
 static uint8_t mWatchVfoIndex = 0;
 
-static VFO shadowVfo;
+static VFO *shadowVfo;
+static VFO *mWatchVfo;
 
 void VFO1_update(void) {
   if (Now() - lastUpdate >= SQL_DELAY) {
     RADIO_CheckAndListen();
     lastUpdate = Now();
-    if (gSettings.mWatch) {
-      if (!gIsListening) {
+
+    // multiwatch
+    if (gSettings.mWatch && gTxState != TX_ON) {
+      if (gIsListening) {
+        if (gSettings.mWatch == MW_SWITCH) {
+          VFO_Select(mWatchVfoIndex);
+          mWatchVfo = NULL;
+        } else if (mWatchVfoIndex != gSettings.activeVFO) {
+          mWatchVfo = shadowVfo;
+        }
+      } else {
         mWatchVfoIndex = IncDecU(mWatchVfoIndex, 0, VFO_GetSize(), true);
         shadowVfo = VFO_Get(mWatchVfoIndex);
-        RADIO_SetupEx(shadowVfo);
-        BK4819_TuneTo(shadowVfo.rxF, true);
-      } else {
-        VFO_Select(mWatchVfoIndex);
+        RADIO_SetupEx(*shadowVfo);
+        BK4819_TuneTo(shadowVfo->rxF, true);
+      }
+
+      if (!gMonitorMode) {
+        gLoot.f = shadowVfo->rxF;
+        gLoot.open = gIsListening;
+        LOOT_Update(&gLoot);
       }
     }
   }
+
   if (Now() - lastRender >= (gIsListening ? 1000 : 250)) {
     lastRender = Now();
     gRedrawScreen = true;
@@ -151,6 +167,19 @@ bool VFO1_key(KEY_Code_t key, Key_State_t state) {
     case KEY_SIDE2:
       SP_NextGraphUnit(key == KEY_SIDE1);
       return true;
+    case KEY_EXIT:
+      if (gLastActiveLoot->f != radio.rxF) {
+        for (uint8_t i = 0; i < VFO_GetSize(); ++i) {
+          if (VFO_Get(i)->rxF == gLastActiveLoot->f) {
+            VFO_Select(mWatchVfoIndex);
+            mWatchVfo = NULL;
+            return true;
+          }
+        }
+        RADIO_TuneToSave(gLastActiveLoot->f);
+        return true;
+      }
+      break;
     default:
       break;
     }
@@ -190,6 +219,7 @@ bool VFO1_key(KEY_Code_t key, Key_State_t state) {
       break;
     case KEY_EXIT:
       if (!APPS_exit()) {
+        mWatchVfo = NULL;
         VFO_Next(true);
         RADIO_SetupByCurrentVFO();
       }
@@ -209,33 +239,33 @@ static void renderTxRxState(uint8_t y, bool isTx) {
 }
 
 static void renderChannelName(uint8_t y, uint16_t channel) {
-  FillRect(0, y - 14, 28, 7, C_FILL);
   if (RADIO_IsChMode()) {
+    FillRect(0, y - 14, 28, 7, C_FILL);
     PrintSmallEx(14, y - 9, POS_C, C_INVERT, "MR %03u", channel);
     UI_Scanlists(LCD_XCENTER - 13, y - 13, gSettings.currentScanlist);
   } else {
-    PrintSmallEx(14, y - 9, POS_C, C_INVERT, "VFO %u/%u",
-                 gSettings.activeVFO + 1, VFO_GetSize());
-    PrintSmallEx(30, y - 9, POS_L, C_INVERT, "%s", radio.name);
+    FillRect(0, y - 14, 44, 7, C_FILL);
+    PrintSmallEx(22, y - 9, POS_C, C_INVERT, "%s", radio.name);
   }
 }
 
 static void renderProModeInfo(uint8_t y) {
   if (radio.radio == RADIO_BK4819) {
-    PrintSmall(0, LCD_HEIGHT - 1, "R %+3u N %+3u G %+3u SNR %+2u", gLoot.rssi,
+    PrintSmall(0, LCD_HEIGHT - 10, "R %+3u N %+3u G %+3u SNR %+2u", gLoot.rssi,
                gLoot.noise, gLoot.glitch, gLoot.snr);
   } else {
-    PrintSmall(0, LCD_HEIGHT - 1, "R %+3u SNR %+2u", gLoot.rssi, gLoot.snr);
+    PrintSmall(0, LCD_HEIGHT - 10, "R %+3u SNR %+2u", gLoot.rssi, gLoot.snr);
   }
 }
 
 void VFO1_render(void) {
   const uint8_t BASE = 40;
 
-  if (gSettings.iAmPro) {
+  if (gIsNumNavInput) {
+    STATUSLINE_SetText("Select: %s", gNumNavInput);
+  } else if (gSettings.iAmPro &&
+             (!gSettings.mWatch || gIsListening)) { // NOTE mwatch is temporary
     STATUSLINE_RenderRadioSettings();
-  } else {
-    STATUSLINE_renderCurrentBand();
   }
 
   uint32_t f = gTxState == TX_ON ? RADIO_GetTXF() : GetScreenF(radio.rxF);
@@ -243,6 +273,14 @@ void VFO1_render(void) {
 
   if (RADIO_IsChMode()) {
     PrintMediumEx(LCD_XCENTER, BASE - 16, POS_C, C_FILL, radio.name);
+  } else {
+    if (gCurrentBand.meta.type == TYPE_BAND_DETACHED) {
+      PrintSmallEx(46, 12, POS_L, C_FILL, "*%s", gCurrentBand.name);
+    } else {
+      PrintSmallEx(
+          46, 12, POS_L, C_FILL, radio.fixedBoundsMode ? "=%s:%u" : "%s:%u",
+          gCurrentBand.name, CHANNELS_GetChannel(&gCurrentBand, radio.rxF) + 1);
+    }
   }
 
   // Шаг, полоса, уровень SQL, мощность, субтоны, названия каналов.
@@ -266,13 +304,6 @@ void VFO1_render(void) {
   if (radio.code.tx.type) {
     PrintRTXCode(String, radio.code.tx.type, radio.code.tx.value);
     PrintSmallEx(0, BASE, POS_L, C_FILL, "T%s", String);
-  }
-  if (gLoot.ct != 255) {
-    PrintRTXCode(String, CODE_TYPE_CONTINUOUS_TONE, gLoot.ct);
-    PrintSmallEx(0, BASE + 6, POS_L, C_FILL, "%s", String);
-  } else if (gLoot.cd != 255) {
-    PrintRTXCode(String, CODE_TYPE_DIGITAL, gLoot.cd);
-    PrintSmallEx(0, BASE + 6, POS_L, C_FILL, "%s", String);
   }
 
   if (gMonitorMode) {
@@ -310,22 +341,34 @@ void VFO1_render(void) {
                    graphMeasurementNames[graphMeasurement],
                    SP_GetLastGraphValue());
     } else {
-      UI_RSSIBar(BASE + 8);
+      UI_RSSIBar(BASE + 1);
     }
   } else {
     if (gIsListening || gSettings.iAmPro) {
-      UI_RSSIBar(BASE + 8);
+      UI_RSSIBar(BASE + 1);
     }
     if (gTxState == TX_ON) {
-      UI_TxBar(BASE + 8);
+      UI_TxBar(BASE + 1);
     }
     if (gSettings.iAmPro) {
       renderProModeInfo(BASE);
     }
+  }
 
-    /* VFO nv = VFO_GetNext(true);
-    PrintMediumEx(LCD_XCENTER, LCD_HEIGHT - 2, POS_C, C_FILL, "%u.%05u",
-                  nv.rxF / MHZ, nv.rxF % MHZ); */
+  if (gLastActiveLoot->ct != 255) {
+    PrintRTXCode(String, CODE_TYPE_CONTINUOUS_TONE, gLastActiveLoot->ct);
+    PrintSmallEx(0, LCD_HEIGHT - 1, POS_L, C_FILL, "%s", String);
+  } else if (gLastActiveLoot->cd != 255) {
+    PrintRTXCode(String, CODE_TYPE_DIGITAL, gLastActiveLoot->cd);
+    PrintSmallEx(0, LCD_HEIGHT - 1, POS_L, C_FILL, "%s", String);
+  }
+  if (gLastActiveLoot) {
+    const uint32_t ago = (Now() - gLastActiveLoot->lastTimeOpen) / 1000;
+    UI_DrawLoot(gLastActiveLoot, LCD_XCENTER, LCD_HEIGHT - 1, POS_C);
+    if (ago) {
+      PrintSmallEx(LCD_WIDTH, LCD_HEIGHT - 1, POS_R, C_FILL, "%u:%02u",
+                   ago / 60, ago % 60);
+    }
   }
 
   REGSMENU_Draw();

@@ -89,7 +89,7 @@ static const MenuItem menu[] = {
     {"Roger", M_ROGER, ARRAY_SIZE(rogerNames)},
     {"Tone local", M_TONE_LOCAL, 2},
     {"Lock PTT", M_PTT_LOCK, 2},
-    {"Mutliwatch", M_MWATCH, 2},
+    {"Mutliwatch", M_MWATCH, 4},
     {"Reset", M_RESET, 2},
 };
 

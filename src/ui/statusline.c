@@ -146,26 +146,6 @@ void STATUSLINE_render(void) {
              statuslineTicker[0] == '\0' ? statuslineText : statuslineTicker);
 }
 
-void STATUSLINE_renderCurrentBand() {
-  if (gIsNumNavInput) {
-    STATUSLINE_SetText("Select: %s", gNumNavInput);
-  } else {
-    if (gCurrentBand.name[0] == '-' && gCurrentBand.name[1] == '\0') {
-      STATUSLINE_SetText("");
-    } else {
-      if (gCurrentBand.meta.type == TYPE_BAND_DETACHED) {
-        STATUSLINE_SetText("*%s", gCurrentBand.name);
-        /* } else if (SVC_Running(SVC_SCAN)) {
-          STATUSLINE_SetText("=%s", gCurrentBand.name); */
-      } else {
-        STATUSLINE_SetText(radio.fixedBoundsMode ? "=%s:%u" : "%s:%u",
-                           gCurrentBand.name,
-                           CHANNELS_GetChannel(&gCurrentBand, radio.rxF) + 1);
-      }
-    }
-  }
-}
-
 void STATUSLINE_RenderRadioSettings() {
   const int8_t vGain = -gainTable[radio.gainIndex].gainDb + 33;
 

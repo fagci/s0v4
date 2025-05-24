@@ -159,22 +159,25 @@ void SYS_Main() {
 
     APPS_update();
 
-    if (Now() - appsRenderTimer > 16) {
+    if (Now() - appsKeyboardTimer > 12) {
       processKeyboard();
-      appRender();
-      appsRenderTimer = Now();
+      appsKeyboardTimer = Now();
     }
 
     if (Now() - secondTimer >= 1000) {
+      STATUSLINE_update();
       systemUpdate();
       secondTimer = Now();
+    }
+
+    if (Now() - appsRenderTimer > 40) {
+      appRender();
+      appsRenderTimer = Now();
     }
 
     while (UART_IsCommandAvailable()) {
       UART_HandleCommand();
       lastUartDataTime = Now();
     }
-
-    STATUSLINE_update();
   }
 }
