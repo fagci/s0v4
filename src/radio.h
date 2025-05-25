@@ -108,4 +108,6 @@ uint8_t RADIO_GetBWCount();
 
 void RADIO_Update();
 
+void RADIO_SetupIsChMode();
+
 #endif /* end of include guard: RADIO_H */

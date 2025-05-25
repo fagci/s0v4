@@ -650,7 +650,8 @@ void RADIO_SwitchRadio() {
 }
 
 static void checkVisibleBand() {
-  if (!BANDS_InRange(radio.rxF, gCurrentBand)) {
+  if (!BANDS_InRange(radio.rxF, gCurrentBand) ||
+      gCurrentBand.meta.type == TYPE_BAND_DETACHED) {
     Log("band %s not in r of %u", gCurrentBand.name, radio.rxF);
     BANDS_SelectByFrequency(radio.rxF, radio.fixedBoundsMode);
   }
@@ -932,9 +933,27 @@ bool RADIO_TuneToMR(uint16_t num) {
   return false;
 }
 
+void RADIO_SetupIsChMode() {
+  if (!RADIO_IsChMode()) {
+    RADIO_SetupByCurrentVFO();
+  } else {
+    CHANNELS_LoadScanlist(TYPE_FILTER_CH, gSettings.currentScanlist);
+    if (gScanlistSize == 0) {
+      return;
+    }
+    if (CHANNELS_GetMeta(radio.channel).type == TYPE_CH) {
+      RADIO_TuneToMR(radio.channel);
+      Log("CH TUNE, radio.ch=%u", radio.channel);
+    } else {
+      CHANNELS_Next(true);
+      Log("CH NEXT, radio.ch=%u", radio.channel);
+    }
+  }
+}
+
 void RADIO_ToggleVfoMR(void) {
   if (RADIO_IsChMode()) {
-    // loadVFO();
+    CHANNELS_LoadScanlist(TYPE_FILTER_BAND, gSettings.currentScanlist);
     loadVFO();
     radio.isChMode = false;
     RADIO_SetupByCurrentVFO();

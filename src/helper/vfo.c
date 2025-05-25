@@ -11,7 +11,8 @@ static uint16_t _scanlistMask = UINT16_MAX;
 void VFO_LoadScanlist(uint16_t scanlistMask) {
   Log("Load VFO SL");
   vfoScanlistSize = 0;
-  for (uint16_t i = 0; i < CHANNELS_GetCountMax(); ++i) {
+  for (uint16_t i = 0;
+       i < CHANNELS_GetCountMax() && vfoScanlistSize < VFO_COUNT_MAX; ++i) {
     CHMeta meta = CHANNELS_GetMeta(i);
 
     bool isOurType = (TYPE_FILTER_VFO & (1 << meta.type)) != 0;
@@ -45,6 +46,7 @@ void VFO_Select(uint8_t index) {
   radio = vfoScanlist[gSettings.activeVFO].vfo;
   Log("!!! Next VFO CH=%u, f=%u", vfoScanlist[gSettings.activeVFO].mr, radio);
   SETTINGS_Save();
+  RADIO_SetupIsChMode();
   RADIO_SetupByCurrentVFO();
 }
 

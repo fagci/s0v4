@@ -33,6 +33,7 @@ static void tuneTo(uint32_t f) {
 void VFO1_init(void) {
   VFO_LoadScanlist(0);
   RADIO_LoadCurrentVFO();
+  gLastActiveLoot = NULL;
 }
 
 static uint32_t lastUpdate;
@@ -74,7 +75,7 @@ void VFO1_update(void) {
     }
   }
 
-  if (Now() - lastRender >= (gIsListening ? 1000 : 250)) {
+  if (Now() - lastRender >= 1000) {
     lastRender = Now();
     gRedrawScreen = true;
   }
@@ -171,7 +172,7 @@ bool VFO1_key(KEY_Code_t key, Key_State_t state) {
       if (gLastActiveLoot->f != radio.rxF) {
         for (uint8_t i = 0; i < VFO_GetSize(); ++i) {
           if (VFO_Get(i)->rxF == gLastActiveLoot->f) {
-            VFO_Select(mWatchVfoIndex);
+            VFO_Select(i);
             mWatchVfo = NULL;
             return true;
           }
@@ -239,13 +240,12 @@ static void renderTxRxState(uint8_t y, bool isTx) {
 }
 
 static void renderChannelName(uint8_t y, uint16_t channel) {
+  FillRect(0, y - 14, 30, 7, C_FILL);
+  PrintSmallEx(15, y - 9, POS_C, C_INVERT, "VFO %u/%u", gSettings.activeVFO + 1,
+               VFO_GetSize());
   if (RADIO_IsChMode()) {
-    FillRect(0, y - 14, 28, 7, C_FILL);
-    PrintSmallEx(14, y - 9, POS_C, C_INVERT, "MR %03u", channel);
-    UI_Scanlists(LCD_XCENTER - 13, y - 13, gSettings.currentScanlist);
-  } else {
-    FillRect(0, y - 14, 44, 7, C_FILL);
-    PrintSmallEx(22, y - 9, POS_C, C_INVERT, "%s", radio.name);
+    PrintSmallEx(32, y - 9, POS_L, C_FILL, "MR %03u", channel);
+    UI_Scanlists(LCD_WIDTH - 25, y - 13, gSettings.currentScanlist);
   }
 }
 
@@ -266,6 +266,8 @@ void VFO1_render(void) {
   } else if (gSettings.iAmPro &&
              (!gSettings.mWatch || gIsListening)) { // NOTE mwatch is temporary
     STATUSLINE_RenderRadioSettings();
+  } else {
+    STATUSLINE_SetText(radio.name);
   }
 
   uint32_t f = gTxState == TX_ON ? RADIO_GetTXF() : GetScreenF(radio.rxF);
@@ -275,10 +277,10 @@ void VFO1_render(void) {
     PrintMediumEx(LCD_XCENTER, BASE - 16, POS_C, C_FILL, radio.name);
   } else {
     if (gCurrentBand.meta.type == TYPE_BAND_DETACHED) {
-      PrintSmallEx(46, 12, POS_L, C_FILL, "*%s", gCurrentBand.name);
+      PrintSmallEx(32, 12, POS_L, C_FILL, "*%s", gCurrentBand.name);
     } else {
       PrintSmallEx(
-          46, 12, POS_L, C_FILL, radio.fixedBoundsMode ? "=%s:%u" : "%s:%u",
+          32, 12, POS_L, C_FILL, radio.fixedBoundsMode ? "=%s:%u" : "%s:%u",
           gCurrentBand.name, CHANNELS_GetChannel(&gCurrentBand, radio.rxF) + 1);
     }
   }
@@ -304,6 +306,11 @@ void VFO1_render(void) {
   if (radio.code.tx.type) {
     PrintRTXCode(String, radio.code.tx.type, radio.code.tx.value);
     PrintSmallEx(0, BASE, POS_L, C_FILL, "T%s", String);
+  }
+
+  if (gSettings.iAmPro) {
+    uint32_t lambda = 29979246 / (radio.rxF / 100);
+    PrintSmallEx(0, BASE - 14, POS_L, C_FILL, "L=%u/%ucm", lambda, lambda / 4);
   }
 
   if (gMonitorMode) {
@@ -355,15 +362,15 @@ void VFO1_render(void) {
     }
   }
 
-  if (gLastActiveLoot->ct != 255) {
-    PrintRTXCode(String, CODE_TYPE_CONTINUOUS_TONE, gLastActiveLoot->ct);
-    PrintSmallEx(0, LCD_HEIGHT - 1, POS_L, C_FILL, "%s", String);
-  } else if (gLastActiveLoot->cd != 255) {
-    PrintRTXCode(String, CODE_TYPE_DIGITAL, gLastActiveLoot->cd);
-    PrintSmallEx(0, LCD_HEIGHT - 1, POS_L, C_FILL, "%s", String);
-  }
   if (gLastActiveLoot) {
     const uint32_t ago = (Now() - gLastActiveLoot->lastTimeOpen) / 1000;
+    if (gLastActiveLoot->ct != 255) {
+      PrintRTXCode(String, CODE_TYPE_CONTINUOUS_TONE, gLastActiveLoot->ct);
+      PrintSmallEx(0, LCD_HEIGHT - 1, POS_L, C_FILL, "%s", String);
+    } else if (gLastActiveLoot->cd != 255) {
+      PrintRTXCode(String, CODE_TYPE_DIGITAL, gLastActiveLoot->cd);
+      PrintSmallEx(0, LCD_HEIGHT - 1, POS_L, C_FILL, "%s", String);
+    }
     UI_DrawLoot(gLastActiveLoot, LCD_XCENTER, LCD_HEIGHT - 1, POS_C);
     if (ago) {
       PrintSmallEx(LCD_WIDTH, LCD_HEIGHT - 1, POS_R, C_FILL, "%u:%02u",
