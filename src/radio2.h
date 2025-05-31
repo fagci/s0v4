@@ -22,18 +22,6 @@ typedef struct {
 } RadioSettings;
 
 typedef struct {
-  /* [REG_GAIN] = "Gain",             //
-  [REG_BW] = "BW",                 //
-  [REG_MOD] = "Mod",               //
-  [REG_STEP] = "Step",             //
-  [REG_SQL] = "SQL",               //
-  [REG_RADIO] = "Radio",           //
-  [REG_AFC] = "AFC",               //
-  [REG_DEV] = "DEV",               //
-  [REG_MIC] = "MIC",               //
-  [REG_XTAL] = "XTAL",             //
-  [REG_AF_DAC_GAIN] = "AF_DAC_GAIN", //
-  [REG_TX_POWER] = "TX POW",       // */
   uint32_t frequency;
   uint8_t gain;
   BK4819_FilterBandwidth_t bw;
@@ -75,6 +63,15 @@ typedef struct {
   } limits;
   void (*apply_fn)(int);
 } RadioParamMeta;
+
+// Структура для быстрого доступа к параметрам по типу
+typedef enum {
+  PARAM_VOLUME,
+  PARAM_SQUELCH,
+  PARAM_MODULATION,
+  // ... другие параметры
+  PARAM_COUNT
+} ParamType;
 
 typedef struct {
   const char *name;

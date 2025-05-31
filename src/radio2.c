@@ -12,6 +12,36 @@
 RadioContext ctxBK;
 RadioContext ctxBC;
 
+// Глобальная таблица параметров (инициализируется один раз)
+static RadioParamMeta g_param_table[PARAM_COUNT];
+
+// Инициализация таблицы параметров
+void InitParamTable(RadioContext *ctx) {
+  g_param_table[PARAM_VOLUME] = (RadioParamMeta){
+      .name = "Volume",
+      .value_ptr = &ctx->settings.volume,
+      .limits = {.values = RADIO_CAPS[ctx->radio_type].gains,
+                 .values_count = RADIO_CAPS[ctx->radio_type].gains_count},
+      .apply_fn = BK4819_SetVolume};
+  // ... аналогично для других параметров
+}
+
+static int FindValueIndex(const int *values, size_t count, int target) {
+  for (size_t i = 0; i < count; i++) {
+    if (values[i] == target) {
+      return i;
+    }
+  }
+  return 0; // Возвращаем 0 если не найдено (безопасное значение по умолчанию)
+}
+
+static RadioParamMeta *GetParamMeta(ParamType type) {
+  if (type >= PARAM_COUNT) {
+    return &g_param_table[PARAM_VOLUME]; // Возвращаем параметр по умолчанию
+  }
+  return &g_param_table[type];
+}
+
 static void rxTurnOff(Radio r) {
   switch (r) {
   case RADIO_BK4819:
