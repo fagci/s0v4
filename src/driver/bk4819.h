@@ -208,6 +208,7 @@ void BK4819_TuneTo(uint32_t f, bool precise);
 void BK4819_SetToneFrequency(uint16_t f);
 void BK4819_SetTone2Frequency(uint16_t f);
 void BK4819_SetModulation(ModulationType type);
+ModulationType BK4819_GetModulation();
 bool BK4819_IsSquelchOpen();
 void BK4819_ResetRSSI();
 

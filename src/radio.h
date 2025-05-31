@@ -3,6 +3,7 @@
 
 #include "driver/bk4819.h"
 #include "helper/lootlist.h"
+#include "radio2.h"
 #include "settings.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -20,6 +21,7 @@ typedef enum {
 } TXState;
 
 extern CH radio;
+extern RadioContext radioCtx;
 
 extern Measurement gLoot;
 

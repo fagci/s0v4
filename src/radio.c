@@ -19,6 +19,7 @@
 #include "helper/measurements.h"
 #include "helper/vfo.h"
 #include "misc.h"
+#include "radio2.h"
 #include "scheduler.h"
 #include "settings.h"
 #include "system.h"
@@ -28,6 +29,9 @@
 #include <string.h>
 
 CH radio;
+
+RadioContext radioCtx;
+
 
 Measurement gLoot = {0};
 
@@ -254,6 +258,20 @@ void RADIO_Init(void) {
   Log("RADIO hasSi=%u, hasPatch=%u", hasSi, hasSsbPatch);
   BK4819_Init();
   BK4819_SetAFC(7);
+
+  RADIO2_Init(&radioCtx, radio.radio);
+
+  HardwareState *h = &radioCtx.hwState;
+  UART_printf("___ UPDATE HW STATE FOR: %s ___\n",
+              radioNames[radioCtx.radioType]);
+  UART_printf("F = %u.%05u\n", h->frequency / MHZ, h->frequency % MHZ);
+  UART_printf("MOD = %s\n", modulationTypeOptions[h->modulation]);
+  UART_printf(h->gain == AUTO_GAIN_INDEX ? "gain = auto\n" : "gain = %+ddB\n",
+              -gainTable[h->gain].gainDb + 33);
+  UART_printf("AFC = %u\n", h->afc);
+  UART_printf("SQ = %s (%u - ni)\n", sqTypeNames[h->squelch.type],
+              h->squelch.value);
+  UART_printf("______\n");
 }
 
 static void setSI4732Modulation(ModulationType mod) {

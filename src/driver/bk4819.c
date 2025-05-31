@@ -434,6 +434,16 @@ void BK4819_SquelchType(SquelchType t) {
   BK4819_SetRegValue(RS_SQ_TYPE, squelchTypeValues[t]);
 }
 
+ModulationType BK4819_GetModulation() {
+  uint16_t v = BK4819_ReadRegister(BK4819_REG_47) >> 8;
+  for (uint8_t i = 0; i < ARRAY_SIZE(modTypeReg47Values); ++i) {
+    if (modTypeReg47Values[i] == (v & 0b1111)) {
+      return i;
+    }
+  }
+  return MOD_FM;
+}
+
 void BK4819_SetAF(BK4819_AF_Type_t AF) {
   BK4819_WriteRegister(BK4819_REG_47, 0x6040 | (AF << 8));
 }
